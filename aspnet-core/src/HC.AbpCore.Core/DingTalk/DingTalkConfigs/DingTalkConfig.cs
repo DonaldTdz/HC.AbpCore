@@ -14,7 +14,7 @@ namespace HC.AbpCore.DingTalk.DingTalkConfigs
         /// 配置分类枚举(公共配置 1、E应用（E应用名称）2)
         /// </summary>
         [Required]
-        public virtual int Type { get; set; }
+        public virtual DingDingTypeEnum Type { get; set; }
         /// <summary>
         /// code
         /// </summary>

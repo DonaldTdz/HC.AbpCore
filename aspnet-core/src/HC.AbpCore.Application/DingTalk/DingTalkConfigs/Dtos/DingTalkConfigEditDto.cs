@@ -20,7 +20,7 @@ namespace  HC.AbpCore.DingTalk.DingTalkConfigs.Dtos
 		/// Type
 		/// </summary>
 		[Required(ErrorMessage="Type不能为空")]
-		public int Type { get; set; }
+		public DingDingTypeEnum Type { get; set; }
 
 
 

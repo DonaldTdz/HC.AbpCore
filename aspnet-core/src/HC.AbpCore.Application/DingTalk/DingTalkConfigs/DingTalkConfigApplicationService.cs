@@ -32,7 +32,7 @@ namespace HC.AbpCore.DingTalk.DingTalkConfigs
     [AbpAuthorize]
     public class DingTalkConfigAppService : AbpCoreAppServiceBase, IDingTalkConfigAppService
     {
-        private readonly IRepository<DingTalkConfig, int> _entityRepository;
+        private readonly IRepository<DingTalkConfig> _entityRepository;
 
         private readonly IDingTalkConfigManager _entityManager;
 
@@ -40,7 +40,7 @@ namespace HC.AbpCore.DingTalk.DingTalkConfigs
         /// 构造函数 
         ///</summary>
         public DingTalkConfigAppService(
-        IRepository<DingTalkConfig, int> entityRepository
+        IRepository<DingTalkConfig> entityRepository
         ,IDingTalkConfigManager entityManager
         )
         {
@@ -96,7 +96,7 @@ namespace HC.AbpCore.DingTalk.DingTalkConfigs
 		public async Task<GetDingTalkConfigForEditOutput> GetForEdit(NullableIdDto<int> input)
 		{
 			var output = new GetDingTalkConfigForEditOutput();
-DingTalkConfigEditDto editDto;
+            DingTalkConfigEditDto editDto;
 
 			if (input.Id.HasValue)
 			{
