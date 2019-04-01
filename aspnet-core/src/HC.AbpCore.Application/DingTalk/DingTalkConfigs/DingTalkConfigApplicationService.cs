@@ -55,7 +55,7 @@ namespace HC.AbpCore.DingTalk.DingTalkConfigs
         /// <param name="input"></param>
         /// <returns></returns>
 		 
-        public async Task<PagedResultDto<DingTalkConfigListDto>> GetPaged(GetDingTalkConfigsInput input)
+        public async Task<PagedResultDto<DingTalkConfigListDto>> GetPagedAsync(GetDingTalkConfigsInput input)
 		{
 
 		    var query = _entityRepository.GetAll();
@@ -64,15 +64,15 @@ namespace HC.AbpCore.DingTalk.DingTalkConfigs
 
 			var count = await query.CountAsync();
 
-			var entityList = await query
-					.OrderBy(input.Sorting).AsNoTracking()
+
+            var entityList = await query
+                    .OrderBy(v=>v.Seq).AsNoTracking()
 					.PageBy(input)
 					.ToListAsync();
 
 			// var entityListDtos = ObjectMapper.Map<List<DingTalkConfigListDto>>(entityList);
 			var entityListDtos =entityList.MapTo<List<DingTalkConfigListDto>>();
-
-			return new PagedResultDto<DingTalkConfigListDto>(count,entityListDtos);
+            return new PagedResultDto<DingTalkConfigListDto>(count,entityListDtos);
 		}
 
 
@@ -80,7 +80,7 @@ namespace HC.AbpCore.DingTalk.DingTalkConfigs
 		/// 通过指定id获取DingTalkConfigListDto信息
 		/// </summary>
 		 
-		public async Task<DingTalkConfigListDto> GetById(EntityDto<int> input)
+		public async Task<DingTalkConfigListDto> GetByIdAsync(EntityDto<int> input)
 		{
 			var entity = await _entityRepository.GetAsync(input.Id);
 
@@ -93,7 +93,7 @@ namespace HC.AbpCore.DingTalk.DingTalkConfigs
 		/// <param name="input"></param>
 		/// <returns></returns>
 		
-		public async Task<GetDingTalkConfigForEditOutput> GetForEdit(NullableIdDto<int> input)
+		public async Task<GetDingTalkConfigForEditOutput> GetForEditAsync(NullableIdDto<int> input)
 		{
 			var output = new GetDingTalkConfigForEditOutput();
             DingTalkConfigEditDto editDto;
@@ -122,16 +122,16 @@ namespace HC.AbpCore.DingTalk.DingTalkConfigs
 		/// <param name="input"></param>
 		/// <returns></returns>
 		
-		public async Task CreateOrUpdate(CreateOrUpdateDingTalkConfigInput input)
+		public async Task CreateOrUpdateAsync(CreateOrUpdateDingTalkConfigInput input)
 		{
 
 			if (input.DingTalkConfig.Id.HasValue)
 			{
-				await Update(input.DingTalkConfig);
+				await UpdateAsync(input.DingTalkConfig);
 			}
 			else
 			{
-				await Create(input.DingTalkConfig);
+				await CreateAsync(input.DingTalkConfig);
 			}
 		}
 
@@ -140,14 +140,14 @@ namespace HC.AbpCore.DingTalk.DingTalkConfigs
 		/// 新增DingTalkConfig
 		/// </summary>
 		
-		protected virtual async Task<DingTalkConfigEditDto> Create(DingTalkConfigEditDto input)
+		protected virtual async Task<DingTalkConfigEditDto> CreateAsync(DingTalkConfigEditDto input)
 		{
 			//TODO:新增前的逻辑判断，是否允许新增
 
+
             // var entity = ObjectMapper.Map <DingTalkConfig>(input);
             var entity=input.MapTo<DingTalkConfig>();
-			
-
+            entity.CreationTime = DateTime.Now;
 			entity = await _entityRepository.InsertAsync(entity);
 			return entity.MapTo<DingTalkConfigEditDto>();
 		}
@@ -156,7 +156,7 @@ namespace HC.AbpCore.DingTalk.DingTalkConfigs
 		/// 编辑DingTalkConfig
 		/// </summary>
 		
-		protected virtual async Task Update(DingTalkConfigEditDto input)
+		protected virtual async Task UpdateAsync(DingTalkConfigEditDto input)
 		{
 			//TODO:更新前的逻辑判断，是否允许更新
 
@@ -175,7 +175,7 @@ namespace HC.AbpCore.DingTalk.DingTalkConfigs
 		/// <param name="input"></param>
 		/// <returns></returns>
 		
-		public async Task Delete(EntityDto<int> input)
+		public async Task DeleteAsync(EntityDto<int> input)
 		{
 			//TODO:删除前的逻辑判断，是否允许删除
 			await _entityRepository.DeleteAsync(input.Id);
@@ -187,7 +187,7 @@ namespace HC.AbpCore.DingTalk.DingTalkConfigs
 		/// 批量删除DingTalkConfig的方法
 		/// </summary>
 		
-		public async Task BatchDelete(List<int> input)
+		public async Task BatchDeleteAsync(List<int> input)
 		{
 			// TODO:批量删除前的逻辑判断，是否允许删除
 			await _entityRepository.DeleteAsync(s => input.Contains(s.Id));

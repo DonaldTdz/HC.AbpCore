@@ -56,6 +56,15 @@ namespace HC.AbpCore.DingTalk.DingTalkConfigs.Dtos
 		public DateTime CreationTime { get; set; }
 
 
+        public string TypeName
+        {
+            get
+            {
+                return Type.ToString();
+            }
+        }
+
+
 
 
     }

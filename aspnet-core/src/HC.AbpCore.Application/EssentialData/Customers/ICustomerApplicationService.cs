@@ -18,28 +18,28 @@ using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 
 
-using HC.AbpCore.DingTalk.DingTalkConfigs.Dtos;
-using HC.AbpCore.DingTalk.DingTalkConfigs;
+using HC.AbpCore.EssentialData.Customers.Dtos;
+using HC.AbpCore.EssentialData.Customers;
 
-namespace HC.AbpCore.DingTalk.DingTalkConfigs
+namespace HC.AbpCore.EssentialData.Customers
 {
     /// <summary>
-    /// DingTalkConfig应用层服务的接口方法
+    /// Customer应用层服务的接口方法
     ///</summary>
-    public interface IDingTalkConfigAppService : IApplicationService
+    public interface ICustomerAppService : IApplicationService
     {
         /// <summary>
-		/// 获取DingTalkConfig的分页列表信息
+		/// 获取Customer的分页列表信息
 		///</summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<PagedResultDto<DingTalkConfigListDto>> GetPagedAsync(GetDingTalkConfigsInput input);
+        Task<PagedResultDto<CustomerListDto>> GetPaged(GetCustomersInput input);
 
 
 		/// <summary>
-		/// 通过指定id获取DingTalkConfigListDto信息
+		/// 通过指定id获取CustomerListDto信息
 		/// </summary>
-		Task<DingTalkConfigListDto> GetByIdAsync(EntityDto<int> input);
+		Task<CustomerListDto> GetById(EntityDto<int> input);
 
 
         /// <summary>
@@ -47,33 +47,33 @@ namespace HC.AbpCore.DingTalk.DingTalkConfigs
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<GetDingTalkConfigForEditOutput> GetForEditAsync(NullableIdDto<int> input);
+        Task<GetCustomerForEditOutput> GetForEdit(NullableIdDto<int> input);
 
 
         /// <summary>
-        /// 添加或者修改DingTalkConfig的公共方法
+        /// 添加或者修改Customer的公共方法
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task CreateOrUpdateAsync(CreateOrUpdateDingTalkConfigInput input);
+        Task CreateOrUpdate(CreateOrUpdateCustomerInput input);
 
 
         /// <summary>
-        /// 删除DingTalkConfig信息的方法
+        /// 删除Customer信息的方法
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task DeleteAsync(EntityDto<int> input);
+        Task Delete(EntityDto<int> input);
 
 
         /// <summary>
-        /// 批量删除DingTalkConfig
+        /// 批量删除Customer
         /// </summary>
-        Task BatchDeleteAsync(List<int> input);
+        Task BatchDelete(List<int> input);
 
 
 		/// <summary>
-        /// 导出DingTalkConfig为excel表
+        /// 导出Customer为excel表
         /// </summary>
         /// <returns></returns>
 		//Task<FileDto> GetToExcel();

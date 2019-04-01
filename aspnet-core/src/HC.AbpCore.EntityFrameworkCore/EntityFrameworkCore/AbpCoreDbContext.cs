@@ -9,6 +9,7 @@ using HC.AbpCore.Wechat.Users;
 using HC.AbpCore.DingTalk.DingTalkConfigs;
 using HC.AbpCore.DingTalk.Employees;
 using HC.AbpCore.DingTalk.Organizations;
+using HC.AbpCore.EssentialData.Customers;
 
 namespace HC.AbpCore.EntityFrameworkCore
 {
@@ -32,5 +33,7 @@ namespace HC.AbpCore.EntityFrameworkCore
         public virtual DbSet<Employee> Employees { get; set; }
 
         public virtual DbSet<Organization> Organizations { get; set; }
+
+        public virtual DbSet<Customer> Customers { get; set; }
     }
 }
