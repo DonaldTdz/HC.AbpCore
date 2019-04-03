@@ -47,19 +47,19 @@ namespace HC.AbpCore.DingTalk
 
             foreach (var item in configList)
             {
-                if (item.Code == DingDingConfigCode.CorpId)
+                if (item.Code.ToLower() == DingDingConfigCode.CorpId.ToLower())
                 {
                     config.CorpId = item.Value;
                 }
-                else if (item.Code == DingDingConfigCode.Appkey)
+                else if (item.Code.ToLower() == DingDingConfigCode.Appkey.ToLower())
                 {
                     config.Appkey = item.Value;
                 }
-                else if (item.Code == DingDingConfigCode.Appsecret)
+                else if (item.Code.ToLower() == DingDingConfigCode.Appsecret.ToLower())
                 {
                     config.Appsecret = item.Value;
                 }
-                else if (item.Code == DingDingConfigCode.AgentID)
+                else if (item.Code.ToLower() == DingDingConfigCode.AgentID.ToLower())
                 {
                     int outAgenId = 0;
                     if (int.TryParse(item.Value, out outAgenId))

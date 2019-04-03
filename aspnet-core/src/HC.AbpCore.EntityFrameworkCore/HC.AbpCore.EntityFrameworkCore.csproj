@@ -23,7 +23,4 @@
   <ItemGroup>
     <ProjectReference Include="..\HC.AbpCore.Core\HC.AbpCore.Core.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="EntityMapper\DingTalkConfigs\" />
-  </ItemGroup>
 </Project>

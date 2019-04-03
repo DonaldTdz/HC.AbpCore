@@ -36,10 +36,13 @@ namespace HC.AbpCore.DingTalk.DingTalkConfigs
         Task<PagedResultDto<DingTalkConfigListDto>> GetPagedAsync(GetDingTalkConfigsInput input);
 
 
-		/// <summary>
-		/// 通过指定id获取DingTalkConfigListDto信息
-		/// </summary>
-		Task<DingTalkConfigListDto> GetByIdAsync(EntityDto<int> input);
+        Task<PagedResultDto<DingTalkConfigListDto>> GetPagedByTypeAsync(GetDingTalkConfigsInput input,int type=1);
+
+
+        /// <summary>
+        /// 通过指定id获取DingTalkConfigListDto信息
+        /// </summary>
+        Task<DingTalkConfigListDto> GetByIdAsync(EntityDto<int> input);
 
 
         /// <summary>
@@ -55,7 +58,7 @@ namespace HC.AbpCore.DingTalk.DingTalkConfigs
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task CreateOrUpdateAsync(CreateOrUpdateDingTalkConfigInput input);
+        Task CreateOrUpdateAsync(DingTalkConfigEditDto input);
 
 
         /// <summary>

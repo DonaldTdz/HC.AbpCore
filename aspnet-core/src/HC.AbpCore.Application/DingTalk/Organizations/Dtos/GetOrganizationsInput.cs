@@ -1,11 +1,11 @@
 
 using Abp.Runtime.Validation;
 using HC.AbpCore.Dtos;
-using HC.AbpCore.DingTalk.DingTalkConfigs;
+using HC.AbpCore.DingTalk.Organizations;
 
-namespace HC.AbpCore.DingTalk.DingTalkConfigs.Dtos
+namespace HC.AbpCore.DingTalk.Organizations.Dtos
 {
-    public class GetDingTalkConfigsInput : PagedSortedAndFilteredInputDto, IShouldNormalize
+    public class GetOrganizationsInput : PagedSortedAndFilteredInputDto, IShouldNormalize
     {
 
         /// <summary>
@@ -18,7 +18,6 @@ namespace HC.AbpCore.DingTalk.DingTalkConfigs.Dtos
                 Sorting = "Id";
             }
         }
-        
 
     }
 }
