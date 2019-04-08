@@ -21,20 +21,20 @@ namespace HC.AbpCore.DingTalk.Organizations
         /// </summary>
         public virtual long? ParentId { get; set; }
         /// <summary>
-        /// 排序，之前批量获取不到，可以看一下接口当前是否可以获取
+        /// 父部门中的次序值
         /// </summary>
         public virtual long? Order { get; set; }
         /// <summary>
-        /// 钉钉组织架构同步自动
+        /// 是否隐藏部门
         /// </summary>
         public virtual bool? DeptHiding { get; set; }
         /// <summary>
-        /// 钉钉组织架构同步自动
+        /// 企业群群主
         /// </summary>
         [StringLength(100)]
         public virtual string OrgDeptOwner { get; set; }
         /// <summary>
-        /// 
+        /// 创建时间
         /// </summary>
         [Required]
         public virtual DateTime CreationTime { get; set; }

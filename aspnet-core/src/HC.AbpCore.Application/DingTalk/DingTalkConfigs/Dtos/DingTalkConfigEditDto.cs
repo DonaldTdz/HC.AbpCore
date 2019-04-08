@@ -56,8 +56,7 @@ namespace  HC.AbpCore.DingTalk.DingTalkConfigs.Dtos
 		/// <summary>
 		/// CreationTime
 		/// </summary>
-		[Required(ErrorMessage="CreationTime不能为空")]
-		public DateTime CreationTime { get; set; }
+		public DateTime? CreationTime { get; set; }
 
 
 
