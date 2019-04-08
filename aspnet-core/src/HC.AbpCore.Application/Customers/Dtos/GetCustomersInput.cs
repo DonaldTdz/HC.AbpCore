@@ -1,9 +1,9 @@
 
 using Abp.Runtime.Validation;
 using HC.AbpCore.Dtos;
-using HC.AbpCore.EssentialData.Customers;
+using HC.AbpCore.Customers;
 
-namespace HC.AbpCore.EssentialData.Customers.Dtos
+namespace HC.AbpCore.Customers.Dtos
 {
     public class GetCustomersInput : PagedSortedAndFilteredInputDto, IShouldNormalize
     {

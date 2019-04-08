@@ -8,6 +8,11 @@
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="EntityMapper\**" />
+    <EmbeddedResource Remove="EntityMapper\**" />
+    <None Remove="EntityMapper\**" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Remove="Migrations\20180726102624_Upgrade_ABP_380.cs" />
     <Compile Remove="Migrations\20180927062408_test.cs" />
     <Compile Remove="Migrations\20190111071724_Upgraded_To_Abp_v4_1_0.cs" />
@@ -22,8 +27,5 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HC.AbpCore.Core\HC.AbpCore.Core.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="EntityMapper\DingTalkConfigs\" />
   </ItemGroup>
 </Project>

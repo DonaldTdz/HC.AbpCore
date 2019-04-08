@@ -1,14 +1,15 @@
 ﻿using Abp.Domain.Entities;
+using Abp.Domain.Entities.Auditing;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
-namespace HC.AbpCore.EssentialData.Customers
+namespace HC.AbpCore.Customers
 {
     [Table("Customers")]
-    public class Customer : Entity<int> //注意修改主键Id数据类型
+    public class Customer : FullAuditedEntity //注意修改主键Id数据类型
     {
         /// <summary>
         /// 客户名称
@@ -60,36 +61,7 @@ namespace HC.AbpCore.EssentialData.Customers
         /// </summary>
         [StringLength(500)]
         public virtual string Remark { get; set; }
-        /// <summary>
-        /// 是否删除
-        /// </summary>
-        [Required]
-        public virtual bool IsDeleted { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        [Required]
-        public virtual DateTime CreationTime { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public virtual long? CreatorUserId { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public virtual DateTime? LastModificationTime { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public virtual long? LastModifierUserId { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public virtual DateTime? DeletionTime { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public virtual long? DeleterUserId { get; set; }
+        
     }
 
 }

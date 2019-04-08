@@ -9,7 +9,7 @@ using HC.AbpCore.Wechat.Users;
 using HC.AbpCore.DingTalk.DingTalkConfigs;
 using HC.AbpCore.DingTalk.Employees;
 using HC.AbpCore.DingTalk.Organizations;
-using HC.AbpCore.EssentialData.Customers;
+using HC.AbpCore.Customers;
 
 namespace HC.AbpCore.EntityFrameworkCore
 {

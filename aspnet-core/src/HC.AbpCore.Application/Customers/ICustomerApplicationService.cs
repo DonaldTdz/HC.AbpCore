@@ -18,10 +18,10 @@ using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 
 
-using HC.AbpCore.EssentialData.Customers.Dtos;
-using HC.AbpCore.EssentialData.Customers;
+using HC.AbpCore.Customers.Dtos;
+using HC.AbpCore.Customers;
 
-namespace HC.AbpCore.EssentialData.Customers
+namespace HC.AbpCore.Customers
 {
     /// <summary>
     /// Customer应用层服务的接口方法
@@ -55,7 +55,7 @@ namespace HC.AbpCore.EssentialData.Customers
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task CreateOrUpdate(CreateOrUpdateCustomerInput input);
+        Task CreateOrUpdate(CustomerEditDto input);
 
 
         /// <summary>

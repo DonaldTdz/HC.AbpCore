@@ -17,10 +17,10 @@ using Abp.Domain.Repositories;
 using Abp.Domain.Services;
 
 using HC.AbpCore;
-using HC.AbpCore.EssentialData.Customers;
+using HC.AbpCore.Customers;
 
 
-namespace HC.AbpCore.EssentialData.Customers.DomainService
+namespace HC.AbpCore.Customers.DomainService
 {
     /// <summary>
     /// Customer领域层的业务管理

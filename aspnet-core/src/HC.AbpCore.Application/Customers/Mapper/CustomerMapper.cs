@@ -1,9 +1,9 @@
 
 using AutoMapper;
-using HC.AbpCore.EssentialData.Customers;
-using HC.AbpCore.EssentialData.Customers.Dtos;
+using HC.AbpCore.Customers;
+using HC.AbpCore.Customers.Dtos;
 
-namespace HC.AbpCore.EssentialData.Customers.Mapper
+namespace HC.AbpCore.Customers.Mapper
 {
 
 	/// <summary>
