@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
+using static HC.AbpCore.Customers.CustomerBase;
 
 namespace HC.AbpCore.Customers
 {
@@ -20,7 +21,7 @@ namespace HC.AbpCore.Customers
         /// <summary>
         /// 枚举（企业、个人、其它）
         /// </summary>
-        public virtual int? Type { get; set; }
+        public virtual CustomerEnum Type { get; set; }
         /// <summary>
         /// 客户地址
         /// </summary>
@@ -61,7 +62,15 @@ namespace HC.AbpCore.Customers
         /// </summary>
         [StringLength(500)]
         public virtual string Remark { get; set; }
-        
+
+        public virtual string typeName
+        {
+            get
+            {
+                return Type.ToString();
+            }
+        }
+
     }
 
 }

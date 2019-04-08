@@ -33,13 +33,13 @@ namespace HC.AbpCore.Customers
 		///</summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<PagedResultDto<CustomerListDto>> GetPaged(GetCustomersInput input);
+        Task<PagedResultDto<CustomerListDto>> GetPagedAsync(GetCustomersInput input);
 
 
 		/// <summary>
 		/// 通过指定id获取CustomerListDto信息
 		/// </summary>
-		Task<CustomerListDto> GetById(EntityDto<int> input);
+		Task<CustomerListDto> GetByIdAsync(EntityDto<int> input);
 
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace HC.AbpCore.Customers
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<GetCustomerForEditOutput> GetForEdit(NullableIdDto<int> input);
+        Task<GetCustomerForEditOutput> GetForEditAsync(NullableIdDto<int> input);
 
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace HC.AbpCore.Customers
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task CreateOrUpdate(CustomerEditDto input);
+        Task CreateOrUpdateAsync(CustomerEditDto input);
 
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace HC.AbpCore.Customers
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task Delete(EntityDto<int> input);
+        Task DeleteAsync(EntityDto<int> input);
 
 
         /// <summary>

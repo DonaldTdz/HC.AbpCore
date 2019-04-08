@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using Abp.Application.Services.Dto;
 using Abp.Domain.Entities.Auditing;
 using HC.AbpCore.Customers;
+using static HC.AbpCore.Customers.CustomerBase;
 
 namespace  HC.AbpCore.Customers.Dtos
 {
@@ -20,7 +21,7 @@ namespace  HC.AbpCore.Customers.Dtos
 		/// <summary>
 		/// Type
 		/// </summary>
-		public int? Type { get; set; }
+		public CustomerEnum Type { get; set; }
 
 
 
@@ -77,8 +78,6 @@ namespace  HC.AbpCore.Customers.Dtos
 		/// Remark
 		/// </summary>
 		public string Remark { get; set; }
-
-
-
+        
     }
 }

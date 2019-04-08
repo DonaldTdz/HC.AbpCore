@@ -53,16 +53,24 @@ namespace HC.AbpCore.Customers
         ///</summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task<PagedResultDto<CustomerListDto>> GetPaged(GetCustomersInput input)
+        public async Task<PagedResultDto<CustomerListDto>> GetPagedAsync(GetCustomersInput input)
         {
+            /*var query = _entityRepository.GetAll()
+                  .WhereIf(!string.IsNullOrEmpty(input.FilterText), u => u.UserName.Contains(input.FilterText)
+                  || u.Phone.Contains(input.FilterText))
+                  .WhereIf(input.Status.HasValue, v => v.UserType == input.Status.Value);
+                  */
 
-            var query = _entityRepository.GetAll();
+            var query = _entityRepository.GetAll()
+                .WhereIf(!string.IsNullOrEmpty(input.name),u=>u.Name.Contains(input.name))
+                .WhereIf(input.type.HasValue,v=>v.Type==input.type.Value);
             // TODO:根据传入的参数添加过滤条件
 
 
             var count = await query.CountAsync();
-
+            
             var entityList = await query
+                
                .OrderBy(input.Sorting).AsNoTracking()
                .PageBy(input)
                .ToListAsync();
@@ -74,7 +82,7 @@ namespace HC.AbpCore.Customers
         /// <summary>
         /// 通过指定id获取CustomerListDto信息
         /// </summary>
-        public async Task<CustomerListDto> GetById(EntityDto<int> input)
+        public async Task<CustomerListDto> GetByIdAsync(EntityDto<int> input)
         {
             var entity = await _entityRepository.GetAsync(input.Id);
 
@@ -86,7 +94,7 @@ namespace HC.AbpCore.Customers
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task<GetCustomerForEditOutput> GetForEdit(NullableIdDto<int> input)
+        public async Task<GetCustomerForEditOutput> GetForEditAsync(NullableIdDto<int> input)
         {
             var output = new GetCustomerForEditOutput();
             CustomerEditDto editDto;
@@ -114,15 +122,15 @@ namespace HC.AbpCore.Customers
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task CreateOrUpdate(CustomerEditDto input)
+        public async Task CreateOrUpdateAsync(CustomerEditDto input)
         {
             if (input.Id.HasValue)
             {
-                await Update(input);
+                await UpdateAsync(input);
             }
             else
             {
-                await Create(input);
+                await CreateAsync(input);
             }
         }
 
@@ -130,7 +138,7 @@ namespace HC.AbpCore.Customers
         /// <summary>
         /// 新增Customer
         /// </summary>
-        protected virtual async Task<CustomerEditDto> Create(CustomerEditDto input)
+        protected virtual async Task<CustomerEditDto> CreateAsync(CustomerEditDto input)
         {
             //TODO:新增前的逻辑判断，是否允许新增
 
@@ -145,7 +153,7 @@ namespace HC.AbpCore.Customers
         /// <summary>
         /// 编辑Customer
         /// </summary>
-        protected virtual async Task Update(CustomerEditDto input)
+        protected virtual async Task UpdateAsync(CustomerEditDto input)
         {
             //TODO:更新前的逻辑判断，是否允许更新
 
@@ -163,7 +171,7 @@ namespace HC.AbpCore.Customers
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task Delete(EntityDto<int> input)
+        public async Task DeleteAsync(EntityDto<int> input)
         {
             //TODO:删除前的逻辑判断，是否允许删除
             await _entityRepository.DeleteAsync(input.Id);
