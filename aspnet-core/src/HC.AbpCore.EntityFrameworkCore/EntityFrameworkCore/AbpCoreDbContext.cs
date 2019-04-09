@@ -10,6 +10,8 @@ using HC.AbpCore.DingTalk.DingTalkConfigs;
 using HC.AbpCore.DingTalk.Employees;
 using HC.AbpCore.DingTalk.Organizations;
 using HC.AbpCore.EssentialData.Customers;
+using HC.AbpCore.Companys.Accounts;
+using HC.AbpCore.Companys;
 
 namespace HC.AbpCore.EntityFrameworkCore
 {
@@ -35,5 +37,9 @@ namespace HC.AbpCore.EntityFrameworkCore
         public virtual DbSet<Organization> Organizations { get; set; }
 
         public virtual DbSet<Customer> Customers { get; set; }
+
+        public virtual DbSet<Company> Companys { get; set; }
+
+        public virtual DbSet<Account> Accounts { get; set; }
     }
 }
