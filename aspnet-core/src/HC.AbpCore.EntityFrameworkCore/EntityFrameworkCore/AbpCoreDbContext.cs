@@ -12,6 +12,7 @@ using HC.AbpCore.DingTalk.Organizations;
 using HC.AbpCore.EssentialData.Customers;
 using HC.AbpCore.Companys.Accounts;
 using HC.AbpCore.Companys;
+using HC.AbpCore.Customers;
 
 namespace HC.AbpCore.EntityFrameworkCore
 {

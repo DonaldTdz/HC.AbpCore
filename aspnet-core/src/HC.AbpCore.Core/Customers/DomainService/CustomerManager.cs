@@ -17,10 +17,10 @@ using Abp.Domain.Repositories;
 using Abp.Domain.Services;
 
 using HC.AbpCore;
-using HC.AbpCore.EssentialData.Customers;
+using HC.AbpCore.Customers;
 
 
-namespace HC.AbpCore.EssentialData.Customers.DomainService
+namespace HC.AbpCore.Customers.DomainService
 {
     /// <summary>
     /// Customer领域层的业务管理
@@ -48,14 +48,8 @@ namespace HC.AbpCore.EssentialData.Customers.DomainService
 		{
 			throw new NotImplementedException();
 		}
-
-		// TODO:编写领域业务代码
-
-
-
-		 
-		  
-		 
-
-	}
+        
+        // TODO:编写领域业务代码
+        
+    }
 }

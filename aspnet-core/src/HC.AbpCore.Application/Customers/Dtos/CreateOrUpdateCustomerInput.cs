@@ -2,13 +2,12 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using HC.AbpCore.EssentialData.Customers;
+using HC.AbpCore.Customers;
 
-namespace HC.AbpCore.EssentialData.Customers.Dtos
+namespace HC.AbpCore.Customers.Dtos
 {
     public class CreateOrUpdateCustomerInput
     {
-        [Required]
         public CustomerEditDto Customer { get; set; }
 
     }

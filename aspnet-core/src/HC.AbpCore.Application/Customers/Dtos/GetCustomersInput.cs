@@ -1,9 +1,10 @@
 
 using Abp.Runtime.Validation;
 using HC.AbpCore.Dtos;
-using HC.AbpCore.EssentialData.Customers;
+using HC.AbpCore.Customers;
+using static HC.AbpCore.Customers.CustomerBase;
 
-namespace HC.AbpCore.EssentialData.Customers.Dtos
+namespace HC.AbpCore.Customers.Dtos
 {
     public class GetCustomersInput : PagedSortedAndFilteredInputDto, IShouldNormalize
     {
@@ -19,5 +20,7 @@ namespace HC.AbpCore.EssentialData.Customers.Dtos
             }
         }
 
+        public CustomerEnum? type { get; set; }
+        public string name { get; set; }
     }
 }

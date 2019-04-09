@@ -4,10 +4,10 @@ using System;
 using System.Threading.Tasks;
 using Abp;
 using Abp.Domain.Services;
-using HC.AbpCore.EssentialData.Customers;
+using HC.AbpCore.Customers;
 
 
-namespace HC.AbpCore.EssentialData.Customers.DomainService
+namespace HC.AbpCore.Customers.DomainService
 {
     public interface ICustomerManager : IDomainService
     {

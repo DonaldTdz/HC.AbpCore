@@ -2,9 +2,9 @@
 
 using System.Collections.Generic;
 using Abp.Application.Services.Dto;
-using HC.AbpCore.EssentialData.Customers;
+using HC.AbpCore.Customers;
 
-namespace HC.AbpCore.EssentialData.Customers.Dtos
+namespace HC.AbpCore.Customers.Dtos
 {
     public class GetCustomerForEditOutput
     {
