@@ -1,0 +1,222 @@
+
+
+<form nz-form #validateForm="ngForm" (ngSubmit)="submitForm()" nzLayout="horizontal" autocomplete="off">
+    <!-- 模态框头部 -->
+    <div class="modal-header">
+        <div class="modal-title">
+            <i class="anticon anticon-medicine-box mr-sm"></i>
+            <span *ngIf="entity.id">{{l('Edit')}}</span>
+            <span *ngIf="!entity.id">{{l('Create')}}</span>
+        </div>
+    </div>
+    <!-- 模态框内容 -->
+    <fieldset>
+        <!-- 提示信息 -->
+        <!-- <nz-alert nzType="info" nzCloseable [nzShowIcon]="true" nzMessage="l('我想提示点什么内容给你说')"></nz-alert> -->
+            <nz-form-item nz-row>
+                    <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="type">{{l('Type')}}</nz-form-label>
+                <nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback>
+                            <input nz-input name="type" #type="ngModel"
+                                   [(ngModel)]="entity.type"
+                                   [placeholder]="l('Type')" >
+
+
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item nz-row>
+                    <nz-form-label nz-col [nzSm]="6" [nzXs]="24" nzRequired nzFor="name">{{l('Name')}}</nz-form-label>
+                <nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback>
+                            <input nz-input name="name" #name="ngModel"
+                                   [(ngModel)]="entity.name"
+                                   [placeholder]="l('Name')"  required >
+
+                            <!-- 校验 -->
+                            <nz-form-explain *ngIf="name.control.dirty&&name.control.errors">
+                                                                <ng-container *ngIf="name.control.hasError('required')">{{l('CanNotNull')}}</ng-container>
+                            </nz-form-explain>
+
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item nz-row>
+                    <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="address">{{l('Address')}}</nz-form-label>
+                <nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback>
+                            <input nz-input name="address" #address="ngModel"
+                                   [(ngModel)]="entity.address"
+                                   [placeholder]="l('Address')" >
+
+
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item nz-row>
+                    <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="zipCode">{{l('ZipCode')}}</nz-form-label>
+                <nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback>
+                            <input nz-input name="zipCode" #zipCode="ngModel"
+                                   [(ngModel)]="entity.zipCode"
+                                   [placeholder]="l('ZipCode')" >
+
+
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item nz-row>
+                    <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="tel">{{l('Tel')}}</nz-form-label>
+                <nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback>
+                            <input nz-input name="tel" #tel="ngModel"
+                                   [(ngModel)]="entity.tel"
+                                   [placeholder]="l('Tel')" >
+
+
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item nz-row>
+                    <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="contact">{{l('Contact')}}</nz-form-label>
+                <nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback>
+                            <input nz-input name="contact" #contact="ngModel"
+                                   [(ngModel)]="entity.contact"
+                                   [placeholder]="l('Contact')" >
+
+
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item nz-row>
+                    <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="position">{{l('Position')}}</nz-form-label>
+                <nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback>
+                            <input nz-input name="position" #position="ngModel"
+                                   [(ngModel)]="entity.position"
+                                   [placeholder]="l('Position')" >
+
+
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item nz-row>
+                    <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="phone">{{l('Phone')}}</nz-form-label>
+                <nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback>
+                            <input nz-input name="phone" #phone="ngModel"
+                                   [(ngModel)]="entity.phone"
+                                   [placeholder]="l('Phone')" >
+
+
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item nz-row>
+                    <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="desc">{{l('Desc')}}</nz-form-label>
+                <nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback>
+                            <input nz-input name="desc" #desc="ngModel"
+                                   [(ngModel)]="entity.desc"
+                                   [placeholder]="l('Desc')" >
+
+
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item nz-row>
+                    <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="remark">{{l('Remark')}}</nz-form-label>
+                <nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback>
+                            <input nz-input name="remark" #remark="ngModel"
+                                   [(ngModel)]="entity.remark"
+                                   [placeholder]="l('Remark')" >
+
+
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item nz-row>
+                    <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="attachments">{{l('Attachments')}}</nz-form-label>
+                <nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback>
+                            <input nz-input name="attachments" #attachments="ngModel"
+                                   [(ngModel)]="entity.attachments"
+                                   [placeholder]="l('Attachments')" >
+
+
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item nz-row>
+                    <nz-form-label nz-col [nzSm]="6" [nzXs]="24" nzRequired nzFor="isDeleted">{{l('IsDeleted')}}</nz-form-label>
+                <nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback>
+                            <label nz-checkbox name="isDeleted" #isDeleted="ngModel"
+                                   [(ngModel)]="entity.isDeleted"  required >{{l('IsDeleted')}}</label>
+
+                            <!-- 校验 -->
+                            <nz-form-explain *ngIf="isDeleted.control.dirty&&isDeleted.control.errors">
+                                                                <ng-container *ngIf="isDeleted.control.hasError('required')">{{l('CanNotNull')}}</ng-container>
+                            </nz-form-explain>
+
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item nz-row>
+                    <nz-form-label nz-col [nzSm]="6" [nzXs]="24" nzRequired nzFor="creationTime">{{l('CreationTime')}}</nz-form-label>
+                <nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback>
+                            <nz-time-picker name="creationTime" #creationTime="ngModel"
+                                            [(ngModel)]="entity.creationTime"  required ></nz-time-picker>
+
+                            <!-- 校验 -->
+                            <nz-form-explain *ngIf="creationTime.control.dirty&&creationTime.control.errors">
+                                                                <ng-container *ngIf="creationTime.control.hasError('required')">{{l('CanNotNull')}}</ng-container>
+                            </nz-form-explain>
+
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item nz-row>
+                    <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="creatorUserId">{{l('CreatorUserId')}}</nz-form-label>
+                <nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback>
+                            <input nz-input name="creatorUserId" #creatorUserId="ngModel"
+                                   [(ngModel)]="entity.creatorUserId"
+                                   [placeholder]="l('CreatorUserId')" >
+
+
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item nz-row>
+                    <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="lastModificationTime">{{l('LastModificationTime')}}</nz-form-label>
+                <nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback>
+                            <input nz-input name="lastModificationTime" #lastModificationTime="ngModel"
+                                   [(ngModel)]="entity.lastModificationTime"
+                                   [placeholder]="l('LastModificationTime')" >
+
+
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item nz-row>
+                    <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="lastModifierUserId">{{l('LastModifierUserId')}}</nz-form-label>
+                <nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback>
+                            <input nz-input name="lastModifierUserId" #lastModifierUserId="ngModel"
+                                   [(ngModel)]="entity.lastModifierUserId"
+                                   [placeholder]="l('LastModifierUserId')" >
+
+
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item nz-row>
+                    <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="deletionTime">{{l('DeletionTime')}}</nz-form-label>
+                <nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback>
+                            <input nz-input name="deletionTime" #deletionTime="ngModel"
+                                   [(ngModel)]="entity.deletionTime"
+                                   [placeholder]="l('DeletionTime')" >
+
+
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item nz-row>
+                    <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="deleterUserId">{{l('DeleterUserId')}}</nz-form-label>
+                <nz-form-control nz-col [nzSm]="14" [nzXs]="24" nzHasFeedback>
+                            <input nz-input name="deleterUserId" #deleterUserId="ngModel"
+                                   [(ngModel)]="entity.deleterUserId"
+                                   [placeholder]="l('DeleterUserId')" >
+
+
+                </nz-form-control>
+            </nz-form-item>
+
+    </fieldset>
+    <!-- 模态框底部 -->
+    <div class="modal-footer">
+        <button nz-button [nzType]="'default'" type="button" (click)="close()" [disabled]="saving">
+            <i class="anticon anticon-close-circle-o"></i> {{l("Cancel")}}
+        </button>
+        <button nz-button [nzType]="'primary'" type="submit" [disabled]="!validateForm.form.valid|| saving" [nzLoading]="saving">
+            <i class="anticon anticon-save" *ngIf="!saving"></i> {{l("Save")}}
+        </button>
+    </div>
+</form>
+
+
+
+
+

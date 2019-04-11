@@ -18,30 +18,30 @@ using Abp.Application.Services.Dto;
 using Abp.Linq.Extensions;
 
 
-using HC.AbpCore.Products;
-using HC.AbpCore.Products.Dtos;
-using HC.AbpCore.Products.DomainService;
+using HC.AbpCore.Suppliers;
+using HC.AbpCore.Suppliers.Dtos;
+using HC.AbpCore.Suppliers.DomainService;
 
 
 
-namespace HC.AbpCore.Products
+namespace HC.AbpCore.Suppliers
 {
     /// <summary>
-    /// Product应用层服务的接口实现方法  
+    /// Supplier应用层服务的接口实现方法  
     ///</summary>
     [AbpAuthorize]
-    public class ProductAppService : AbpCoreAppServiceBase, IProductAppService
+    public class SupplierAppService : AbpCoreAppServiceBase, ISupplierAppService
     {
-        private readonly IRepository<Product, int> _entityRepository;
+        private readonly IRepository<Supplier, int> _entityRepository;
 
-        private readonly IProductManager _entityManager;
+        private readonly ISupplierManager _entityManager;
 
         /// <summary>
         /// 构造函数 
         ///</summary>
-        public ProductAppService(
-        IRepository<Product, int> entityRepository
-        , IProductManager entityManager
+        public SupplierAppService(
+        IRepository<Supplier, int> entityRepository
+        , ISupplierManager entityManager
         )
         {
             _entityRepository = entityRepository;
@@ -50,16 +50,15 @@ namespace HC.AbpCore.Products
 
 
         /// <summary>
-        /// 获取Product的分页列表信息
+        /// 获取Supplier的分页列表信息
         ///</summary>
         /// <param name="input"></param>
         /// <returns></returns>
 
-        public async Task<PagedResultDto<ProductListDto>> GetPagedAsync(GetProductsInput input)
+        public async Task<PagedResultDto<SupplierListDto>> GetPagedAsync(GetSuppliersInput input)
         {
 
-            var query = _entityRepository.GetAll().WhereIf(!string.IsNullOrEmpty(input.Name), u => u.Name.Contains(input.Name))
-                .WhereIf(input.Type.HasValue, a => a.Type == input.Type);
+            var query = _entityRepository.GetAll().WhereIf(!String.IsNullOrEmpty(input.Name),a=>a.Name.Contains(input.Name));
             // TODO:根据传入的参数添加过滤条件
 
 
@@ -67,100 +66,98 @@ namespace HC.AbpCore.Products
 
             var entityList = await query
                     .OrderBy(input.Sorting).AsNoTracking()
-                     .OrderByDescending(a => a.CreationTime)
+                 .OrderByDescending(a => a.CreationTime)
                     .PageBy(input)
                     .ToListAsync();
 
-            // var entityListDtos = ObjectMapper.Map<List<ProductListDto>>(entityList);
-            var entityListDtos = entityList.MapTo<List<ProductListDto>>();
+            // var entityListDtos = ObjectMapper.Map<List<SupplierListDto>>(entityList);
+            var entityListDtos = entityList.MapTo<List<SupplierListDto>>();
 
-            return new PagedResultDto<ProductListDto>(count, entityListDtos);
+            return new PagedResultDto<SupplierListDto>(count, entityListDtos);
         }
 
 
         /// <summary>
-        /// 通过指定id获取ProductListDto信息
+        /// 通过指定id获取SupplierListDto信息
         /// </summary>
 
-        public async Task<ProductListDto> GetByIdAsync(EntityDto<int> input)
+        public async Task<SupplierListDto> GetByIdAsync(EntityDto<int> input)
         {
             var entity = await _entityRepository.GetAsync(input.Id);
 
-            return entity.MapTo<ProductListDto>();
+            return entity.MapTo<SupplierListDto>();
         }
 
         /// <summary>
-        /// 获取编辑 Product
+        /// 获取编辑 Supplier
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
 
-        public async Task<GetProductForEditOutput> GetForEditAsync(NullableIdDto<int> input)
+        public async Task<GetSupplierForEditOutput> GetForEditAsync(NullableIdDto<int> input)
         {
-            var output = new GetProductForEditOutput();
-            ProductEditDto editDto;
+            var output = new GetSupplierForEditOutput();
+            SupplierEditDto editDto;
 
             if (input.Id.HasValue)
             {
                 var entity = await _entityRepository.GetAsync(input.Id.Value);
 
-                editDto = entity.MapTo<ProductEditDto>();
+                editDto = entity.MapTo<SupplierEditDto>();
 
-                //productEditDto = ObjectMapper.Map<List<productEditDto>>(entity);
+                //supplierEditDto = ObjectMapper.Map<List<supplierEditDto>>(entity);
             }
             else
             {
-                editDto = new ProductEditDto();
+                editDto = new SupplierEditDto();
             }
 
-            output.Product = editDto;
+            output.Supplier = editDto;
             return output;
         }
 
 
         /// <summary>
-        /// 添加或者修改Product的公共方法
+        /// 添加或者修改Supplier的公共方法
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
 
-        public async Task CreateOrUpdateAsync(CreateOrUpdateProductInput input)
+        public async Task CreateOrUpdateAsync(CreateOrUpdateSupplierInput input)
         {
 
-            if (input.Product.Id.HasValue)
+            if (input.Supplier.Id.HasValue)
             {
-                await UpdateAsync(input.Product);
+                await UpdateAsync(input.Supplier);
             }
             else
             {
-                await CreateAsync(input.Product);
+                await CreateAsync(input.Supplier);
             }
         }
 
 
         /// <summary>
-        /// 新增Product
+        /// 新增Supplier
         /// </summary>
 
-        protected virtual async Task<ProductEditDto> CreateAsync(ProductEditDto input)
+        protected virtual async Task<SupplierEditDto> CreateAsync(SupplierEditDto input)
         {
             //TODO:新增前的逻辑判断，是否允许新增
 
-            // var entity = ObjectMapper.Map <Product>(input);
-            input.CreationTime = DateTime.Now;
-            input.IsEnabled = true;
-            var entity = input.MapTo<Product>();
+            // var entity = ObjectMapper.Map <Supplier>(input);
+            var entity = input.MapTo<Supplier>();
 
 
             entity = await _entityRepository.InsertAsync(entity);
-            return entity.MapTo<ProductEditDto>();
+            return entity.MapTo<SupplierEditDto>();
         }
 
         /// <summary>
-        /// 编辑Product
+        /// 编辑Supplier
         /// </summary>
 
-        protected virtual async Task UpdateAsync(ProductEditDto input)
+        protected virtual async Task UpdateAsync(SupplierEditDto input)
         {
             //TODO:更新前的逻辑判断，是否允许更新
 
@@ -174,7 +171,7 @@ namespace HC.AbpCore.Products
 
 
         /// <summary>
-        /// 删除Product信息的方法
+        /// 删除Supplier信息的方法
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
@@ -188,7 +185,7 @@ namespace HC.AbpCore.Products
 
 
         /// <summary>
-        /// 批量删除Product的方法
+        /// 批量删除Supplier的方法
         /// </summary>
 
         public async Task BatchDeleteAsync(List<int> input)
@@ -197,8 +194,9 @@ namespace HC.AbpCore.Products
             await _entityRepository.DeleteAsync(s => input.Contains(s.Id));
         }
 
+
         /// <summary>
-        /// 导出Product为excel表,等待开发。
+        /// 导出Supplier为excel表,等待开发。
         /// </summary>
         /// <returns></returns>
         //public async Task<FileDto> GetToExcel()

@@ -13,6 +13,8 @@ using HC.AbpCore.Companys.Accounts;
 using HC.AbpCore.Companys;
 using HC.AbpCore.Customers;
 using HC.AbpCore.Products;
+using HC.AbpCore.Suppliers;
+using HC.AbpCore.DataDictionarys;
 
 namespace HC.AbpCore.EntityFrameworkCore
 {
@@ -44,5 +46,9 @@ namespace HC.AbpCore.EntityFrameworkCore
         public virtual DbSet<Account> Accounts { get; set; }
 
         public virtual DbSet<Product> Products { get; set; }
+
+        public virtual DbSet<Supplier> Suppliers { get; set; }
+
+        public virtual DbSet<DataDictionary> DataDictionaries { get; set; }
     }
 }
