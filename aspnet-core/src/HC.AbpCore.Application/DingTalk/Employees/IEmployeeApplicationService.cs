@@ -20,6 +20,7 @@ using Abp.Application.Services.Dto;
 
 using HC.AbpCore.DingTalk.Employees.Dtos;
 using HC.AbpCore.DingTalk.Employees;
+using HC.AbpCore.Dtos;
 
 namespace HC.AbpCore.DingTalk.Employees
 {
@@ -40,6 +41,12 @@ namespace HC.AbpCore.DingTalk.Employees
 		/// 通过指定id获取EmployeeListDto信息
 		/// </summary>
 		Task<EmployeeListDto> GetByIdAsync(string id);
+
+        /// <summary>
+        /// 获取人员下拉列表
+        /// </summary>
+        /// <returns></returns>
+        Task<List<DropDownDto>> GetDropDownDtosAsync();
 
 
         ///// <summary>

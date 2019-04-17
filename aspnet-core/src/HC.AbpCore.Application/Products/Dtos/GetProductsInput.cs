@@ -28,5 +28,10 @@ namespace HC.AbpCore.Products.Dtos
         /// </summary>
         public int? Type { get; set; }
 
+        /// <summary>
+        /// 查询条件状态
+        /// </summary>
+        public bool? IsEnabled { get; set; }
+
     }
 }

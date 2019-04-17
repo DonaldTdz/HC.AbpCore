@@ -21,8 +21,7 @@ using Abp.Linq.Extensions;
 using HC.AbpCore.DingTalk.Employees;
 using HC.AbpCore.DingTalk.Employees.Dtos;
 using HC.AbpCore.DingTalk.Employees.DomainService;
-
-
+using HC.AbpCore.Dtos;
 
 namespace HC.AbpCore.DingTalk.Employees
 {
@@ -212,7 +211,18 @@ namespace HC.AbpCore.DingTalk.Employees
                     employeeListDtos
                 );
         }
-        
+
+        public async Task<List<DropDownDto>> GetDropDownDtosAsync()
+        {
+            var DropDownDtoList = await _entityRepository.GetAll()
+                .OrderBy(a => a.CreationTime).AsNoTracking()
+                .Select(aa => new DropDownDto()
+                {
+                    Text = aa.Name,
+                    Value = aa.Id
+                }).ToListAsync();
+            return DropDownDtoList;
+        }
 
         /// <summary>
         /// 导出Employee为excel表,等待开发。

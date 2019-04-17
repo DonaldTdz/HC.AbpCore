@@ -18,29 +18,35 @@ using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 
 
-using HC.AbpCore.Customers.Dtos;
-using HC.AbpCore.Customers;
+using HC.AbpCore.Projects.Dtos;
+using HC.AbpCore.Projects;
 using HC.AbpCore.Dtos;
 
-namespace HC.AbpCore.Customers
+namespace HC.AbpCore.Projects
 {
     /// <summary>
-    /// Customer应用层服务的接口方法
+    /// Project应用层服务的接口方法
     ///</summary>
-    public interface ICustomerAppService : IApplicationService
+    public interface IProjectAppService : IApplicationService
     {
         /// <summary>
-		/// 获取Customer的分页列表信息
+		/// 获取Project的分页列表信息
 		///</summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<PagedResultDto<CustomerListDto>> GetPagedAsync(GetCustomersInput input);
+        Task<PagedResultDto<ProjectListDto>> GetPagedAsync(GetProjectsInput input);
 
 
 		/// <summary>
-		/// 通过指定id获取CustomerListDto信息
+		/// 通过指定id获取ProjectListDto信息
 		/// </summary>
-		Task<CustomerListDto> GetByIdAsync(EntityDto<int> input);
+		Task<ProjectListDto> GetByIdAsync(EntityDto<Guid> input);
+
+        /// <summary>
+        /// 获取项目下拉列表
+        /// </summary>
+        /// <returns></returns>
+        Task<List<DropDownDto>> GetDropDownsAsync();
 
 
         /// <summary>
@@ -48,39 +54,33 @@ namespace HC.AbpCore.Customers
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<GetCustomerForEditOutput> GetForEditAsync(NullableIdDto<int> input);
-
-        /// <summary>
-        /// 获取客户下拉列表
-        /// </summary>
-        /// <returns></returns>
-        Task<List<DropDownDto>> GetDropDownDtosAsync();
+        Task<GetProjectForEditOutput> GetForEditAsync(NullableIdDto<Guid> input);
 
 
         /// <summary>
-        /// 添加或者修改Customer的公共方法
+        /// 添加或者修改Project的公共方法
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task CreateOrUpdateAsync(CustomerEditDto input);
+        Task CreateOrUpdateAsync(CreateOrUpdateProjectInput input);
 
 
         /// <summary>
-        /// 删除Customer信息的方法
+        /// 删除Project信息的方法
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task DeleteAsync(EntityDto<int> input);
+        Task DeleteAsync(EntityDto<Guid> input);
 
 
         /// <summary>
-        /// 批量删除Customer
+        /// 批量删除Project
         /// </summary>
-        Task BatchDelete(List<int> input);
+        Task BatchDeleteAsync(List<Guid> input);
 
 
 		/// <summary>
-        /// 导出Customer为excel表
+        /// 导出Project为excel表
         /// </summary>
         /// <returns></returns>
 		//Task<FileDto> GetToExcel();

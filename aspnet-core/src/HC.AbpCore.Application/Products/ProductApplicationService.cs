@@ -21,8 +21,7 @@ using Abp.Linq.Extensions;
 using HC.AbpCore.Products;
 using HC.AbpCore.Products.Dtos;
 using HC.AbpCore.Products.DomainService;
-
-
+using HC.AbpCore.Dtos;
 
 namespace HC.AbpCore.Products
 {
@@ -59,7 +58,7 @@ namespace HC.AbpCore.Products
         {
 
             var query = _entityRepository.GetAll().WhereIf(!string.IsNullOrEmpty(input.Name), u => u.Name.Contains(input.Name))
-                .WhereIf(input.Type.HasValue, a => a.Type == input.Type);
+                .WhereIf(input.Type.HasValue, a => a.Type == input.Type).WhereIf(input.IsEnabled.HasValue,a=>a.IsEnabled==input.IsEnabled.Value);
             // TODO:根据传入的参数添加过滤条件
 
 
@@ -196,6 +195,7 @@ namespace HC.AbpCore.Products
             // TODO:批量删除前的逻辑判断，是否允许删除
             await _entityRepository.DeleteAsync(s => input.Contains(s.Id));
         }
+        
 
         /// <summary>
         /// 导出Product为excel表,等待开发。

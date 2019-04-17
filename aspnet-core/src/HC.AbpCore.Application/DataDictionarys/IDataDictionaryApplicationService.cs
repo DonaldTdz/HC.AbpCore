@@ -20,6 +20,8 @@ using Abp.Application.Services.Dto;
 
 using HC.AbpCore.DataDictionarys.Dtos;
 using HC.AbpCore.DataDictionarys;
+using HC.AbpCore.Dtos;
+using static HC.AbpCore.DataDictionarys.DataDictionaryBase;
 
 namespace HC.AbpCore.DataDictionarys
 {
@@ -35,11 +37,17 @@ namespace HC.AbpCore.DataDictionarys
         /// <returns></returns>
         Task<PagedResultDto<DataDictionaryListDto>> GetPagedAsync(GetDataDictionarysInput input);
 
+        /// <summary>
+        /// 根据group获取字典下拉框
+        /// </summary>
+        /// <param name="group"></param>
+        /// <returns></returns>
+        Task<List<DropDownDto>> GetDropDownDtosByGroupAsync(DataDictionaryGroupEnum group);
 
-		/// <summary>
-		/// 通过指定id获取DataDictionaryListDto信息
-		/// </summary>
-		Task<DataDictionaryListDto> GetByIdAsync(EntityDto<int> input);
+        /// <summary>
+        /// 通过指定id获取DataDictionaryListDto信息
+        /// </summary>
+        Task<DataDictionaryListDto> GetByIdAsync(EntityDto<int> input);
 
 
         /// <summary>

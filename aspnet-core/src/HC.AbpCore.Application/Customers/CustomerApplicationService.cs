@@ -21,7 +21,7 @@ using Abp.Linq.Extensions;
 using HC.AbpCore.Customers;
 using HC.AbpCore.Customers.Dtos;
 using HC.AbpCore.Customers.DomainService;
-
+using HC.AbpCore.Dtos;
 
 namespace HC.AbpCore.Customers
 {
@@ -198,8 +198,16 @@ namespace HC.AbpCore.Customers
             return entity.MapTo<CustomerListDto>();
         }
 
-
-
+        public async Task<List<DropDownDto>> GetDropDownDtosAsync()
+        {
+            var DropDownDtoList = await _entityRepository.GetAll().OrderBy(a => a.CreationTime).AsNoTracking()
+                .Select(c => new DropDownDto()
+                {
+                    Text = c.Name,
+                    Value = c.Id.ToString()
+                }).ToListAsync();
+            return DropDownDtoList;
+        }
 
         /// <summary>
         /// 导出Customer为excel表,等待开发。

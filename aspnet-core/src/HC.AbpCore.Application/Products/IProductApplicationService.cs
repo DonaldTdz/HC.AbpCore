@@ -20,6 +20,7 @@ using Abp.Application.Services.Dto;
 
 using HC.AbpCore.Products.Dtos;
 using HC.AbpCore.Products;
+using HC.AbpCore.Dtos;
 
 namespace HC.AbpCore.Products
 {
@@ -70,7 +71,7 @@ namespace HC.AbpCore.Products
         /// 批量删除Product
         /// </summary>
         Task BatchDeleteAsync(List<int> input);
-
+        
 
         /// <summary>
         /// 导出Product为excel表

@@ -21,8 +21,8 @@ using Abp.Linq.Extensions;
 using HC.AbpCore.DataDictionarys;
 using HC.AbpCore.DataDictionarys.Dtos;
 using HC.AbpCore.DataDictionarys.DomainService;
-
-
+using HC.AbpCore.Dtos;
+using static HC.AbpCore.DataDictionarys.DataDictionaryBase;
 
 namespace HC.AbpCore.DataDictionarys
 {
@@ -195,6 +195,17 @@ namespace HC.AbpCore.DataDictionarys
             await _entityRepository.DeleteAsync(s => input.Contains(s.Id));
         }
 
+        public async Task<List<DropDownDto>> GetDropDownDtosByGroupAsync(DataDictionaryGroupEnum group)
+        {
+            var dropDownDtoList = await _entityRepository.GetAll().Where(aa => aa.Group == group)
+               .OrderBy(aa => aa.CreationTime).AsNoTracking()
+               .Select(aa => new DropDownDto
+               {
+                   Text = aa.Value,
+                   Value = aa.Code
+               }).ToListAsync();
+            return dropDownDtoList;
+        }
 
         /// <summary>
         /// 导出DataDictionary为excel表,等待开发。
