@@ -5,9 +5,11 @@ using Abp.Application.Services.Dto;
 using Abp.Domain.Entities.Auditing;
 using System.ComponentModel.DataAnnotations;
 using HC.AbpCore.Purchases;
+using Abp.AutoMapper;
 
 namespace HC.AbpCore.Purchases.Dtos
 {
+    [AutoMapFrom(typeof(Purchase))]
     public class PurchaseListDto : FullAuditedEntityDto<Guid> 
     {
 
@@ -45,8 +47,15 @@ namespace HC.AbpCore.Purchases.Dtos
 		/// </summary>
 		public string Desc { get; set; }
 
+        /// <summary>
+        /// 项目名称
+        /// </summary>
+        public string ProjectName { get; set; }
 
-
-
+        /// <summary>
+        /// 采购负责人名称
+        /// </summary>
+        public string EmployeeName { get; set; }
+        
     }
 }

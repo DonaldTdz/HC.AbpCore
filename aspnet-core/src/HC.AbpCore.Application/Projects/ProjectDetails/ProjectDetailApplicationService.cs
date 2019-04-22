@@ -60,7 +60,9 @@ namespace HC.AbpCore.Projects.ProjectDetails
         public async Task<PagedResultDto<ProjectDetailListDto>> GetPagedAsync(GetProjectDetailsInput input)
         {
 
-            var query = _entityRepository.GetAll();
+            var query = _entityRepository.GetAll().WhereIf(input.ProjectId.HasValue,aa=>aa.ProjectId==input.ProjectId.Value)
+                .WhereIf(!String.IsNullOrEmpty(input.Name),aa=>aa.Name.Contains(input.Name))
+                .WhereIf(!String.IsNullOrEmpty(input.Type),aa=>aa.Type==input.Type);
             // TODO:根据传入的参数添加过滤条件
 
             var count = await query.CountAsync();
@@ -149,9 +151,9 @@ namespace HC.AbpCore.Projects.ProjectDetails
             // var entity = ObjectMapper.Map <ProjectDetail>(input);
             if (!input.ProductId.HasValue)
             {
-                var product = await _productRepository.GetAll().Where(aa => aa.Name == input.Name && aa.Specification == input.Specification && aa.Unit == input.Unit && aa.IsEnabled == true).FirstOrDefaultAsync();
+                var product = await _productRepository.GetAll().Where(aa => aa.Name == input.Name.Trim() && aa.Specification == input.Specification.Trim() && aa.IsEnabled == true).FirstOrDefaultAsync();
                 if (product == null)
-                    input.ProductId = await _productRepository.InsertAndGetIdAsync(new Product() { Name = input.Name, Specification = input.Specification, Unit = input.Unit, Type = 0, IsEnabled = true });
+                    input.ProductId = await _productRepository.InsertAndGetIdAsync(new Product() { Name = input.Name.Trim(), Specification = input.Specification.Trim(), Type = 0, IsEnabled = true });
                 else
                 {
                     input.ProductId = product.Id;
@@ -174,9 +176,9 @@ namespace HC.AbpCore.Projects.ProjectDetails
             //TODO:更新前的逻辑判断，是否允许更新
             if (!input.ProductId.HasValue)
             {
-                var product = await _productRepository.GetAll().Where(aa => aa.Name == input.Name && aa.Specification == input.Specification && aa.Unit == input.Unit && aa.IsEnabled == true).FirstOrDefaultAsync();
+                var product = await _productRepository.GetAll().Where(aa => aa.Name == input.Name.Trim() && aa.Specification == input.Specification.Trim() && aa.IsEnabled == true).FirstOrDefaultAsync();
                 if (product == null)
-                    input.ProductId = await _productRepository.InsertAndGetIdAsync(new Product() { Name = input.Name, Specification = input.Specification, Unit = input.Unit, Type = 0, IsEnabled = true });
+                    input.ProductId = await _productRepository.InsertAndGetIdAsync(new Product() { Name = input.Name.Trim(), Specification = input.Specification.Trim(), Type = 0, IsEnabled = true });
                 else
                 {
                     input.ProductId = product.Id;
@@ -216,11 +218,17 @@ namespace HC.AbpCore.Projects.ProjectDetails
             await _entityRepository.DeleteAsync(s => input.Contains(s.Id));
         }
 
-        public async Task<List<DropDownDto>> GetDropDownsByprojectIdAsync(int projectId)
+        /// <summary>
+        /// 根据项目id获取下拉列表
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <returns></returns>
+        public async Task<List<DropDownDto>> GetDropDownsByProjectIdAsync(Guid projectId)
         {
             var query = _entityRepository.GetAll();
             var entityList = await query
                     .OrderBy(a => a.CreationTime).AsNoTracking()
+                    .Where(aa=>aa.ProjectId==projectId)
                     .Select(c => new DropDownDto() { Text = c.Name, Value = c.Id.ToString() })
                     .ToListAsync();
             return entityList;

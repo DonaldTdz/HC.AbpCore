@@ -62,15 +62,15 @@ namespace HC.AbpCore.Customers
                   */
 
             var query = _entityRepository.GetAll()
-                .WhereIf(!string.IsNullOrEmpty(input.name),u=>u.Name.Contains(input.name))
-                .WhereIf(input.type.HasValue,v=>v.Type==input.type.Value);
+                .WhereIf(!string.IsNullOrEmpty(input.name), u => u.Name.Contains(input.name))
+                .WhereIf(input.type.HasValue, v => v.Type == input.type.Value);
             // TODO:根据传入的参数添加过滤条件
 
 
             var count = await query.CountAsync();
-            
+
             var entityList = await query
-                
+
                .OrderBy(input.Sorting).AsNoTracking()
                .PageBy(input)
                .ToListAsync();
@@ -122,15 +122,16 @@ namespace HC.AbpCore.Customers
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task CreateOrUpdateAsync(CustomerEditDto input)
+        public async Task<APIResultDto> CreateOrUpdateAsync(CustomerEditDto input)
         {
+            input.Name = input.Name.Trim();
             if (input.Id.HasValue)
             {
-                await UpdateAsync(input);
+                return await UpdateAsync(input);
             }
             else
             {
-                await CreateAsync(input);
+                return await CreateAsync(input);
             }
         }
 
@@ -138,30 +139,48 @@ namespace HC.AbpCore.Customers
         /// <summary>
         /// 新增Customer
         /// </summary>
-        protected virtual async Task<CustomerEditDto> CreateAsync(CustomerEditDto input)
+        protected virtual async Task<APIResultDto> CreateAsync(CustomerEditDto input)
         {
             //TODO:新增前的逻辑判断，是否允许新增
+            int customerCount = await _entityRepository.GetAll().Where(aa => aa.Name == input.Name).CountAsync();
+            if (customerCount > 0)
+                return new APIResultDto() { Code = 0, Msg = "该客户名称已存在" };
+
 
             // var entity = ObjectMapper.Map <Customer>(input);
             var entity = input.MapTo<Customer>();
 
 
             entity = await _entityRepository.InsertAsync(entity);
-            return entity.MapTo<CustomerEditDto>();
+            if (entity != null)
+                return new APIResultDto() { Code = 1, Msg = "保存成功" };
+            else
+                return new APIResultDto() { Code = 0, Msg = "保存失败" };
         }
 
         /// <summary>
         /// 编辑Customer
         /// </summary>
-        protected virtual async Task UpdateAsync(CustomerEditDto input)
+        protected virtual async Task<APIResultDto> UpdateAsync(CustomerEditDto input)
         {
             //TODO:更新前的逻辑判断，是否允许更新
 
             var entity = await _entityRepository.GetAsync(input.Id.Value);
+            if (entity.Name != input.Name)
+            {
+                int customerCount = await _entityRepository.GetAll().Where(aa => aa.Name == input.Name).CountAsync();
+                if (customerCount > 0)
+                    return new APIResultDto() { Code = 0, Msg = "该客户名称已存在" };
+            }
+
             input.MapTo(entity);
 
             // ObjectMapper.Map(input, entity);
-            await _entityRepository.UpdateAsync(entity);
+            entity = await _entityRepository.UpdateAsync(entity);
+            if (entity != null)
+                return new APIResultDto() { Code = 1, Msg = "保存成功" };
+            else
+                return new APIResultDto() { Code = 0, Msg = "保存失败" };
         }
 
 

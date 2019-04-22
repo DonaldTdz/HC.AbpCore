@@ -229,6 +229,10 @@ namespace HC.AbpCore.Projects
             await _entityRepository.DeleteAsync(s => input.Contains(s.Id));
         }
 
+        /// <summary>
+        /// 获取项目下拉列表
+        /// </summary>
+        /// <returns></returns>
         public async Task<List<DropDownDto>> GetDropDownsAsync()
         {
             var query = _entityRepository.GetAll();

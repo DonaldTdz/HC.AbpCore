@@ -72,8 +72,12 @@ namespace HC.AbpCore.Projects.ProjectDetails
         /// </summary>
         Task BatchDeleteAsync(List<Guid> input);
 
-
-        Task<List<DropDownDto>> GetDropDownsByprojectIdAsync(int projectId);
+        /// <summary>
+        /// 根据项目id获取下拉列表
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <returns></returns>
+        Task<List<DropDownDto>> GetDropDownsByProjectIdAsync(Guid projectId);
 
 
         /// <summary>

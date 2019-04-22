@@ -21,8 +21,7 @@ using Abp.Linq.Extensions;
 using HC.AbpCore.Suppliers;
 using HC.AbpCore.Suppliers.Dtos;
 using HC.AbpCore.Suppliers.DomainService;
-
-
+using HC.AbpCore.Dtos;
 
 namespace HC.AbpCore.Suppliers
 {
@@ -58,7 +57,7 @@ namespace HC.AbpCore.Suppliers
         public async Task<PagedResultDto<SupplierListDto>> GetPagedAsync(GetSuppliersInput input)
         {
 
-            var query = _entityRepository.GetAll().WhereIf(!String.IsNullOrEmpty(input.Name),a=>a.Name.Contains(input.Name));
+            var query = _entityRepository.GetAll().WhereIf(!String.IsNullOrEmpty(input.Name), a => a.Name.Contains(input.Name));
             // TODO:根据传入的参数添加过滤条件
 
 
@@ -123,16 +122,16 @@ namespace HC.AbpCore.Suppliers
         /// <param name="input"></param>
         /// <returns></returns>
 
-        public async Task CreateOrUpdateAsync(CreateOrUpdateSupplierInput input)
+        public async Task<APIResultDto> CreateOrUpdateAsync(CreateOrUpdateSupplierInput input)
         {
-
+            input.Supplier.Name = input.Supplier.Name.Trim();
             if (input.Supplier.Id.HasValue)
             {
-                await UpdateAsync(input.Supplier);
+                return await UpdateAsync(input.Supplier);
             }
             else
             {
-                await CreateAsync(input.Supplier);
+                return await CreateAsync(input.Supplier);
             }
         }
 
@@ -141,31 +140,50 @@ namespace HC.AbpCore.Suppliers
         /// 新增Supplier
         /// </summary>
 
-        protected virtual async Task<SupplierEditDto> CreateAsync(SupplierEditDto input)
+        protected virtual async Task<APIResultDto> CreateAsync(SupplierEditDto input)
         {
             //TODO:新增前的逻辑判断，是否允许新增
+            int supplierCount = await _entityRepository.GetAll().Where(aa => aa.Name == input.Name).CountAsync();
+            if (supplierCount > 0)
+                return new APIResultDto() { Code = 0, Msg = "该供应商名称已存在" };
 
             // var entity = ObjectMapper.Map <Supplier>(input);
             var entity = input.MapTo<Supplier>();
 
 
             entity = await _entityRepository.InsertAsync(entity);
-            return entity.MapTo<SupplierEditDto>();
+            if (entity != null)
+                return new APIResultDto() { Code = 1, Msg = "保存成功" };
+            else
+                return new APIResultDto() { Code = 0, Msg = "保存失败" };
         }
 
         /// <summary>
         /// 编辑Supplier
         /// </summary>
 
-        protected virtual async Task UpdateAsync(SupplierEditDto input)
+        protected virtual async Task<APIResultDto> UpdateAsync(SupplierEditDto input)
         {
             //TODO:更新前的逻辑判断，是否允许更新
 
             var entity = await _entityRepository.GetAsync(input.Id.Value);
+
+            if (entity.Name != input.Name)
+            {
+                int supplierCount = await _entityRepository.GetAll().Where(aa => aa.Name == input.Name).CountAsync();
+                if (supplierCount > 0)
+                    return new APIResultDto() { Code = 0, Msg = "该供应商名称已存在" };
+            }
+
             input.MapTo(entity);
 
             // ObjectMapper.Map(input, entity);
-            await _entityRepository.UpdateAsync(entity);
+            entity = await _entityRepository.UpdateAsync(entity);
+
+            if (entity != null)
+                return new APIResultDto() { Code = 1, Msg = "保存成功" };
+            else
+                return new APIResultDto() { Code = 0, Msg = "保存失败" };
         }
 
 
@@ -194,6 +212,21 @@ namespace HC.AbpCore.Suppliers
             await _entityRepository.DeleteAsync(s => input.Contains(s.Id));
         }
 
+        /// <summary>
+        /// 获取供应商下拉列表
+        /// </summary>
+        /// <returns></returns>
+        public async Task<List<DropDownDto>> GetDropDownsAsync()
+        {
+            var items = await _entityRepository.GetAll()
+                .OrderByDescending(aa => aa.CreationTime)
+                .Select(aa => new DropDownDto()
+                {
+                    Text = aa.Name,
+                    Value = aa.Id.ToString()
+                }).AsNoTracking().ToListAsync();
+            return items;
+        }
 
         /// <summary>
         /// 导出Supplier为excel表,等待开发。

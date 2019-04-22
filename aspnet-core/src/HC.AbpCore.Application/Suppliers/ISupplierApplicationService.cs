@@ -20,6 +20,7 @@ using Abp.Application.Services.Dto;
 
 using HC.AbpCore.Suppliers.Dtos;
 using HC.AbpCore.Suppliers;
+using HC.AbpCore.Dtos;
 
 namespace HC.AbpCore.Suppliers
 {
@@ -55,7 +56,7 @@ namespace HC.AbpCore.Suppliers
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task CreateOrUpdateAsync(CreateOrUpdateSupplierInput input);
+        Task<APIResultDto> CreateOrUpdateAsync(CreateOrUpdateSupplierInput input);
 
 
         /// <summary>
@@ -72,11 +73,18 @@ namespace HC.AbpCore.Suppliers
         Task BatchDeleteAsync(List<int> input);
 
 
-		/// <summary>
+        /// <summary>
+        /// 获取项目下拉列表
+        /// </summary>
+        /// <returns></returns>
+        Task<List<DropDownDto>> GetDropDownsAsync();
+
+
+        /// <summary>
         /// 导出Supplier为excel表
         /// </summary>
         /// <returns></returns>
-		//Task<FileDto> GetToExcel();
+        //Task<FileDto> GetToExcel();
 
     }
 }

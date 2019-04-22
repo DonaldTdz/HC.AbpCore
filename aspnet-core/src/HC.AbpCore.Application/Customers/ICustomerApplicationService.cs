@@ -62,7 +62,7 @@ namespace HC.AbpCore.Customers
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task CreateOrUpdateAsync(CustomerEditDto input);
+        Task<APIResultDto> CreateOrUpdateAsync(CustomerEditDto input);
 
 
         /// <summary>

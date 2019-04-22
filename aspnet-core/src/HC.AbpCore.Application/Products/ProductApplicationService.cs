@@ -123,16 +123,17 @@ namespace HC.AbpCore.Products
         /// <param name="input"></param>
         /// <returns></returns>
 
-        public async Task CreateOrUpdateAsync(CreateOrUpdateProductInput input)
+        public async Task<APIResultDto> CreateOrUpdateAsync(CreateOrUpdateProductInput input)
         {
-
+            input.Product.Name = input.Product.Name.Trim();
+            input.Product.Specification = input.Product.Specification.Trim();
             if (input.Product.Id.HasValue)
             {
-                await UpdateAsync(input.Product);
+               return await UpdateAsync(input.Product);
             }
             else
             {
-                await CreateAsync(input.Product);
+               return await CreateAsync(input.Product);
             }
         }
 
@@ -141,10 +142,12 @@ namespace HC.AbpCore.Products
         /// 新增Product
         /// </summary>
 
-        protected virtual async Task<ProductEditDto> CreateAsync(ProductEditDto input)
+        protected virtual async Task<APIResultDto> CreateAsync(ProductEditDto input)
         {
             //TODO:新增前的逻辑判断，是否允许新增
-
+            int productCount = await _entityRepository.GetAll().Where(aa => aa.Name == input.Name&&aa.Specification==input.Specification).CountAsync();
+            if (productCount > 0)
+                return new APIResultDto() { Code = 0, Msg = "该产品已存在(规格型号完全一致)" };
             // var entity = ObjectMapper.Map <Product>(input);
             input.CreationTime = DateTime.Now;
             input.IsEnabled = true;
@@ -152,22 +155,37 @@ namespace HC.AbpCore.Products
 
 
             entity = await _entityRepository.InsertAsync(entity);
-            return entity.MapTo<ProductEditDto>();
+            if (entity != null)
+                return new APIResultDto() { Code = 1, Msg = "保存成功" };
+            else
+                return new APIResultDto() { Code = 0, Msg = "保存失败" };
         }
 
         /// <summary>
         /// 编辑Product
         /// </summary>
 
-        protected virtual async Task UpdateAsync(ProductEditDto input)
+        protected virtual async Task<APIResultDto> UpdateAsync(ProductEditDto input)
         {
             //TODO:更新前的逻辑判断，是否允许更新
-
             var entity = await _entityRepository.GetAsync(input.Id.Value);
+            
+            if (entity.Name != input.Name || entity.Specification!=input.Specification)
+            {
+                int productCount = await _entityRepository.GetAll().Where(aa => aa.Name == input.Name && aa.Specification == input.Specification).CountAsync();
+                if (productCount > 0)
+                    return new APIResultDto() { Code = 0, Msg = "该产品已存在(规格型号完全一致)" };
+            }
+
             input.MapTo(entity);
 
             // ObjectMapper.Map(input, entity);
-            await _entityRepository.UpdateAsync(entity);
+            entity = await _entityRepository.UpdateAsync(entity);
+
+            if (entity != null)
+                return new APIResultDto() { Code = 1, Msg = "保存成功" };
+            else
+                return new APIResultDto() { Code = 0, Msg = "保存失败" };
         }
 
 

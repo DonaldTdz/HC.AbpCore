@@ -56,7 +56,7 @@ namespace HC.AbpCore.Products
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task CreateOrUpdateAsync(CreateOrUpdateProductInput input);
+        Task<APIResultDto> CreateOrUpdateAsync(CreateOrUpdateProductInput input);
 
 
         /// <summary>

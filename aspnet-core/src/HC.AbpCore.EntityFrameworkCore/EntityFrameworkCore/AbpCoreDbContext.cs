@@ -18,6 +18,10 @@ using HC.AbpCore.DataDictionarys;
 using HC.AbpCore.Projects;
 using HC.AbpCore.Projects.ProjectDetails;
 using HC.AbpCore.Tenders;
+using HC.AbpCore.Purchases;
+using HC.AbpCore.Purchases.PurchaseDetails;
+using HC.AbpCore.Contracts.ContractDetails;
+using HC.AbpCore.Contracts;
 
 namespace HC.AbpCore.EntityFrameworkCore
 {
@@ -59,5 +63,13 @@ namespace HC.AbpCore.EntityFrameworkCore
         public virtual DbSet<ProjectDetail> ProjectDetails { get; set; }
 
         public virtual DbSet<Tender> Tenders { get; set; }
+
+        public virtual DbSet<Purchase> Purchases { get; set; }
+
+        public virtual DbSet<PurchaseDetail> PurchaseDetails { get; set; }
+
+        public virtual DbSet<Contract> Contracts { get; set; }
+
+        public virtual DbSet<ContractDetail> ContractDetails { get; set; }
     }
 }
