@@ -221,6 +221,21 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
             await _entityRepository.DeleteAsync(s => input.Contains(s.Id));
         }
 
+        /// <summary>
+        /// 根据采购id获取采购明细下拉列表
+        /// </summary>
+        /// <returns></returns>
+        public async Task<List<DropDownDto>> GetDropDownsByPurchaseIdAsync(Guid purchaseId)
+        {
+            var query = _entityRepository.GetAll();
+            var entityList = await query
+                    .OrderBy(a => a.CreationTime).AsNoTracking()
+                    .Where(aa=>aa.PurchaseId==purchaseId)
+                    .Select(c => new DropDownDto() { Text = c.Price.ToString(), Value = c.Id.ToString() })
+                    .ToListAsync();
+            return entityList;
+        }
+
 
         /// <summary>
         /// 导出PurchaseDetail为excel表,等待开发。

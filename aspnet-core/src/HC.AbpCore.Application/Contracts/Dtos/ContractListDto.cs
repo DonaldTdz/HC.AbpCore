@@ -6,9 +6,11 @@ using Abp.Domain.Entities.Auditing;
 using System.ComponentModel.DataAnnotations;
 using HC.AbpCore.Contracts;
 using static HC.AbpCore.Contracts.ContractEnum;
+using Abp.AutoMapper;
 
 namespace HC.AbpCore.Contracts.Dtos
 {
+    [AutoMapFrom(typeof(Contract))]
     public class ContractListDto : FullAuditedEntityDto<Guid> 
     {
 
@@ -62,6 +64,19 @@ namespace HC.AbpCore.Contracts.Dtos
 		/// </summary>
 		public string Attachments { get; set; }
 
+
+
+
+        public string TypeName
+        {
+            get
+            {
+                return Type.ToString();
+            }
+        }
+
+
+        public string RefName { get; set; }
 
 
 

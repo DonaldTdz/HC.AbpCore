@@ -20,6 +20,7 @@ using Abp.Application.Services.Dto;
 
 using HC.AbpCore.Contracts.ContractDetails.Dtos;
 using HC.AbpCore.Contracts.ContractDetails;
+using HC.AbpCore.Dtos;
 
 namespace HC.AbpCore.Contracts.ContractDetails
 {
@@ -33,13 +34,13 @@ namespace HC.AbpCore.Contracts.ContractDetails
 		///</summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<PagedResultDto<ContractDetailListDto>> GetPaged(GetContractDetailsInput input);
+        Task<PagedResultDto<ContractDetailListDto>> GetPagedAsync(GetContractDetailsInput input);
 
 
 		/// <summary>
 		/// 通过指定id获取ContractDetailListDto信息
 		/// </summary>
-		Task<ContractDetailListDto> GetById(EntityDto<Guid> input);
+		Task<ContractDetailListDto> GetByIdAsync(EntityDto<Guid> input);
 
 
         /// <summary>
@@ -47,7 +48,7 @@ namespace HC.AbpCore.Contracts.ContractDetails
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<GetContractDetailForEditOutput> GetForEdit(NullableIdDto<Guid> input);
+        Task<GetContractDetailForEditOutput> GetForEditAsync(NullableIdDto<Guid> input);
 
 
         /// <summary>
@@ -55,7 +56,7 @@ namespace HC.AbpCore.Contracts.ContractDetails
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task CreateOrUpdate(CreateOrUpdateContractDetailInput input);
+        Task CreateOrUpdateAsync(CreateOrUpdateContractDetailInput input);
 
 
         /// <summary>
@@ -63,13 +64,13 @@ namespace HC.AbpCore.Contracts.ContractDetails
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task Delete(EntityDto<Guid> input);
+        Task DeleteAsync(EntityDto<Guid> input);
 
 
         /// <summary>
         /// 批量删除ContractDetail
         /// </summary>
-        Task BatchDelete(List<Guid> input);
+        Task BatchDeleteAsync(List<Guid> input);
 
 
 		/// <summary>

@@ -2,6 +2,7 @@
 using Abp.Runtime.Validation;
 using HC.AbpCore.Dtos;
 using HC.AbpCore.Contracts.ContractDetails;
+using System;
 
 namespace HC.AbpCore.Contracts.ContractDetails.Dtos
 {
@@ -18,6 +19,11 @@ namespace HC.AbpCore.Contracts.ContractDetails.Dtos
                 Sorting = "Id";
             }
         }
+
+        /// <summary>
+        /// 查询条件-合同ID
+        /// </summary>
+        public Guid? ContractId { get; set; }
 
     }
 }

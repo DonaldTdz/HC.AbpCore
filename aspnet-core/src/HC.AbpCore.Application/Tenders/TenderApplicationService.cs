@@ -133,6 +133,7 @@ namespace HC.AbpCore.Tenders
             var entity = await _entityRepository.GetAsync(input.Id);
             var employeeList = await _employeeRepository.GetAll().AsNoTracking().ToListAsync();
             var item= entity.MapTo<TenderListDto>();
+            item.ProjectName = (await _projectRepository.GetAsync(item.ProjectId)).Name;
             if (!String.IsNullOrEmpty(item.EmployeeId))
                 item.EmployeeName = (await _employeeRepository.GetAsync(item.EmployeeId)).Name;
             if (!String.IsNullOrEmpty(item.ReadyEmployeeIds))

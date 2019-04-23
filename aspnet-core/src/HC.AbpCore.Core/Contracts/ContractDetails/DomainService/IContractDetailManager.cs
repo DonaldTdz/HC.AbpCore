@@ -3,6 +3,7 @@
 using System;
 using System.Threading.Tasks;
 using Abp;
+using Abp.Domain.Entities;
 using Abp.Domain.Services;
 using HC.AbpCore.Contracts.ContractDetails;
 
@@ -18,10 +19,23 @@ namespace HC.AbpCore.Contracts.ContractDetails.DomainService
         void InitContractDetail();
 
 
+        /// <summary>
+        /// 新增
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        Task<ContractDetail> CreateAsync(ContractDetail input);
 
-		 
-      
-         
+
+        /// <summary>
+        /// 编辑
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        Task UpdateAsync(ContractDetail input);
+
+        Task DeleteAsync(Guid Id);
+
 
     }
 }

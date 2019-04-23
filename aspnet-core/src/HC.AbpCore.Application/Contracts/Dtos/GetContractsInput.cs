@@ -2,6 +2,8 @@
 using Abp.Runtime.Validation;
 using HC.AbpCore.Dtos;
 using HC.AbpCore.Contracts;
+using static HC.AbpCore.Contracts.ContractEnum;
+using System;
 
 namespace HC.AbpCore.Contracts.Dtos
 {
@@ -18,6 +20,21 @@ namespace HC.AbpCore.Contracts.Dtos
                 Sorting = "Id";
             }
         }
+
+        /// <summary>
+        /// 查询条件-合同分类
+        /// </summary>
+        public ContractTypeEnum? Type { get; set; }
+
+        /// <summary>
+        /// 查询条件-合同编号
+        /// </summary>
+        public string ContractCode { get; set; }
+
+        /// <summary>
+        /// 查询条件-项目ID
+        /// </summary>
+        public Guid? ProjectId { get; set; }
 
     }
 }

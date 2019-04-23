@@ -50,6 +50,12 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
         /// <returns></returns>
         Task<GetPurchaseDetailForEditOutput> GetForEditAsync(NullableIdDto<Guid> input);
 
+        /// <summary>
+        /// 根据采购id获取采购明细下拉列表
+        /// </summary>
+        /// <returns></returns>
+        Task<List<DropDownDto>> GetDropDownsByPurchaseIdAsync(Guid purchaseId);
+
 
         /// <summary>
         /// 添加或者修改PurchaseDetail的公共方法
