@@ -77,6 +77,7 @@ namespace HC.AbpCore.Contracts.ContractDetails
 
             var entityList = await query
                     .OrderBy(input.Sorting).AsNoTracking()
+                    .OrderByDescending(aa=>aa.CreationTime)
                     .PageBy(input)
                     .ToListAsync();
 
@@ -158,7 +159,6 @@ namespace HC.AbpCore.Contracts.ContractDetails
 
             // var entity = ObjectMapper.Map <ContractDetail>(input);
             var entity = input.MapTo<ContractDetail>();
-
 
             entity = await _entityManager.CreateAsync(entity);
             return entity;

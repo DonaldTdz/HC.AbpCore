@@ -24,6 +24,7 @@ using HC.AbpCore.Purchases.PurchaseDetails.DomainService;
 using HC.AbpCore.Suppliers;
 using HC.AbpCore.Projects.ProjectDetails;
 using HC.AbpCore.Dtos;
+using HC.AbpCore.Projects;
 
 namespace HC.AbpCore.Purchases.PurchaseDetails
 {
@@ -34,6 +35,7 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
     public class PurchaseDetailAppService : AbpCoreAppServiceBase, IPurchaseDetailAppService
     {
         private readonly IRepository<PurchaseDetail, Guid> _entityRepository;
+        private readonly IRepository<Purchase, Guid> _purchaseRepository;
         private readonly IRepository<Supplier, int> _supplierRepository;
         private readonly IRepository<ProjectDetail, Guid> _projectDetailRepository;
         private readonly IPurchaseDetailManager _entityManager;
@@ -43,12 +45,14 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
         ///</summary>
         public PurchaseDetailAppService(
         IRepository<PurchaseDetail, Guid> entityRepository,
-                IRepository<Supplier, int> supplierRepository,
-                    IRepository<ProjectDetail, Guid> projectDetailRepository
+                IRepository<Supplier, int> supplierRepository
+            , IRepository<ProjectDetail, Guid> projectDetailRepository
+            , IRepository<Purchase, Guid> purchaseRepository
         , IPurchaseDetailManager entityManager
         )
         {
             _projectDetailRepository = projectDetailRepository;
+            _purchaseRepository = purchaseRepository;
             _supplierRepository = supplierRepository;
             _entityRepository = entityRepository;
             _entityManager = entityManager;
@@ -141,16 +145,16 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
         /// <param name="input"></param>
         /// <returns></returns>
 
-        public async Task<APIResultDto> CreateOrUpdateAsync(CreateOrUpdatePurchaseDetailInput input)
+        public async Task CreateOrUpdateAsync(CreateOrUpdatePurchaseDetailInput input)
         {
 
             if (input.PurchaseDetail.Id.HasValue)
             {
-                return await UpdateAsync(input.PurchaseDetail);
+                await UpdateAsync(input.PurchaseDetail);
             }
             else
             {
-                return await CreateAsync(input.PurchaseDetail);
+                await CreateAsync(input.PurchaseDetail);
             }
         }
 
@@ -159,7 +163,7 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
         /// 新增PurchaseDetail
         /// </summary>
 
-        protected virtual async Task<APIResultDto> CreateAsync(PurchaseDetailEditDto input)
+        protected virtual async Task<PurchaseDetailEditDto> CreateAsync(PurchaseDetailEditDto input)
         {
             //TODO:新增前的逻辑判断，是否允许新增
 
@@ -169,17 +173,14 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
 
 
             entity = await _entityRepository.InsertAsync(entity);
-            if (entity != null)
-                return new APIResultDto() { Code = 1, Msg = "保存成功" };
-            else
-                return new APIResultDto() { Code = 0, Msg = "保存失败" };
+            return entity.MapTo<PurchaseDetailEditDto>();
         }
 
         /// <summary>
         /// 编辑PurchaseDetail
         /// </summary>
 
-        protected virtual async Task<APIResultDto> UpdateAsync(PurchaseDetailEditDto input)
+        protected virtual async Task UpdateAsync(PurchaseDetailEditDto input)
         {
             //TODO:更新前的逻辑判断，是否允许更新
 
@@ -187,12 +188,7 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
             input.MapTo(entity);
 
             // ObjectMapper.Map(input, entity);
-            entity = await _entityRepository.UpdateAsync(entity);
-
-            if (entity != null)
-                return new APIResultDto() { Code = 1, Msg = "保存成功" };
-            else
-                return new APIResultDto() { Code = 0, Msg = "保存失败" };
+            await _entityRepository.UpdateAsync(entity);
         }
 
 
@@ -227,11 +223,13 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
         /// <returns></returns>
         public async Task<List<DropDownDto>> GetDropDownsByPurchaseIdAsync(Guid purchaseId)
         {
+            var projectId = _purchaseRepository.Get(purchaseId).ProjectId;
+            var projectDetails = await _projectDetailRepository.GetAll().Where(aa => aa.ProjectId == projectId).AsNoTracking().ToListAsync();
             var query = _entityRepository.GetAll();
             var entityList = await query
                     .OrderBy(a => a.CreationTime).AsNoTracking()
-                    .Where(aa=>aa.PurchaseId==purchaseId)
-                    .Select(c => new DropDownDto() { Text = c.Price.ToString(), Value = c.Id.ToString() })
+                    .Where(aa => aa.PurchaseId == purchaseId)
+                    .Select(c => new DropDownDto() { Text = projectDetails.Where(aa=>aa.Id==c.ProjectDetailId).FirstOrDefault().Name, Value = c.Id.ToString() })
                     .ToListAsync();
             return entityList;
         }

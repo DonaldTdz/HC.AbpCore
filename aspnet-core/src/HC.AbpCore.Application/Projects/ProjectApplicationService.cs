@@ -158,16 +158,16 @@ namespace HC.AbpCore.Projects
         /// <param name="input"></param>
         /// <returns></returns>
 
-        public async Task CreateOrUpdateAsync(CreateOrUpdateProjectInput input)
+        public async Task<APIResultDto> CreateOrUpdateAsync(CreateOrUpdateProjectInput input)
         {
 
             if (input.Project.Id.HasValue)
             {
-                await UpdateAsync(input.Project);
+                return await UpdateAsync(input.Project);
             }
             else
             {
-                await CreateAsync(input.Project);
+                return await CreateAsync(input.Project);
             }
         }
 
@@ -176,31 +176,51 @@ namespace HC.AbpCore.Projects
         /// 新增Project
         /// </summary>
 
-        protected virtual async Task<ProjectEditDto> CreateAsync(ProjectEditDto input)
+        protected virtual async Task<APIResultDto> CreateAsync(ProjectEditDto input)
         {
             //TODO:新增前的逻辑判断，是否允许新增
+
+            //判断编号是否重复
+            var projectCount = await _entityRepository.GetAll().Where(aa => aa.ProjectCode == input.ProjectCode).CountAsync();
+            if (projectCount > 0)
+                return new APIResultDto() { Code = 0, Msg = "保存失败,项目编号已存在" };
 
             // var entity = ObjectMapper.Map <Project>(input);
             var entity = input.MapTo<Project>();
 
 
             entity = await _entityRepository.InsertAsync(entity);
-            return entity.MapTo<ProjectEditDto>();
+            if (entity != null)
+                return new APIResultDto() { Code = 1, Msg = "保存成功" };
+            else
+                return new APIResultDto() { Code = 0, Msg = "保存失败" };
+            //return entity.MapTo<ProjectEditDto>();
         }
 
         /// <summary>
         /// 编辑Project
         /// </summary>
 
-        protected virtual async Task UpdateAsync(ProjectEditDto input)
+        protected virtual async Task<APIResultDto> UpdateAsync(ProjectEditDto input)
         {
             //TODO:更新前的逻辑判断，是否允许更新
 
             var entity = await _entityRepository.GetAsync(input.Id.Value);
+            //判断合同编号是否重复
+            if (entity.ProjectCode != input.ProjectCode)
+            {
+                var projectCount = await _entityRepository.GetAll().Where(aa => aa.ProjectCode == input.ProjectCode).CountAsync();
+                if (projectCount > 0)
+                    return new APIResultDto() { Code = 0, Msg = "保存失败,项目编号已存在" };
+            }
             input.MapTo(entity);
 
             // ObjectMapper.Map(input, entity);
-            await _entityRepository.UpdateAsync(entity);
+            entity= await _entityRepository.UpdateAsync(entity);
+            if (entity != null)
+                return new APIResultDto() { Code = 1, Msg = "保存成功" };
+            else
+                return new APIResultDto() { Code = 0, Msg = "保存失败" };
         }
 
 

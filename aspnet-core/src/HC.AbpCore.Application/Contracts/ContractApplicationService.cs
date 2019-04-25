@@ -68,7 +68,8 @@ namespace HC.AbpCore.Contracts
 
             var query = _entityRepository.GetAll().WhereIf(input.Type.HasValue, aa => aa.Type == input.Type.Value)
                 .WhereIf(!String.IsNullOrEmpty(input.ContractCode), aa => aa.ContractCode.Contains(input.ContractCode))
-                .WhereIf(input.ProjectId.HasValue,aa=>aa.RefId==input.ProjectId.Value);
+                .WhereIf(input.ProjectId.HasValue,aa=>aa.RefId==input.ProjectId.Value)
+                .WhereIf(input.PurchaseId.HasValue,aa=>aa.RefId==input.PurchaseId.Value);
             // TODO:根据传入的参数添加过滤条件
             var projectList = await _projectRepository.GetAll().AsNoTracking().ToListAsync();
             var purchaseList = await _purchaseRepository.GetAll().AsNoTracking().ToListAsync();
@@ -94,9 +95,9 @@ namespace HC.AbpCore.Contracts
                     .ToListAsync();
 
             // var entityListDtos = ObjectMapper.Map<List<ContractListDto>>(entityList);
-            var entityListDtos = entityList.MapTo<List<ContractListDto>>();
+            //var entityListDtos = entityList.MapTo<List<ContractListDto>>();
 
-            return new PagedResultDto<ContractListDto>(count, entityListDtos);
+            return new PagedResultDto<ContractListDto>(count, entityList);
         }
 
 

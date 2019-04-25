@@ -1,12 +1,12 @@
 
 using Abp.Runtime.Validation;
 using HC.AbpCore.Dtos;
-using HC.AbpCore.Purchases;
+using HC.AbpCore.Invoices;
 using System;
 
-namespace HC.AbpCore.Purchases.Dtos
+namespace HC.AbpCore.Invoices.Dtos
 {
-    public class GetPurchasesInput : PagedSortedAndFilteredInputDto, IShouldNormalize
+    public class GetInvoicesInput : PagedSortedAndFilteredInputDto, IShouldNormalize
     {
 
         /// <summary>
@@ -21,19 +21,25 @@ namespace HC.AbpCore.Purchases.Dtos
         }
 
         /// <summary>
-        /// 查询条件-采购编号
+        /// 查询条件-发票分类
+        /// </summary>
+        public InvoiceTypeEnum? Type { get; set; }
+
+        /// <summary>
+        /// 查询条件发票号
         /// </summary>
         public string Code { get; set; }
 
-        /// <summary>
-        /// 查询条件-项目Id
-        /// </summary>
-        public Guid? ProjectId { get; set; }
 
         /// <summary>
-        /// 查询条件-Id
+        /// 查询条件refId
         /// </summary>
-        public Guid? Id { get; set; }
+        public Guid? RefId { get; set; }
+
+        /// <summary>
+        /// 查询条件-发票抬头
+        /// </summary>
+        public string Title { get; set; }
 
     }
 }

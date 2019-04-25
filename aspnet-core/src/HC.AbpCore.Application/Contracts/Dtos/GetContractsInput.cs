@@ -36,5 +36,10 @@ namespace HC.AbpCore.Contracts.Dtos
         /// </summary>
         public Guid? ProjectId { get; set; }
 
+        /// <summary>
+        /// 查询条件-采购ID
+        /// </summary>
+        public Guid? PurchaseId { get; set; }
+
     }
 }

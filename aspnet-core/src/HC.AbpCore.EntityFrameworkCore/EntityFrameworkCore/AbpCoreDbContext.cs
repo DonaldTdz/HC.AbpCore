@@ -22,6 +22,8 @@ using HC.AbpCore.Purchases;
 using HC.AbpCore.Purchases.PurchaseDetails;
 using HC.AbpCore.Contracts.ContractDetails;
 using HC.AbpCore.Contracts;
+using HC.AbpCore.Invoices;
+using HC.AbpCore.Invoices.InvoiceDetails;
 
 namespace HC.AbpCore.EntityFrameworkCore
 {
@@ -71,5 +73,9 @@ namespace HC.AbpCore.EntityFrameworkCore
         public virtual DbSet<Contract> Contracts { get; set; }
 
         public virtual DbSet<ContractDetail> ContractDetails { get; set; }
+
+        public virtual DbSet<Invoice> Invoices { get; set; }
+
+        public virtual DbSet<InvoiceDetail> InvoiceDetails { get; set; }
     }
 }

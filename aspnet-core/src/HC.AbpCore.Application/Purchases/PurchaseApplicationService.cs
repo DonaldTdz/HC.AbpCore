@@ -64,7 +64,8 @@ namespace HC.AbpCore.Purchases
         {
 
             var query = _entityRepository.GetAll().WhereIf(input.ProjectId.HasValue, AA => AA.ProjectId == input.ProjectId.Value)
-                .WhereIf(!String.IsNullOrEmpty(input.Code), aa => aa.Code.Contains(input.Code));
+                .WhereIf(!String.IsNullOrEmpty(input.Code), aa => aa.Code.Contains(input.Code))
+                .WhereIf(input.Id.HasValue,aa=>aa.Id==input.Id.Value);
             // TODO:根据传入的参数添加过滤条件
             var employeeList = await _employeeRepository.GetAll().AsNoTracking().ToListAsync();
             var projectList = await _projectRepository.GetAll().AsNoTracking().ToListAsync();
@@ -233,10 +234,11 @@ namespace HC.AbpCore.Purchases
         /// <returns></returns>
         public async Task<List<DropDownDto>> GetDropDownsAsync()
         {
+            var projects = await _projectRepository.GetAll().AsNoTracking().ToListAsync();
             var query = _entityRepository.GetAll();
             var entityList = await query
                     .OrderBy(a => a.CreationTime).AsNoTracking()
-                    .Select(c => new DropDownDto() { Text = c.Code, Value = c.Id.ToString() })
+                    .Select(c => new DropDownDto() { Text = projects.Where(aa=>aa.Id==c.ProjectId).FirstOrDefault().Name, Value = c.Id.ToString() })
                     .ToListAsync();
             return entityList;
         }

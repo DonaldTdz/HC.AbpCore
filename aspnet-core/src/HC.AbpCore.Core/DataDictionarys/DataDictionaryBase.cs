@@ -11,7 +11,8 @@ namespace HC.AbpCore.DataDictionarys
             项目分类 = 1,
             项目明细分类 = 2,
             报销分类 = 3,
-            公共配置=4
+            公共配置=4,
+            税率=5,
         }
     }
 }

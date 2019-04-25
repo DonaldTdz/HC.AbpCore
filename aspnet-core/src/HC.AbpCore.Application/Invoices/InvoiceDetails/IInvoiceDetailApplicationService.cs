@@ -18,29 +18,28 @@ using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 
 
-using HC.AbpCore.Purchases.PurchaseDetails.Dtos;
-using HC.AbpCore.Purchases.PurchaseDetails;
-using HC.AbpCore.Dtos;
+using HC.AbpCore.Invoices.InvoiceDetails.Dtos;
+using HC.AbpCore.Invoices.InvoiceDetails;
 
-namespace HC.AbpCore.Purchases.PurchaseDetails
+namespace HC.AbpCore.Invoices.InvoiceDetails
 {
     /// <summary>
-    /// PurchaseDetail应用层服务的接口方法
+    /// InvoiceDetail应用层服务的接口方法
     ///</summary>
-    public interface IPurchaseDetailAppService : IApplicationService
+    public interface IInvoiceDetailAppService : IApplicationService
     {
         /// <summary>
-		/// 获取PurchaseDetail的分页列表信息
+		/// 获取InvoiceDetail的分页列表信息
 		///</summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<PagedResultDto<PurchaseDetailListDto>> GetPagedAsync(GetPurchaseDetailsInput input);
+        Task<PagedResultDto<InvoiceDetailListDto>> GetPagedAsync(GetInvoiceDetailsInput input);
 
 
 		/// <summary>
-		/// 通过指定id获取PurchaseDetailListDto信息
+		/// 通过指定id获取InvoiceDetailListDto信息
 		/// </summary>
-		Task<PurchaseDetailListDto> GetByIdAsync(EntityDto<Guid> input);
+		Task<InvoiceDetailListDto> GetByIdAsync(EntityDto<Guid> input);
 
 
         /// <summary>
@@ -48,25 +47,19 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<GetPurchaseDetailForEditOutput> GetForEditAsync(NullableIdDto<Guid> input);
-
-        /// <summary>
-        /// 根据采购id获取采购明细下拉列表
-        /// </summary>
-        /// <returns></returns>
-        Task<List<DropDownDto>> GetDropDownsByPurchaseIdAsync(Guid purchaseId);
+        Task<GetInvoiceDetailForEditOutput> GetForEditAsync(NullableIdDto<Guid> input);
 
 
         /// <summary>
-        /// 添加或者修改PurchaseDetail的公共方法
+        /// 添加或者修改InvoiceDetail的公共方法
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task CreateOrUpdateAsync(CreateOrUpdatePurchaseDetailInput input);
+        Task CreateOrUpdateAsync(CreateOrUpdateInvoiceDetailInput input);
 
 
         /// <summary>
-        /// 删除PurchaseDetail信息的方法
+        /// 删除InvoiceDetail信息的方法
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
@@ -74,13 +67,13 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
 
 
         /// <summary>
-        /// 批量删除PurchaseDetail
+        /// 批量删除InvoiceDetail
         /// </summary>
         Task BatchDeleteAsync(List<Guid> input);
 
 
 		/// <summary>
-        /// 导出PurchaseDetail为excel表
+        /// 导出InvoiceDetail为excel表
         /// </summary>
         /// <returns></returns>
 		//Task<FileDto> GetToExcel();

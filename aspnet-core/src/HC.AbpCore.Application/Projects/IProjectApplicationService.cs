@@ -62,7 +62,7 @@ namespace HC.AbpCore.Projects
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task CreateOrUpdateAsync(CreateOrUpdateProjectInput input);
+        Task<APIResultDto> CreateOrUpdateAsync(CreateOrUpdateProjectInput input);
 
 
         /// <summary>
