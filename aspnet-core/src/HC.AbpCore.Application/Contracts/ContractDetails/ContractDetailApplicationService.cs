@@ -36,8 +36,8 @@ namespace HC.AbpCore.Contracts.ContractDetails
     {
         private readonly IRepository<ContractDetail, Guid> _entityRepository;
         private readonly IRepository<Contract, Guid> _contractRepository;
-        private readonly IRepository<ProjectDetail, Guid> _entityProjectDetail;
-        private readonly IRepository<PurchaseDetail, Guid> _entityPurchaseDetail;
+        private readonly IRepository<ProjectDetail, Guid> _projectDetailRepository;
+        private readonly IRepository<PurchaseDetail, Guid> _purchaseDetailRepository;
 
         private readonly IContractDetailManager _entityManager;
 
@@ -47,14 +47,14 @@ namespace HC.AbpCore.Contracts.ContractDetails
         public ContractDetailAppService(
         IRepository<ContractDetail, Guid> entityRepository,
              IRepository<Contract, Guid> contractRepository
-                        , IRepository<ProjectDetail, Guid> entityProjectDetail
-            , IRepository<PurchaseDetail, Guid> entityPurchaseDetail
+                        , IRepository<ProjectDetail, Guid> projectDetailRepository
+            , IRepository<PurchaseDetail, Guid> purchaseDetailRepository
         , IContractDetailManager entityManager
         )
         {
             _contractRepository = contractRepository;
-            _entityProjectDetail = entityProjectDetail;
-            _entityPurchaseDetail = entityPurchaseDetail;
+            _projectDetailRepository = projectDetailRepository;
+            _purchaseDetailRepository = purchaseDetailRepository;
             _entityRepository = entityRepository;
             _entityManager = entityManager;
         }
@@ -71,7 +71,8 @@ namespace HC.AbpCore.Contracts.ContractDetails
 
             var query = _entityRepository.GetAll().WhereIf(input.ContractId.HasValue,aa=>aa.ContractId==input.ContractId.Value);
             // TODO:根据传入的参数添加过滤条件
-
+            var projectDetails = await _projectDetailRepository.GetAll().AsNoTracking().ToListAsync();
+            var purchaseDetails = await _purchaseDetailRepository.GetAll().AsNoTracking().ToListAsync();
 
             var count = await query.CountAsync();
 
@@ -82,9 +83,33 @@ namespace HC.AbpCore.Contracts.ContractDetails
                     .ToListAsync();
 
             // var entityListDtos = ObjectMapper.Map<List<ContractDetailListDto>>(entityList);
-            var entityListDtos = entityList.MapTo<List<ContractDetailListDto>>();
+            List<ContractDetailListDto> contractDetailListDtos = new List<ContractDetailListDto>();
+            foreach (var item in entityList)
+            {
+                var contractDetailListDto = item.MapTo<ContractDetailListDto>();
+                if (contractDetailListDto.RefDetailId.HasValue)
+                {
+                    if (input.Type == ContractTypeEnum.销项)
+                    {
+                        contractDetailListDto.RefDetailName = projectDetails.Where(aa => aa.Id == contractDetailListDto.RefDetailId.Value).FirstOrDefault()!=null? projectDetails.Where(aa => aa.Id == contractDetailListDto.RefDetailId.Value).FirstOrDefault().Name:null;
+                    }
+                    else
+                    {
+                        var projectDetailId = purchaseDetails.Where(aa => aa.Id == contractDetailListDto.RefDetailId.Value).FirstOrDefault()!=null? purchaseDetails.Where(aa => aa.Id == contractDetailListDto.RefDetailId.Value).FirstOrDefault().ProjectDetailId:null;
+                        if (projectDetailId.HasValue)
+                            contractDetailListDto.RefDetailName = projectDetails.Where(aa => aa.Id == projectDetailId.Value).FirstOrDefault()!=null? projectDetails.Where(aa => aa.Id == projectDetailId.Value).FirstOrDefault().Name:null;
+                        else
+                            contractDetailListDto.RefDetailName = null;
+                    }
+                }
+                else
+                {
+                    contractDetailListDto.RefDetailName = null;
+                }
+                contractDetailListDtos.Add(contractDetailListDto);
+            }
 
-            return new PagedResultDto<ContractDetailListDto>(count, entityListDtos);
+            return new PagedResultDto<ContractDetailListDto>(count, contractDetailListDtos);
         }
 
 

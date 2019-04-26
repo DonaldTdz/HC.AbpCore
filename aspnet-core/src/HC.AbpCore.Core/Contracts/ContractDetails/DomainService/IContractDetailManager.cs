@@ -34,6 +34,11 @@ namespace HC.AbpCore.Contracts.ContractDetails.DomainService
         /// <returns></returns>
         Task UpdateAsync(ContractDetail input);
 
+        /// <summary>
+        /// 删除
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <returns></returns>
         Task DeleteAsync(Guid Id);
 
 

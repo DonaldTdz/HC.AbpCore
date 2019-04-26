@@ -71,7 +71,10 @@ namespace HC.AbpCore.Invoices.Dtos
         }
 
 
-
+        /// <summary>
+        /// RefName
+        /// </summary>
+        public string RefName { get; set; }
 
     }
 }

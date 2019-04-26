@@ -5,9 +5,11 @@ using Abp.Application.Services.Dto;
 using Abp.Domain.Entities.Auditing;
 using System.ComponentModel.DataAnnotations;
 using HC.AbpCore.Invoices.InvoiceDetails;
+using Abp.AutoMapper;
 
 namespace HC.AbpCore.Invoices.InvoiceDetails.Dtos
 {
+    [AutoMapFrom(typeof(InvoiceDetail))]
     public class InvoiceDetailListDto : FullAuditedEntityDto<Guid> 
     {
 
@@ -68,7 +70,10 @@ namespace HC.AbpCore.Invoices.InvoiceDetails.Dtos
 		public string TaxRate { get; set; }
 
 
-
+        /// <summary>
+        /// RefName
+        /// </summary>
+        public string RefName { get; set; }
 
     }
 }

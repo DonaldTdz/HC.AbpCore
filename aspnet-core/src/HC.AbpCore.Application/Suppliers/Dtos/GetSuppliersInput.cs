@@ -19,8 +19,15 @@ namespace HC.AbpCore.Suppliers.Dtos
             }
         }
 
-
+        /// <summary>
+        /// 查询条件-供应商名称
+        /// </summary>
         public string Name { get; set; }
+
+       /// <summary>
+       /// 查询条件-供应商ID
+       /// </summary>
+        public int Id { get; set; }
 
     }
 }

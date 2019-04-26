@@ -57,6 +57,14 @@ namespace HC.AbpCore.Invoices
         /// <returns></returns>
         Task CreateOrUpdateAsync(CreateOrUpdateInvoiceInput input);
 
+        /// <summary>
+        /// 获取发票抬头
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="refId"></param>
+        /// <returns></returns>
+        Task<string> GetTitleByTypeAndRefIdAsync(InvoiceTypeEnum type, Guid refId);
+
 
         /// <summary>
         /// 删除Invoice信息的方法

@@ -32,14 +32,9 @@ namespace HC.AbpCore.Contracts.Dtos
         public string ContractCode { get; set; }
 
         /// <summary>
-        /// 查询条件-项目ID
+        /// 查询条件-RefId
         /// </summary>
-        public Guid? ProjectId { get; set; }
-
-        /// <summary>
-        /// 查询条件-采购ID
-        /// </summary>
-        public Guid? PurchaseId { get; set; }
+        public Guid? RefId { get; set; }
 
     }
 }

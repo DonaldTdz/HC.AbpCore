@@ -22,6 +22,10 @@ using HC.AbpCore.Suppliers;
 using HC.AbpCore.Suppliers.Dtos;
 using HC.AbpCore.Suppliers.DomainService;
 using HC.AbpCore.Dtos;
+using HC.AbpCore.Purchases;
+using HC.AbpCore.Purchases.PurchaseDetails;
+using HC.AbpCore.Projects;
+using HC.AbpCore.Projects.ProjectDetails;
 
 namespace HC.AbpCore.Suppliers
 {
@@ -32,17 +36,25 @@ namespace HC.AbpCore.Suppliers
     public class SupplierAppService : AbpCoreAppServiceBase, ISupplierAppService
     {
         private readonly IRepository<Supplier, int> _entityRepository;
-
+        private readonly IRepository<Purchase, Guid> _purchaseRepository;
+        private readonly IRepository<PurchaseDetail, Guid> _purchaseDetailRepository;
+        private readonly IRepository<ProjectDetail, Guid> _projectDetailRepository;
         private readonly ISupplierManager _entityManager;
 
         /// <summary>
         /// 构造函数 
         ///</summary>
         public SupplierAppService(
-        IRepository<Supplier, int> entityRepository
+        IRepository<Supplier, int> entityRepository,
+                 IRepository<ProjectDetail, Guid> projectDetailRepository,
+         IRepository<Purchase, Guid> purchaseRepository,
+         IRepository<PurchaseDetail, Guid> purchaseDetailRepository
         , ISupplierManager entityManager
         )
         {
+            _purchaseDetailRepository = purchaseDetailRepository;
+            _projectDetailRepository = projectDetailRepository;
+            _purchaseRepository = purchaseRepository;
             _entityRepository = entityRepository;
             _entityManager = entityManager;
         }
@@ -73,6 +85,35 @@ namespace HC.AbpCore.Suppliers
             var entityListDtos = entityList.MapTo<List<SupplierListDto>>();
 
             return new PagedResultDto<SupplierListDto>(count, entityListDtos);
+        }
+
+        /// <summary>
+        /// 获取所属供应商采购产品记录查询
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public async Task<PagedResultDto<GetPurchaseProductListDto>> GetPurchaseProductListAsync(GetSuppliersInput input)
+        {
+            var projectDetails = _projectDetailRepository.GetAll().AsNoTracking();
+            var purchases = _purchaseRepository.GetAll().AsNoTracking();
+            var Ids = _purchaseDetailRepository.GetAll().Where(aa => aa.SupplierId == input.Id).Select(aa=>new { purchaseId =aa.PurchaseId, projectDetailId=aa.ProjectDetailId});
+            var items = from item in Ids
+                        join purchase in purchases on item.purchaseId equals purchase.Id
+                        join projectDetail in projectDetails on item.projectDetailId equals projectDetail.Id into temp
+                        from tem in temp.DefaultIfEmpty()
+                        select new GetPurchaseProductListDto()
+                        {
+                            PurchaseId = item.purchaseId.Value,
+                            PurchaseCode = purchase.Code,
+                            PurchaseDate = purchase.PurchaseDate,
+                            PurchaseName = tem.Name,
+                            Specification = tem.Specification
+                        };
+            var count = await items.CountAsync();
+            var entity =await items.OrderByDescending(aa => aa.PurchaseDate)
+                .PageBy(input)
+                .ToListAsync();
+            return new PagedResultDto<GetPurchaseProductListDto>(count, entity);
         }
 
 

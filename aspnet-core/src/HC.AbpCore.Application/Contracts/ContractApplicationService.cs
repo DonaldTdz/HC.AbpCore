@@ -68,36 +68,47 @@ namespace HC.AbpCore.Contracts
 
             var query = _entityRepository.GetAll().WhereIf(input.Type.HasValue, aa => aa.Type == input.Type.Value)
                 .WhereIf(!String.IsNullOrEmpty(input.ContractCode), aa => aa.ContractCode.Contains(input.ContractCode))
-                .WhereIf(input.ProjectId.HasValue,aa=>aa.RefId==input.ProjectId.Value)
-                .WhereIf(input.PurchaseId.HasValue,aa=>aa.RefId==input.PurchaseId.Value);
+                .WhereIf(input.RefId.HasValue, aa => aa.RefId == input.RefId.Value);
             // TODO:根据传入的参数添加过滤条件
-            var projectList = await _projectRepository.GetAll().AsNoTracking().ToListAsync();
-            var purchaseList = await _purchaseRepository.GetAll().AsNoTracking().ToListAsync();
+            var projects = await _projectRepository.GetAll().Select(aa => new { Id = aa.Id, Name = aa.Name }).AsNoTracking().ToListAsync();
+            var purchases = await _purchaseRepository.GetAll().Select(aa => new { aa.Id, aa.ProjectId }).AsNoTracking().ToListAsync();
 
             var count = await query.CountAsync();
 
             var entityList = await query
                     .OrderBy(input.Sorting).AsNoTracking()
                     .OrderByDescending(aa => aa.CreationTime)
-                    .Select(aa => new ContractListDto()
-                    {
-                        Id=aa.Id,
-                        Type = aa.Type,
-                        ContractCode = aa.ContractCode,
-                        RefId = aa.RefId,
-                        SignatureTime = aa.SignatureTime,
-                        Amount = aa.Amount,
-                        Desc = aa.Desc,
-                        Attachments = aa.Attachments,
-                        RefName = aa.Type == ContractTypeEnum.销项 ? projectList.Where(bb => bb.Id == aa.RefId).FirstOrDefault().Name : purchaseList.Where(bb => bb.Id == aa.RefId).FirstOrDefault().Code,
-                    })
                     .PageBy(input)
                     .ToListAsync();
 
-            // var entityListDtos = ObjectMapper.Map<List<ContractListDto>>(entityList);
-            //var entityListDtos = entityList.MapTo<List<ContractListDto>>();
+            //var entityListDtos = ObjectMapper.Map<List<ContractListDto>>(entityList);
+            List<ContractListDto> contractListDtos = new List<ContractListDto>();
+            foreach (var item in entityList)
+            {
+                var contractListDto = item.MapTo<ContractListDto>();
+                if (contractListDto.RefId.HasValue)
+                {
+                    if (contractListDto.Type == ContractTypeEnum.销项)
+                    {
+                        contractListDto.RefName = projects.Where(aa => aa.Id == contractListDto.RefId).FirstOrDefault()!= null?projects.Where(aa => aa.Id == contractListDto.RefId).FirstOrDefault().Name:null;
+                    }
+                    else
+                    {
+                        var projectId = purchases.Where(aa => aa.Id == contractListDto.RefId).FirstOrDefault()!=null? purchases.Where(aa => aa.Id == contractListDto.RefId).FirstOrDefault().ProjectId:null;
+                        if (projectId.HasValue)
+                            contractListDto.RefName = projects.Where(aa => aa.Id == projectId.Value).FirstOrDefault() != null ? projects.Where(aa => aa.Id == projectId.Value).FirstOrDefault().Name : null;
+                        else
+                            contractListDto.RefName = null;
+                    }
+                }
+                else
+                {
+                    contractListDto.RefName = null;
+                }
+                contractListDtos.Add(contractListDto);
+            }
 
-            return new PagedResultDto<ContractListDto>(count, entityList);
+            return new PagedResultDto<ContractListDto>(count, contractListDtos);
         }
 
 
@@ -109,14 +120,19 @@ namespace HC.AbpCore.Contracts
         {
             var entity = await _entityRepository.GetAsync(input.Id);
 
-            var item= entity.MapTo<ContractListDto>();
+            var item = entity.MapTo<ContractListDto>();
             if (item.Type == ContractTypeEnum.销项 && item.RefId.HasValue)
                 item.RefName = (await _projectRepository.GetAsync(item.RefId.Value)).Name;
             if (item.Type == ContractTypeEnum.进项 && item.RefId.HasValue)
-                item.RefName = (await _purchaseRepository.GetAsync(item.RefId.Value)).Code;
+            {
+                var projectId = (await _purchaseRepository.GetAsync(item.RefId.Value)).ProjectId;
+                if (projectId.HasValue)
+                    item.RefName = (await _projectRepository.GetAsync(projectId.Value)).Name;
+            }
 
             return item;
         }
+
 
         /// <summary>
         /// 获取编辑 Contract
@@ -158,11 +174,11 @@ namespace HC.AbpCore.Contracts
 
             if (input.Contract.Id.HasValue)
             {
-               return await UpdateAsync(input.Contract);
+                return await UpdateAsync(input.Contract);
             }
             else
             {
-               return await CreateAsync(input.Contract);
+                return await CreateAsync(input.Contract);
             }
         }
 
@@ -177,7 +193,7 @@ namespace HC.AbpCore.Contracts
             input.Amount = 0;
             //判断合同编号是否重复
             var contractCount = await _entityRepository.GetAll().Where(aa => aa.ContractCode == input.ContractCode).CountAsync();
-            if(contractCount>0)
+            if (contractCount > 0)
                 return new APIResultDto() { Code = 0, Msg = "保存失败,合同编号已存在" };
 
             // var entity = ObjectMapper.Map <Contract>(input);
@@ -211,7 +227,7 @@ namespace HC.AbpCore.Contracts
             input.MapTo(entity);
 
             // ObjectMapper.Map(input, entity);
-            entity= await _entityRepository.UpdateAsync(entity);
+            entity = await _entityRepository.UpdateAsync(entity);
 
             if (entity != null)
                 return new APIResultDto() { Code = 1, Msg = "保存成功" };

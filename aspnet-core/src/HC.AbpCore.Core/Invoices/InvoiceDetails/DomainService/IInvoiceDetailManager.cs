@@ -18,10 +18,30 @@ namespace HC.AbpCore.Invoices.InvoiceDetails.DomainService
         void InitInvoiceDetail();
 
 
+        /// <summary>
+        /// 新增
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        Task<InvoiceDetail> CreateAsync(InvoiceDetail input);
 
-		 
-      
-         
+
+        /// <summary>
+        /// 编辑
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        Task UpdateAsync(InvoiceDetail input);
+
+        /// <summary>
+        /// 删除
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <returns></returns>
+        Task DeleteAsync(Guid Id);
+
+
+
 
     }
 }

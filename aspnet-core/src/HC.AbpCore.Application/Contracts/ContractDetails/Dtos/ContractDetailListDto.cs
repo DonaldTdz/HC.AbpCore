@@ -5,9 +5,11 @@ using Abp.Application.Services.Dto;
 using Abp.Domain.Entities.Auditing;
 using System.ComponentModel.DataAnnotations;
 using HC.AbpCore.Contracts.ContractDetails;
+using Abp.AutoMapper;
 
 namespace HC.AbpCore.Contracts.ContractDetails.Dtos
 {
+    [AutoMapFrom(typeof(ContractDetail))]
     public class ContractDetailListDto : FullAuditedEntityDto<Guid> 
     {
 
@@ -33,6 +35,9 @@ namespace HC.AbpCore.Contracts.ContractDetails.Dtos
 
 
 
-
+        /// <summary>
+		/// RefDetailName
+		/// </summary>
+		public string RefDetailName { get; set; }
     }
 }

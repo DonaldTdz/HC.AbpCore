@@ -2,6 +2,7 @@
 using Abp.Runtime.Validation;
 using HC.AbpCore.Dtos;
 using HC.AbpCore.Invoices.InvoiceDetails;
+using System;
 
 namespace HC.AbpCore.Invoices.InvoiceDetails.Dtos
 {
@@ -18,6 +19,16 @@ namespace HC.AbpCore.Invoices.InvoiceDetails.Dtos
                 Sorting = "Id";
             }
         }
+
+        /// <summary>
+        /// 查询条件-发票ID
+        /// </summary>
+        public Guid? InvoiceId { get; set; }
+
+        /// <summary>
+        /// 查询条件-发票类型
+        /// </summary>
+        public InvoiceTypeEnum? Type { get; set; }
 
     }
 }

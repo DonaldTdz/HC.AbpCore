@@ -112,9 +112,9 @@ namespace HC.AbpCore.Contracts.ContractDetails.DomainService
         {
             //TODO:更新前的逻辑判断，是否允许更新
 
-            var entity = await _repository.GetAsync(input.Id);
+            //var entity = await _repository.GetAsync(input.Id);
             //修改合同金额
-            if (entity.RefDetailId != input.RefDetailId && input.ContractId.HasValue)
+            if (input.ContractId.HasValue)
             {
                 var contract = await _contractRepository.GetAsync(input.ContractId.Value);
                 decimal detailAmount = 0;
@@ -142,9 +142,14 @@ namespace HC.AbpCore.Contracts.ContractDetails.DomainService
             
 
             // ObjectMapper.Map(input, entity);
-            await _repository.UpdateAsync(entity);
+            await _repository.UpdateAsync(input);
         }
 
+        /// <summary>
+        /// 删除
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <returns></returns>
         public async Task DeleteAsync(Guid Id)
         {
             var entity = await _repository.GetAsync(Id);

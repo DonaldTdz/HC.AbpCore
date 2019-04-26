@@ -44,6 +44,14 @@ namespace HC.AbpCore.Suppliers
 
 
         /// <summary>
+        /// 获取所属供应商采购产品记录查询
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        Task<PagedResultDto<GetPurchaseProductListDto>> GetPurchaseProductListAsync(GetSuppliersInput input);
+
+
+        /// <summary>
         /// 返回实体的EditDto
         /// </summary>
         /// <param name="input"></param>

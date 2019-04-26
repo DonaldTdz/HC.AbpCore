@@ -21,8 +21,8 @@ using Abp.Linq.Extensions;
 using HC.AbpCore.Invoices.InvoiceDetails;
 using HC.AbpCore.Invoices.InvoiceDetails.Dtos;
 using HC.AbpCore.Invoices.InvoiceDetails.DomainService;
-
-
+using HC.AbpCore.Projects.ProjectDetails;
+using HC.AbpCore.Purchases.PurchaseDetails;
 
 namespace HC.AbpCore.Invoices.InvoiceDetails
 {
@@ -33,7 +33,8 @@ namespace HC.AbpCore.Invoices.InvoiceDetails
     public class InvoiceDetailAppService : AbpCoreAppServiceBase, IInvoiceDetailAppService
     {
         private readonly IRepository<InvoiceDetail, Guid> _entityRepository;
-
+        private readonly IRepository<ProjectDetail, Guid> _projectDetailRepository;
+        private readonly IRepository<PurchaseDetail, Guid> _purchaseDetailRepository;
         private readonly IInvoiceDetailManager _entityManager;
 
         /// <summary>
@@ -41,9 +42,13 @@ namespace HC.AbpCore.Invoices.InvoiceDetails
         ///</summary>
         public InvoiceDetailAppService(
         IRepository<InvoiceDetail, Guid> entityRepository
-        ,IInvoiceDetailManager entityManager
+        , IRepository<ProjectDetail, Guid> projectDetailRepository
+        , IRepository<PurchaseDetail, Guid> purchaseDetailRepository
+        , IInvoiceDetailManager entityManager
         )
         {
+            _projectDetailRepository = projectDetailRepository;
+            _purchaseDetailRepository = purchaseDetailRepository;
             _entityRepository = entityRepository; 
              _entityManager=entityManager;
         }
@@ -58,22 +63,47 @@ namespace HC.AbpCore.Invoices.InvoiceDetails
         public async Task<PagedResultDto<InvoiceDetailListDto>> GetPagedAsync(GetInvoiceDetailsInput input)
 		{
 
-		    var query = _entityRepository.GetAll();
-			// TODO:根据传入的参数添加过滤条件
-            
+		    var query = _entityRepository.GetAll().WhereIf(input.InvoiceId.HasValue,aa=>aa.InvoiceId==input.InvoiceId);
+            // TODO:根据传入的参数添加过滤条件
+            var projectDetails = await _projectDetailRepository.GetAll().AsNoTracking().ToListAsync();
+            var purchaseDetails = await _purchaseDetailRepository.GetAll().AsNoTracking().ToListAsync();
 
-			var count = await query.CountAsync();
+            var count = await query.CountAsync();
 
 			var entityList = await query
 					.OrderBy(input.Sorting).AsNoTracking()
 					.PageBy(input)
 					.ToListAsync();
 
-			// var entityListDtos = ObjectMapper.Map<List<InvoiceDetailListDto>>(entityList);
-			var entityListDtos =entityList.MapTo<List<InvoiceDetailListDto>>();
+            // var entityListDtos = ObjectMapper.Map<List<InvoiceDetailListDto>>(entityList);
+            List<InvoiceDetailListDto> InvoiceDetailListDtos = new List<InvoiceDetailListDto>();
+            foreach (var item in entityList)
+            {
+                var InvoiceDetailListDto = item.MapTo<InvoiceDetailListDto>();
+                if (InvoiceDetailListDto.RefId.HasValue)
+                {
+                    if (input.Type == InvoiceTypeEnum.销项)
+                    {
+                        InvoiceDetailListDto.RefName = projectDetails.Where(aa => aa.Id == InvoiceDetailListDto.RefId.Value).FirstOrDefault() != null ? projectDetails.Where(aa => aa.Id == InvoiceDetailListDto.RefId.Value).FirstOrDefault().Name : null;
+                    }
+                    else
+                    {
+                        var projectDetailId = purchaseDetails.Where(aa => aa.Id == InvoiceDetailListDto.RefId.Value).FirstOrDefault() != null ? purchaseDetails.Where(aa => aa.Id == InvoiceDetailListDto.RefId.Value).FirstOrDefault().ProjectDetailId : null;
+                        if (projectDetailId.HasValue)
+                            InvoiceDetailListDto.RefName = projectDetails.Where(aa => aa.Id == projectDetailId.Value).FirstOrDefault() != null ? projectDetails.Where(aa => aa.Id == projectDetailId.Value).FirstOrDefault().Name : null;
+                        else
+                            InvoiceDetailListDto.RefName = null;
+                    }
+                }
+                else
+                {
+                    InvoiceDetailListDto.RefName = null;
+                }
+                InvoiceDetailListDtos.Add(InvoiceDetailListDto);
+            }
 
-			return new PagedResultDto<InvoiceDetailListDto>(count,entityListDtos);
-		}
+            return new PagedResultDto<InvoiceDetailListDto>(count, InvoiceDetailListDtos);
+        }
 
 
 		/// <summary>
@@ -146,11 +176,12 @@ InvoiceDetailEditDto editDto;
 
             // var entity = ObjectMapper.Map <InvoiceDetail>(input);
             var entity=input.MapTo<InvoiceDetail>();
-			
 
-			entity = await _entityRepository.InsertAsync(entity);
-			return entity.MapTo<InvoiceDetailEditDto>();
-		}
+
+            entity = await _entityManager.CreateAsync(entity);
+            var item = entity.MapTo<InvoiceDetailEditDto>();
+            return item;
+        }
 
 		/// <summary>
 		/// 编辑InvoiceDetail
@@ -160,11 +191,10 @@ InvoiceDetailEditDto editDto;
 		{
 			//TODO:更新前的逻辑判断，是否允许更新
 
-			var entity = await _entityRepository.GetAsync(input.Id.Value);
-			input.MapTo(entity);
+			var entity =input.MapTo<InvoiceDetail>();
 
 			// ObjectMapper.Map(input, entity);
-		    await _entityRepository.UpdateAsync(entity);
+		    await _entityManager.UpdateAsync(entity);
 		}
 
 
@@ -177,9 +207,9 @@ InvoiceDetailEditDto editDto;
 		
 		public async Task DeleteAsync(EntityDto<Guid> input)
 		{
-			//TODO:删除前的逻辑判断，是否允许删除
-			await _entityRepository.DeleteAsync(input.Id);
-		}
+            //TODO:删除前的逻辑判断，是否允许删除
+            await _entityManager.DeleteAsync(input.Id);
+        }
 
 
 

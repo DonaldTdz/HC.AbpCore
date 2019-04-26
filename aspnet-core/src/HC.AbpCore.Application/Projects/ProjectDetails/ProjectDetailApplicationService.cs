@@ -149,14 +149,21 @@ namespace HC.AbpCore.Projects.ProjectDetails
             //TODO:新增前的逻辑判断，是否允许新增
 
             // var entity = ObjectMapper.Map <ProjectDetail>(input);
-            if (!input.ProductId.HasValue)
+            //更新产品表
+            if(input.Type=="商品采购")
             {
-                var product = await _productRepository.GetAll().Where(aa => aa.Name == input.Name.Trim() && aa.Specification == input.Specification.Trim() && aa.IsEnabled == true).FirstOrDefaultAsync();
-                if (product == null)
-                    input.ProductId = await _productRepository.InsertAndGetIdAsync(new Product() { Name = input.Name.Trim(), Specification = input.Specification.Trim(), Type = 0, IsEnabled = true });
+                if (input.ProductId.HasValue)
+                {
+                    var product = await _productRepository.GetAsync(input.ProductId.Value);
+                    if (product.Unit != input.Unit)
+                    {
+                        product.Unit = input.Unit;
+                        await _productRepository.UpdateAsync(product);
+                    }
+                }
                 else
                 {
-                    input.ProductId = product.Id;
+                    input.ProductId = await _productRepository.InsertAndGetIdAsync(new Product() { Name = input.Name.Trim(), Specification = input.Specification.Trim(),Unit=input.Unit, Type = 0, IsEnabled = true, CreationTime = DateTime.Now });
                 }
             }
 
@@ -174,14 +181,22 @@ namespace HC.AbpCore.Projects.ProjectDetails
         protected virtual async Task UpdateAsync(ProjectDetailEditDto input)
         {
             //TODO:更新前的逻辑判断，是否允许更新
-            if (!input.ProductId.HasValue)
+            if (input.ProductId.HasValue)
             {
-                var product = await _productRepository.GetAll().Where(aa => aa.Name == input.Name.Trim() && aa.Specification == input.Specification.Trim() && aa.IsEnabled == true).FirstOrDefaultAsync();
-                if (product == null)
-                    input.ProductId = await _productRepository.InsertAndGetIdAsync(new Product() { Name = input.Name.Trim(), Specification = input.Specification.Trim(), Type = 0, IsEnabled = true });
-                else
+                //var product = await _productRepository.GetAll().Where(aa => aa.Name == input.Name.Trim() && aa.Specification == input.Specification.Trim() && aa.IsEnabled == true).FirstOrDefaultAsync();
+                //if (product == null)
+                //    input.ProductId = await _productRepository.InsertAndGetIdAsync(new Product() { Name = input.Name.Trim(), Specification = input.Specification.Trim(), Type = 0, IsEnabled = true,CreationTime=DateTime.Now });
+                //else
+                //{
+                //    product.Unit = input.Unit;
+                //    await _productRepository.UpdateAsync(product);
+                //    input.ProductId = product.Id;
+                //}
+                var product = await _productRepository.GetAsync(input.ProductId.Value);
+                if (product.Unit != input.Unit)
                 {
-                    input.ProductId = product.Id;
+                    product.Unit = input.Unit;
+                    await _productRepository.UpdateAsync(product);
                 }
             }
 
