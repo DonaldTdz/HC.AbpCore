@@ -65,7 +65,7 @@ namespace HC.AbpCore.Purchases
 
             var query = _entityRepository.GetAll().WhereIf(input.ProjectId.HasValue, AA => AA.ProjectId == input.ProjectId.Value)
                 .WhereIf(!String.IsNullOrEmpty(input.Code), aa => aa.Code.Contains(input.Code))
-                .WhereIf(input.Id.HasValue,aa=>aa.Id==input.Id.Value);
+                .WhereIf(input.Id.HasValue, aa => aa.Id == input.Id.Value);
             // TODO:根据传入的参数添加过滤条件
             var employeeList = await _employeeRepository.GetAll().AsNoTracking().ToListAsync();
             var projectList = await _projectRepository.GetAll().AsNoTracking().ToListAsync();
@@ -80,6 +80,7 @@ namespace HC.AbpCore.Purchases
                         Id = aa.Id,
                         Code = aa.Code,
                         ProjectId = aa.ProjectId,
+                        Type = aa.Type,
                         EmployeeId = aa.EmployeeId,
                         PurchaseDate = aa.PurchaseDate,
                         Desc = aa.Desc,
@@ -91,9 +92,9 @@ namespace HC.AbpCore.Purchases
                     .ToListAsync();
 
             // var entityListDtos = ObjectMapper.Map<List<PurchaseListDto>>(entityList);
-            var entityListDtos = entityList.MapTo<List<PurchaseListDto>>();
+            //var entityListDtos = entityList.MapTo<List<PurchaseListDto>>();
 
-            return new PagedResultDto<PurchaseListDto>(count, entityListDtos);
+            return new PagedResultDto<PurchaseListDto>(count, entityList);
         }
 
 
@@ -238,9 +239,33 @@ namespace HC.AbpCore.Purchases
             var query = _entityRepository.GetAll();
             var entityList = await query
                     .OrderBy(a => a.CreationTime).AsNoTracking()
-                    .Select(c => new DropDownDto() { Text = projects.Where(aa=>aa.Id==c.ProjectId).FirstOrDefault().Name, Value = c.Id.ToString() })
+                    .Select(c => new DropDownDto() { Text = projects.Where(aa => aa.Id == c.ProjectId).FirstOrDefault().Name, Value = c.Id.ToString() })
                     .ToListAsync();
             return entityList;
+        }
+
+        /// <summary>
+        /// 根据采购分类获取自动生成的采购编号
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public async Task<string> GetPurchaseCodeAsync(PurchaseTypeEnum type)
+        {
+            var purchases = await _entityRepository.GetAll().Where(aa => aa.Type == type && aa.CreationTime >= DateTime.Now.Date && aa.CreationTime <= DateTime.Now.Date.AddDays(1)).AsNoTracking().ToListAsync();
+            var code = purchases.Max(aa => aa.Code);
+            if (!String.IsNullOrEmpty(code))
+            {
+                var arr = code.Split("J");
+                code = arr[0].ToString() + "J" + (long.Parse(arr[1]) + 1).ToString();
+            }
+            else
+            {
+                if (type == PurchaseTypeEnum.硬件)
+                    code = "HC-C-YJ" + DateTime.Now.ToString("yyyyMMdd") + "001";
+                else
+                    code = "HC-C-RJ" + DateTime.Now.ToString("yyyyMMdd") + "001";
+            }
+            return code;
         }
 
         /// <summary>

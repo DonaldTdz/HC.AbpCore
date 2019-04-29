@@ -254,8 +254,8 @@ namespace HC.AbpCore.Tenders
         public async Task<List<GetTenderRemindListDto>> GetTenderRemindData()
         {
             List<GetTenderRemindListDto> getTenderRemindListDtos = new List<GetTenderRemindListDto>();
-            var datas = await _entityRepository.GetAll().Where(aa => aa.BondTime <= DateTime.Now.AddDays(2)).AsNoTracking().ToListAsync();
-            var readyTimeRemind= await _entityRepository.GetAll().Where(aa => aa.ReadyTime <= DateTime.Now.AddDays(4)).AsNoTracking().ToListAsync();
+            var datas = await _entityRepository.GetAll().Where(aa => aa.BondTime <= DateTime.Now.AddDays(2) && aa.BondTime>=DateTime.Now).AsNoTracking().ToListAsync();
+            var readyTimeRemind= await _entityRepository.GetAll().Where(aa =>aa.ReadyTime <= DateTime.Now.AddDays(4) && aa.ReadyTime>=DateTime.Now).AsNoTracking().ToListAsync();
             if (datas?.Count > 0)
             {
                 foreach (var item in datas)

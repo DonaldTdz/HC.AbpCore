@@ -261,6 +261,24 @@ namespace HC.AbpCore.Contracts
             await _entityRepository.DeleteAsync(s => input.Contains(s.Id));
         }
 
+        public async Task<string> GetContractCodeAsync(CodeTypeEnum CodeType)
+        {
+            var contracts = await _entityRepository.GetAll().Where(aa => aa.CodeType == CodeType && aa.CreationTime >= DateTime.Now.Date && aa.CreationTime <= DateTime.Now.Date.AddDays(1)).AsNoTracking().ToListAsync();
+            var contractCode = contracts.Max(aa => aa.ContractCode);
+            if (!String.IsNullOrEmpty(contractCode))
+            {
+                var arr = contractCode.Split("J");
+                contractCode = arr[0].ToString() + "J" + (long.Parse(arr[1]) + 1).ToString();
+            }
+            else
+            {
+                if (CodeType == CodeTypeEnum.硬件)
+                    contractCode = "HC-X-YJ" + DateTime.Now.ToString("yyyyMMdd") + "001";
+                else
+                    contractCode = "HC-X-RJ" + DateTime.Now.ToString("yyyyMMdd") + "001";
+            }
+            return contractCode;
+        }
 
         /// <summary>
         /// 导出Contract为excel表,等待开发。

@@ -22,6 +22,13 @@ namespace HC.AbpCore.Contracts
         [StringLength(50)]
         [Required]
         public virtual string ContractCode { get; set; }
+
+        /// <summary>
+        /// 编号分类   主要用来生成编号
+        /// </summary>
+        [Required]
+        public virtual CodeTypeEnum CodeType { get; set; }
+
         /// <summary>
         /// 项目合同 为 项目Id  采购合同为采购单Id
         /// </summary>

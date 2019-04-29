@@ -78,6 +78,12 @@ namespace HC.AbpCore.Purchases
         /// <returns></returns>
         Task<List<DropDownDto>> GetDropDownsAsync();
 
+        /// <summary>
+        /// 根据采购分类获取自动生成的采购编号
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        Task<string> GetPurchaseCodeAsync(PurchaseTypeEnum type);
 
         /// <summary>
         /// 导出Purchase为excel表

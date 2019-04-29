@@ -14,5 +14,13 @@ namespace HC.AbpCore.Contracts
             销项 = 1,
             进项 = 2
         }
+
+        /// <summary>
+        /// 合同编号分类
+        /// </summary>
+        public enum CodeTypeEnum
+        {
+            硬件=1,软件=2
+        }
     }
 }

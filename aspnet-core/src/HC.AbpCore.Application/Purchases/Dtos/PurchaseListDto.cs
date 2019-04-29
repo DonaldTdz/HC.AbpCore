@@ -26,12 +26,15 @@ namespace HC.AbpCore.Purchases.Dtos
 		/// </summary>
 		public Guid? ProjectId { get; set; }
 
+        /// <summary>
+        /// Type
+        /// </summary>
+        public PurchaseTypeEnum Type { get; set; }
 
-
-		/// <summary>
-		/// EmployeeId
-		/// </summary>
-		public string EmployeeId { get; set; }
+        /// <summary>
+        /// EmployeeId
+        /// </summary>
+        public string EmployeeId { get; set; }
 
 
 
@@ -56,6 +59,12 @@ namespace HC.AbpCore.Purchases.Dtos
         /// 采购负责人名称
         /// </summary>
         public string EmployeeName { get; set; }
+
+
+        public string TypeName
+        {
+            get { return Type.ToString(); }
+        }
         
     }
 }

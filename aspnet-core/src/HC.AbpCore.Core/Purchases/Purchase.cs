@@ -19,6 +19,13 @@ namespace HC.AbpCore.Purchases
         /// 项目Id 外键
         /// </summary>
         public virtual Guid? ProjectId { get; set; }
+
+        /// <summary>
+        /// 分类
+        /// </summary>
+        [Required]
+        public virtual PurchaseTypeEnum Type { get; set; }
+
         /// <summary>
         /// 采购负责人
         /// </summary>

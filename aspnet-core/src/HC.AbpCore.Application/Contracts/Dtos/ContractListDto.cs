@@ -29,12 +29,16 @@ namespace HC.AbpCore.Contracts.Dtos
 		[Required(ErrorMessage="ContractCode不能为空")]
 		public string ContractCode { get; set; }
 
-
-
-		/// <summary>
-		/// RefId
+        /// <summary>
+		/// CodeType
 		/// </summary>
-		public Guid? RefId { get; set; }
+		[Required(ErrorMessage = "CodeType不能为空")]
+        public CodeTypeEnum CodeType { get; set; }
+
+        /// <summary>
+        /// RefId
+        /// </summary>
+        public Guid? RefId { get; set; }
 
 
 

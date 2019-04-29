@@ -21,6 +21,7 @@ using Abp.Application.Services.Dto;
 using HC.AbpCore.Contracts.Dtos;
 using HC.AbpCore.Contracts;
 using HC.AbpCore.Dtos;
+using static HC.AbpCore.Contracts.ContractEnum;
 
 namespace HC.AbpCore.Contracts
 {
@@ -73,11 +74,18 @@ namespace HC.AbpCore.Contracts
         Task BatchDeleteAsync(List<Guid> input);
 
 
-		/// <summary>
+        /// <summary>
+        /// 根据编号分类获取自动生成的合同编号
+        /// </summary>
+        /// <param name="CodeType"></param>
+        /// <returns></returns>
+        Task<string> GetContractCodeAsync(CodeTypeEnum CodeType);
+
+        /// <summary>
         /// 导出Contract为excel表
         /// </summary>
         /// <returns></returns>
-		//Task<FileDto> GetToExcel();
+        //Task<FileDto> GetToExcel();
 
     }
 }

@@ -23,12 +23,16 @@ namespace  HC.AbpCore.Purchases.Dtos
 		/// </summary>
 		public Guid? ProjectId { get; set; }
 
+        /// <summary>
+        /// Type
+        /// </summary>
+        public PurchaseTypeEnum Type { get; set; }
 
 
-		/// <summary>
-		/// EmployeeId
-		/// </summary>
-		public string EmployeeId { get; set; }
+        /// <summary>
+        /// EmployeeId
+        /// </summary>
+        public string EmployeeId { get; set; }
 
 
 
