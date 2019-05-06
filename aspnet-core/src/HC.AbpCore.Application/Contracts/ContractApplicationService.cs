@@ -77,10 +77,10 @@ namespace HC.AbpCore.Contracts
 
             var entityList = await query
                     .OrderBy(input.Sorting).AsNoTracking()
-                    .OrderByDescending(aa => aa.CreationTime)
+                    .OrderByDescending(aa => aa.SignatureTime)
                     .PageBy(input)
                     .ToListAsync();
-
+            //Clock.Now
             //var entityListDtos = ObjectMapper.Map<List<ContractListDto>>(entityList);
             List<ContractListDto> contractListDtos = new List<ContractListDto>();
             foreach (var item in entityList)

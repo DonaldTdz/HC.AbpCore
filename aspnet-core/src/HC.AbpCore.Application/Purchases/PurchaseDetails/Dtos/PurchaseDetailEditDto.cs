@@ -21,7 +21,10 @@ namespace HC.AbpCore.Purchases.PurchaseDetails.Dtos
         /// </summary>
         public int? SupplierId { get; set; }
 
-
+        /// <summary>
+        /// Num
+        /// </summary>
+        public int? Num { get; set; }
 
         /// <summary>
         /// Price

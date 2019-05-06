@@ -79,7 +79,7 @@ namespace HC.AbpCore.Invoices
 
             var entityList = await query
                     .OrderBy(input.Sorting).AsNoTracking()
-                    .OrderByDescending(aa => aa.CreationTime)
+                    .OrderByDescending(aa => aa.SubmitDate)
                     .PageBy(input)
                     .ToListAsync();
 

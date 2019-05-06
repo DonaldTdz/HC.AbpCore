@@ -20,13 +20,25 @@ namespace HC.AbpCore.Tenders
         /// </summary>
         public virtual DateTime? TenderTime { get; set; }
         /// <summary>
+        /// 保证金
+        /// </summary>
+        public virtual decimal? Bond { get; set; }
+        /// <summary>
         /// 保证金截止时间 （提前2天提醒）页面标注
         /// </summary>
         public virtual DateTime? BondTime { get; set; }
         /// <summary>
+        /// 是否缴纳保证金
+        /// </summary>
+        public virtual bool? IsPayBond { get; set; }
+        /// <summary>
         /// 准备完成时间 （完成时间提醒 比如提前4提醒）页面标注
         /// </summary>
         public virtual DateTime? ReadyTime { get; set; }
+        /// <summary>
+        /// 是否完成准备
+        /// </summary>
+        public virtual bool? IsReady { get; set; }
         /// <summary>
         /// 招标负责人，准备完成时间提醒
         /// </summary>

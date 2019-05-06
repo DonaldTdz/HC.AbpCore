@@ -67,7 +67,6 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
 
         public async Task<PagedResultDto<PurchaseDetailListDto>> GetPagedAsync(GetPurchaseDetailsInput input)
         {
-
             var query = _entityRepository.GetAll().WhereIf(input.PurchaseId.HasValue, aa => aa.PurchaseId == input.PurchaseId.Value)
                 .WhereIf(input.SupplierId.HasValue, aa => aa.SupplierId == input.SupplierId.Value);
             // TODO:根据传入的参数添加过滤条件
@@ -85,6 +84,7 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
                         Id = bb.Id,
                         PurchaseId = bb.PurchaseId,
                         SupplierId = bb.SupplierId,
+                        Num=bb.Num,
                         Price = bb.Price,
                         ProjectDetailId = bb.ProjectDetailId,
                         SupplierName = bb.SupplierId.HasValue ? suppliers.Where(aa => aa.Id == bb.SupplierId.Value).FirstOrDefault().Name : null,

@@ -19,6 +19,10 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
         /// </summary>
         public virtual int? SupplierId { get; set; }
         /// <summary>
+        /// 采购数量
+        /// </summary>
+        public virtual int? Num { get; set; }
+        /// <summary>
         /// 采购单价
         /// </summary>
         public virtual decimal? Price { get; set; }

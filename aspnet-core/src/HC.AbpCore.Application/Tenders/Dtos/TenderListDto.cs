@@ -28,25 +28,45 @@ namespace HC.AbpCore.Tenders.Dtos
 		public DateTime? TenderTime { get; set; }
 
 
-
-		/// <summary>
-		/// BondTime
-		/// </summary>
-		public DateTime? BondTime { get; set; }
-
-
-
-		/// <summary>
-		/// ReadyTime
-		/// </summary>
-		public DateTime? ReadyTime { get; set; }
+        /// <summary>
+        /// Bond
+        /// </summary>
+        public decimal? Bond { get; set; }
 
 
 
-		/// <summary>
-		/// EmployeeId
-		/// </summary>
-		public string EmployeeId { get; set; }
+        /// <summary>
+        /// BondTime
+        /// </summary>
+        public DateTime? BondTime { get; set; }
+
+
+
+        /// <summary>
+        /// IsPayBond
+        /// </summary>
+        public bool? IsPayBond { get; set; }
+
+
+
+        /// <summary>
+        /// ReadyTime
+        /// </summary>
+        public DateTime? ReadyTime { get; set; }
+
+
+
+        /// <summary>
+        /// IsReady
+        /// </summary>
+        public bool? IsReady { get; set; }
+
+
+
+        /// <summary>
+        /// EmployeeId
+        /// </summary>
+        public string EmployeeId { get; set; }
 
 
 

@@ -74,7 +74,7 @@ namespace HC.AbpCore.Purchases
 
             var entityList = await query
                     .OrderBy(input.Sorting).AsNoTracking()
-                    .OrderByDescending(aa => aa.CreationTime)
+                    .OrderByDescending(aa => aa.PurchaseDate)
                     .Select(aa => new PurchaseListDto()
                     {
                         Id = aa.Id,

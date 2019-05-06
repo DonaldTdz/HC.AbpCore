@@ -28,6 +28,13 @@ namespace HC.AbpCore.Tenders.Dtos
 
 
         /// <summary>
+        /// Bond
+        /// </summary>
+        public decimal? Bond { get; set; }
+
+
+
+        /// <summary>
         /// BondTime
         /// </summary>
         public DateTime? BondTime { get; set; }
@@ -35,9 +42,23 @@ namespace HC.AbpCore.Tenders.Dtos
 
 
         /// <summary>
+        /// IsPayBond
+        /// </summary>
+        public bool? IsPayBond { get; set; }
+
+
+
+        /// <summary>
         /// ReadyTime
         /// </summary>
         public DateTime? ReadyTime { get; set; }
+
+
+
+        /// <summary>
+        /// IsReady
+        /// </summary>
+        public bool? IsReady { get; set; }
 
 
 

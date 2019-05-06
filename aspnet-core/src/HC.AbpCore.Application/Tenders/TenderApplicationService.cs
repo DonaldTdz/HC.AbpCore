@@ -75,20 +75,24 @@ namespace HC.AbpCore.Tenders
 
             var entityList = await query
                     .OrderBy(input.Sorting).AsNoTracking()
-                    .OrderByDescending(a => a.CreationTime)
-                    .Select(aa => new TenderListDto() {
+                    .OrderByDescending(a => a.TenderTime)
+                    .Select(aa => new TenderListDto()
+                    {
                         Id = aa.Id,
                         ProjectName = projectList.Where(bb => bb.Id == aa.ProjectId).FirstOrDefault().Name,
                         ProjectId = aa.ProjectId,
                         TenderTime = aa.TenderTime,
+                        Bond = aa.Bond,
                         BondTime = aa.BondTime,
                         ReadyTime = aa.ReadyTime,
+                        IsPayBond = aa.IsPayBond,
+                        IsReady = aa.IsReady,
                         EmployeeId = aa.EmployeeId,
                         EmployeeName = employeeList.Where(bb => bb.Id == aa.EmployeeId).FirstOrDefault().Name,
                         ReadyEmployeeIds = aa.ReadyEmployeeIds,
-                        ReadyEmployeeNames = !String.IsNullOrEmpty(aa.ReadyEmployeeIds) ? ReadyEmployeeNames(employeeList,aa.ReadyEmployeeIds).ToString() : aa.ReadyEmployeeIds,
-                        IsWinbid=aa.IsWinbid,
-                        Attachments=aa.Attachments
+                        ReadyEmployeeNames = !String.IsNullOrEmpty(aa.ReadyEmployeeIds) ? ReadyEmployeeNames(employeeList, aa.ReadyEmployeeIds).ToString() : aa.ReadyEmployeeIds,
+                        IsWinbid = aa.IsWinbid,
+                        Attachments = aa.Attachments
                     })
                     .PageBy(input)
                     .ToListAsync();
@@ -104,11 +108,11 @@ namespace HC.AbpCore.Tenders
         /// </summary>
         /// <param name="readyEmployeeIds"></param>
         /// <returns></returns>
-        public string ReadyEmployeeNames(List<Employee> employeeList,string readyEmployeeIds)
+        public string ReadyEmployeeNames(List<Employee> employeeList, string readyEmployeeIds)
         {
-            string readyEmployeeNames=null;
+            string readyEmployeeNames = null;
             string[] sArray = readyEmployeeIds.Split(',');
-            foreach(string id in sArray)
+            foreach (string id in sArray)
             {
                 string name = employeeList.Where(aa => aa.Id == id).FirstOrDefault().Name;
                 if (!String.IsNullOrEmpty(name))
@@ -132,7 +136,7 @@ namespace HC.AbpCore.Tenders
         {
             var entity = await _entityRepository.GetAsync(input.Id);
             var employeeList = await _employeeRepository.GetAll().AsNoTracking().ToListAsync();
-            var item= entity.MapTo<TenderListDto>();
+            var item = entity.MapTo<TenderListDto>();
             item.ProjectName = (await _projectRepository.GetAsync(item.ProjectId)).Name;
             if (!String.IsNullOrEmpty(item.EmployeeId))
                 item.EmployeeName = (await _employeeRepository.GetAsync(item.EmployeeId)).Name;
@@ -254,8 +258,8 @@ namespace HC.AbpCore.Tenders
         public async Task<List<GetTenderRemindListDto>> GetTenderRemindData()
         {
             List<GetTenderRemindListDto> getTenderRemindListDtos = new List<GetTenderRemindListDto>();
-            var datas = await _entityRepository.GetAll().Where(aa => aa.BondTime <= DateTime.Now.AddDays(2) && aa.BondTime>=DateTime.Now).AsNoTracking().ToListAsync();
-            var readyTimeRemind= await _entityRepository.GetAll().Where(aa =>aa.ReadyTime <= DateTime.Now.AddDays(4) && aa.ReadyTime>=DateTime.Now).AsNoTracking().ToListAsync();
+            var datas = await _entityRepository.GetAll().Where(aa => aa.BondTime <= DateTime.Now.AddDays(2) && aa.BondTime >= DateTime.Now).AsNoTracking().ToListAsync();
+            var readyTimeRemind = await _entityRepository.GetAll().Where(aa => aa.ReadyTime <= DateTime.Now.AddDays(4) && aa.ReadyTime >= DateTime.Now).AsNoTracking().ToListAsync();
             if (datas?.Count > 0)
             {
                 foreach (var item in datas)
@@ -280,7 +284,7 @@ namespace HC.AbpCore.Tenders
                     getTenderRemindListDtos.Add(getTenderRemindListDto);
                 }
             }
-            
+
             return getTenderRemindListDtos;
         }
 
