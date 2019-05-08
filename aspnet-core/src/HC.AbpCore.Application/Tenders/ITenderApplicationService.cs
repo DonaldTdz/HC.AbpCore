@@ -72,7 +72,7 @@ namespace HC.AbpCore.Tenders
         Task BatchDeleteAsync(List<Guid> input);
 
         /// <summary>
-        /// 获取招标提醒数据
+        /// 发送钉钉工作通知
         /// </summary>
         /// <returns></returns>
         Task<List<GetTenderRemindListDto>> GetTenderRemindData();

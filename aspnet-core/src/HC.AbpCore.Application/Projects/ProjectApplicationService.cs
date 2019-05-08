@@ -79,6 +79,7 @@ namespace HC.AbpCore.Projects
 
             var entityList = await query
                     .OrderBy(input.Sorting).AsNoTracking()
+                    .OrderByDescending(aa=>aa.CreationTime)
                     .PageBy(input)
                     .Select(aa => new ProjectListDto()
                     {
@@ -190,8 +191,9 @@ namespace HC.AbpCore.Projects
 
 
             entity = await _entityRepository.InsertAsync(entity);
+            var item = entity.MapTo<ProjectEditDto>();
             if (entity != null)
-                return new APIResultDto() { Code = 1, Msg = "保存成功" };
+                return new APIResultDto() { Code = 1, Msg = "保存成功",Data=item };
             else
                 return new APIResultDto() { Code = 0, Msg = "保存失败" };
             //return entity.MapTo<ProjectEditDto>();
@@ -217,8 +219,9 @@ namespace HC.AbpCore.Projects
 
             // ObjectMapper.Map(input, entity);
             entity= await _entityRepository.UpdateAsync(entity);
+            var item = entity.MapTo<ProjectEditDto>();
             if (entity != null)
-                return new APIResultDto() { Code = 1, Msg = "保存成功" };
+                return new APIResultDto() { Code = 1, Msg = "保存成功",Data = item };
             else
                 return new APIResultDto() { Code = 0, Msg = "保存失败" };
         }
@@ -258,7 +261,7 @@ namespace HC.AbpCore.Projects
             var query = _entityRepository.GetAll();
             var entityList = await query
                     .OrderBy(a => a.CreationTime).AsNoTracking()
-                    .Select(c => new DropDownDto() { Text = c.Name, Value = c.Id.ToString() })
+                    .Select(c => new DropDownDto() { Text = c.Name+"("+c.ProjectCode+")", Value = c.Id.ToString() })
                     .ToListAsync();
             return entityList;
         }

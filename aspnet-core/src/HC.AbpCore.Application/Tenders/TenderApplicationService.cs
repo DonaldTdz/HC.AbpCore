@@ -23,6 +23,7 @@ using HC.AbpCore.Tenders.Dtos;
 using HC.AbpCore.Tenders.DomainService;
 using HC.AbpCore.DingTalk.Employees;
 using HC.AbpCore.Projects;
+using HC.AbpCore.DingTalk;
 
 namespace HC.AbpCore.Tenders
 {
@@ -35,6 +36,7 @@ namespace HC.AbpCore.Tenders
         private readonly IRepository<Tender, Guid> _entityRepository;
         private readonly IRepository<Employee, string> _employeeRepository;
         private readonly IRepository<Project, Guid> _projectRepository;
+        private readonly IDingTalkManager _dingTalkManager;
 
         private readonly ITenderManager _entityManager;
 
@@ -43,6 +45,7 @@ namespace HC.AbpCore.Tenders
         ///</summary>
         public TenderAppService(
         IRepository<Tender, Guid> entityRepository
+            , IDingTalkManager dingTalkManager
             , IRepository<Employee, string> employeeRepository
             , IRepository<Project, Guid> projectRepository
         , ITenderManager entityManager
@@ -52,6 +55,7 @@ namespace HC.AbpCore.Tenders
             _employeeRepository = employeeRepository;
             _projectRepository = projectRepository;
             _entityManager = entityManager;
+            _dingTalkManager = dingTalkManager;
         }
 
 
@@ -68,32 +72,35 @@ namespace HC.AbpCore.Tenders
                 .WhereIf(!String.IsNullOrEmpty(input.EmployeeId), aa => aa.EmployeeId == input.EmployeeId);
             // TODO:根据传入的参数添加过滤条件
 
-            var projectList = await _projectRepository.GetAll().AsNoTracking().ToListAsync();
+            var projects = _projectRepository.GetAll();
             var employeeList = await _employeeRepository.GetAll().AsNoTracking().ToListAsync();
 
             var count = await query.CountAsync();
 
-            var entityList = await query
+            var items= from item in query
+                       join project in projects on item.ProjectId equals project.Id
+                       select new TenderListDto()
+                       {
+                           Id = item.Id,
+                           ProjectName = project.Name + "(" + project.ProjectCode + ")",
+                           ProjectId = item.ProjectId,
+                           TenderTime = item.TenderTime,
+                           Bond = item.Bond,
+                           BondTime = item.BondTime,
+                           ReadyTime = item.ReadyTime,
+                           IsPayBond = item.IsPayBond,
+                           IsReady = item.IsReady,
+                           EmployeeId = item.EmployeeId,
+                           EmployeeName = employeeList.Where(bb => bb.Id == item.EmployeeId).FirstOrDefault().Name,
+                           ReadyEmployeeIds = item.ReadyEmployeeIds,
+                           ReadyEmployeeNames = !String.IsNullOrEmpty(item.ReadyEmployeeIds) ? ReadyEmployeeNames(employeeList, item.ReadyEmployeeIds).ToString() : item.ReadyEmployeeIds,
+                           IsWinbid = item.IsWinbid,
+                           Attachments = item.Attachments
+                       };
+
+            var entityList = await items
                     .OrderBy(input.Sorting).AsNoTracking()
                     .OrderByDescending(a => a.TenderTime)
-                    .Select(aa => new TenderListDto()
-                    {
-                        Id = aa.Id,
-                        ProjectName = projectList.Where(bb => bb.Id == aa.ProjectId).FirstOrDefault().Name,
-                        ProjectId = aa.ProjectId,
-                        TenderTime = aa.TenderTime,
-                        Bond = aa.Bond,
-                        BondTime = aa.BondTime,
-                        ReadyTime = aa.ReadyTime,
-                        IsPayBond = aa.IsPayBond,
-                        IsReady = aa.IsReady,
-                        EmployeeId = aa.EmployeeId,
-                        EmployeeName = employeeList.Where(bb => bb.Id == aa.EmployeeId).FirstOrDefault().Name,
-                        ReadyEmployeeIds = aa.ReadyEmployeeIds,
-                        ReadyEmployeeNames = !String.IsNullOrEmpty(aa.ReadyEmployeeIds) ? ReadyEmployeeNames(employeeList, aa.ReadyEmployeeIds).ToString() : aa.ReadyEmployeeIds,
-                        IsWinbid = aa.IsWinbid,
-                        Attachments = aa.Attachments
-                    })
                     .PageBy(input)
                     .ToListAsync();
 
@@ -252,7 +259,7 @@ namespace HC.AbpCore.Tenders
         }
 
         /// <summary>
-        /// 获取招标提醒数据
+        /// 发送钉钉工作通知
         /// </summary>
         /// <returns></returns>
         public async Task<List<GetTenderRemindListDto>> GetTenderRemindData()
@@ -260,6 +267,7 @@ namespace HC.AbpCore.Tenders
             List<GetTenderRemindListDto> getTenderRemindListDtos = new List<GetTenderRemindListDto>();
             var datas = await _entityRepository.GetAll().Where(aa => aa.BondTime <= DateTime.Now.AddDays(2) && aa.BondTime >= DateTime.Now).AsNoTracking().ToListAsync();
             var readyTimeRemind = await _entityRepository.GetAll().Where(aa => aa.ReadyTime <= DateTime.Now.AddDays(4) && aa.ReadyTime >= DateTime.Now).AsNoTracking().ToListAsync();
+            string accessToken = await _dingTalkManager.GetAccessTokenByAppAsync(DingDingAppEnum.智能办公);
             if (datas?.Count > 0)
             {
                 foreach (var item in datas)

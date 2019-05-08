@@ -100,12 +100,9 @@ namespace HC.AbpCore.Contracts
                         else
                             contractListDto.RefName = null;
                     }
+
+                    contractListDtos.Add(contractListDto);
                 }
-                else
-                {
-                    contractListDto.RefName = null;
-                }
-                contractListDtos.Add(contractListDto);
             }
 
             return new PagedResultDto<ContractListDto>(count, contractListDtos);
@@ -201,8 +198,9 @@ namespace HC.AbpCore.Contracts
 
 
             entity = await _entityRepository.InsertAsync(entity);
+            var item = entity.MapTo<ContractEditDto>();
             if (entity != null)
-                return new APIResultDto() { Code = 1, Msg = "保存成功" };
+                return new APIResultDto() { Code = 1, Msg = "保存成功",Data= item };
             else
                 return new APIResultDto() { Code = 0, Msg = "保存失败" };
         }
@@ -228,9 +226,9 @@ namespace HC.AbpCore.Contracts
 
             // ObjectMapper.Map(input, entity);
             entity = await _entityRepository.UpdateAsync(entity);
-
+            var item = entity.MapTo<ContractEditDto>();
             if (entity != null)
-                return new APIResultDto() { Code = 1, Msg = "保存成功" };
+                return new APIResultDto() { Code = 1, Msg = "保存成功",Data=item };
             else
                 return new APIResultDto() { Code = 0, Msg = "保存失败" };
         }

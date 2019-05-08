@@ -9,7 +9,7 @@ using Abp.AutoMapper;
 
 namespace HC.AbpCore.Projects.ProjectDetails.Dtos
 {
-    [AutoMapFrom(typeof(Project))]
+    [AutoMapFrom(typeof(ProjectDetail))]
     public class ProjectDetailListDto : FullAuditedEntityDto<Guid> 
     {
 
@@ -70,6 +70,9 @@ namespace HC.AbpCore.Projects.ProjectDetails.Dtos
 
 
 
-
+        /// <summary>
+        /// ×Ü½ð¶î
+        /// </summary>
+        public decimal? TotalSum { get; set; }
     }
 }

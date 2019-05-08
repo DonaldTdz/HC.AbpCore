@@ -68,33 +68,51 @@ namespace HC.AbpCore.Purchases
                 .WhereIf(input.Id.HasValue, aa => aa.Id == input.Id.Value);
             // TODO:根据传入的参数添加过滤条件
             var employeeList = await _employeeRepository.GetAll().AsNoTracking().ToListAsync();
-            var projectList = await _projectRepository.GetAll().AsNoTracking().ToListAsync();
+            var projects = _projectRepository.GetAll();
 
             var count = await query.CountAsync();
+            var entityList = from item in query
+                             join project in projects on item.ProjectId equals project.Id
+                             select new PurchaseListDto()
+                             {
+                                 Id = item.Id,
+                                 Code = item.Code,
+                                 ProjectId = item.ProjectId,
+                                 Type = item.Type,
+                                 EmployeeId = item.EmployeeId,
+                                 PurchaseDate = item.PurchaseDate,
+                                 Desc = item.Desc,
+                                 ProjectName = project.Name + "(" + project.ProjectCode + ")",
+                                 EmployeeName = !String.IsNullOrEmpty(item.EmployeeId) ? employeeList.Where(bb => bb.Id == item.EmployeeId).FirstOrDefault().Name : null,
+                                 CreationTime = item.CreationTime
+                             };
+            var items =await entityList.OrderByDescending(aa => aa.PurchaseDate)
+                .PageBy(input)
+                .ToListAsync();
 
-            var entityList = await query
-                    .OrderBy(input.Sorting).AsNoTracking()
-                    .OrderByDescending(aa => aa.PurchaseDate)
-                    .Select(aa => new PurchaseListDto()
-                    {
-                        Id = aa.Id,
-                        Code = aa.Code,
-                        ProjectId = aa.ProjectId,
-                        Type = aa.Type,
-                        EmployeeId = aa.EmployeeId,
-                        PurchaseDate = aa.PurchaseDate,
-                        Desc = aa.Desc,
-                        ProjectName = aa.ProjectId.HasValue ? projectList.Where(bb => bb.Id == aa.ProjectId).FirstOrDefault().Name : null,
-                        EmployeeName = !String.IsNullOrEmpty(aa.EmployeeId) ? employeeList.Where(bb => bb.Id == aa.EmployeeId).FirstOrDefault().Name : null,
-                        CreationTime = aa.CreationTime
-                    })
-                    .PageBy(input)
-                    .ToListAsync();
+            //var entityList = await query
+            //        .OrderBy(input.Sorting).AsNoTracking()
+            //        .OrderByDescending(aa => aa.PurchaseDate)
+            //        .Select(aa => new PurchaseListDto()
+            //        {
+            //            Id = aa.Id,
+            //            Code = aa.Code,
+            //            ProjectId = aa.ProjectId,
+            //            Type = aa.Type,
+            //            EmployeeId = aa.EmployeeId,
+            //            PurchaseDate = aa.PurchaseDate,
+            //            Desc = aa.Desc,
+            //            ProjectName = aa.ProjectId.HasValue ? projectList.Where(bb => bb.Id == aa.ProjectId).FirstOrDefault().Name : null,
+            //            EmployeeName = !String.IsNullOrEmpty(aa.EmployeeId) ? employeeList.Where(bb => bb.Id == aa.EmployeeId).FirstOrDefault().Name : null,
+            //            CreationTime = aa.CreationTime
+            //        })
+            //        .PageBy(input)
+            //        .ToListAsync();
 
             // var entityListDtos = ObjectMapper.Map<List<PurchaseListDto>>(entityList);
             //var entityListDtos = entityList.MapTo<List<PurchaseListDto>>();
 
-            return new PagedResultDto<PurchaseListDto>(count, entityList);
+            return new PagedResultDto<PurchaseListDto>(count, items);
         }
 
 

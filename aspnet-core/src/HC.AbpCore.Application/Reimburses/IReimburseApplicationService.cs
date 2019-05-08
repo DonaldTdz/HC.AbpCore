@@ -18,28 +18,28 @@ using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 
 
-using HC.AbpCore.Invoices.Dtos;
-using HC.AbpCore.Invoices;
+using HC.AbpCore.Reimburses.Dtos;
+using HC.AbpCore.Reimburses;
 
-namespace HC.AbpCore.Invoices
+namespace HC.AbpCore.Reimburses
 {
     /// <summary>
-    /// Invoice应用层服务的接口方法
+    /// Reimburse应用层服务的接口方法
     ///</summary>
-    public interface IInvoiceAppService : IApplicationService
+    public interface IReimburseAppService : IApplicationService
     {
         /// <summary>
-		/// 获取Invoice的分页列表信息
+		/// 获取Reimburse的分页列表信息
 		///</summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<PagedResultDto<InvoiceListDto>> GetPagedAsync(GetInvoicesInput input);
+        Task<PagedResultDto<ReimburseListDto>> GetPagedAsync(GetReimbursesInput input);
 
 
 		/// <summary>
-		/// 通过指定id获取InvoiceListDto信息
+		/// 通过指定id获取ReimburseListDto信息
 		/// </summary>
-		Task<InvoiceListDto> GetByIdAsync(EntityDto<Guid> input);
+		Task<ReimburseListDto> GetByIdAsync(EntityDto<Guid> input);
 
 
         /// <summary>
@@ -47,27 +47,19 @@ namespace HC.AbpCore.Invoices
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<GetInvoiceForEditOutput> GetForEditAsync(NullableIdDto<Guid> input);
+        Task<GetReimburseForEditOutput> GetForEditAsync(NullableIdDto<Guid> input);
 
 
         /// <summary>
-        /// 添加或者修改Invoice的公共方法
+        /// 添加或者修改Reimburse的公共方法
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<InvoiceEditDto> CreateOrUpdateAsync(CreateOrUpdateInvoiceInput input);
-
-        /// <summary>
-        /// 获取发票抬头
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="refId"></param>
-        /// <returns></returns>
-        Task<string> GetTitleByTypeAndRefIdAsync(InvoiceTypeEnum type, Guid refId);
+        Task CreateOrUpdateAsync(CreateOrUpdateReimburseInput input);
 
 
         /// <summary>
-        /// 删除Invoice信息的方法
+        /// 删除Reimburse信息的方法
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
@@ -75,13 +67,13 @@ namespace HC.AbpCore.Invoices
 
 
         /// <summary>
-        /// 批量删除Invoice
+        /// 批量删除Reimburse
         /// </summary>
         Task BatchDeleteAsync(List<Guid> input);
 
 
 		/// <summary>
-        /// 导出Invoice为excel表
+        /// 导出Reimburse为excel表
         /// </summary>
         /// <returns></returns>
 		//Task<FileDto> GetToExcel();

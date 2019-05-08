@@ -70,13 +70,30 @@ namespace HC.AbpCore.Projects.ProjectDetails
             var entityList = await query
                     .OrderBy(input.Sorting).AsNoTracking()
                     .OrderByDescending(aa => aa.CreationTime)
-                    .PageBy(input)
+                    //.PageBy(input)
                     .ToListAsync();
 
-            // var entityListDtos = ObjectMapper.Map<List<ProjectDetailListDto>>(entityList);
-            var entityListDtos = entityList.MapTo<List<ProjectDetailListDto>>();
+            List<ProjectDetailListDto> projectDetailListDtos = new List<ProjectDetailListDto>();
+            decimal? totalSum=0;
+            decimal? totalQuantity = 0;
+            foreach (var item in entityList)
+            {
+                ProjectDetailListDto projectDetailListDto = item.MapTo<ProjectDetailListDto>();
+                projectDetailListDto.TotalSum = projectDetailListDto.Num * projectDetailListDto.Price;
+                totalSum += projectDetailListDto.TotalSum;
+                totalQuantity += projectDetailListDto.Num;
+                projectDetailListDtos.Add(projectDetailListDto);
+            }
+            ProjectDetailListDto entity = new ProjectDetailListDto();
+            entity.Name = "合计";
+            entity.Num = totalQuantity;
+            entity.TotalSum = totalSum;
+            projectDetailListDtos.Add(entity);
 
-            return new PagedResultDto<ProjectDetailListDto>(count, entityListDtos);
+            // var entityListDtos = ObjectMapper.Map<List<ProjectDetailListDto>>(entityList);
+            //var entityListDtos = entityList.MapTo<List<ProjectDetailListDto>>();
+
+            return new PagedResultDto<ProjectDetailListDto>(count, projectDetailListDtos);
         }
 
 

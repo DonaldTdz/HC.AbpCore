@@ -24,6 +24,9 @@ using HC.AbpCore.Contracts.ContractDetails;
 using HC.AbpCore.Contracts;
 using HC.AbpCore.Invoices;
 using HC.AbpCore.Invoices.InvoiceDetails;
+using HC.AbpCore.Reimburses;
+using HC.AbpCore.Reimburses.ReimburseDetails;
+using HC.AbpCore.TimeSheets;
 
 namespace HC.AbpCore.EntityFrameworkCore
 {
@@ -77,5 +80,11 @@ namespace HC.AbpCore.EntityFrameworkCore
         public virtual DbSet<Invoice> Invoices { get; set; }
 
         public virtual DbSet<InvoiceDetail> InvoiceDetails { get; set; }
+
+        public virtual DbSet<Reimburse> Reimburses { get; set; }
+
+        public virtual DbSet<ReimburseDetail> ReimburseDetails { get; set; }
+
+        public virtual DbSet<TimeSheet> TimeSheets { get; set; }
     }
 }

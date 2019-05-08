@@ -102,12 +102,9 @@ namespace HC.AbpCore.Invoices
                         else
                             InvoiceListDto.RefName = null;
                     }
+
+                    InvoiceListDtos.Add(InvoiceListDto);
                 }
-                else
-                {
-                    InvoiceListDto.RefName = null;
-                }
-                InvoiceListDtos.Add(InvoiceListDto);
             }
 
             return new PagedResultDto<InvoiceListDto>(count, InvoiceListDtos);
@@ -168,16 +165,16 @@ namespace HC.AbpCore.Invoices
         /// <param name="input"></param>
         /// <returns></returns>
 
-        public async Task CreateOrUpdateAsync(CreateOrUpdateInvoiceInput input)
+        public async Task<InvoiceEditDto> CreateOrUpdateAsync(CreateOrUpdateInvoiceInput input)
         {
 
             if (input.Invoice.Id.HasValue)
             {
-                await UpdateAsync(input.Invoice);
+                return await UpdateAsync(input.Invoice);
             }
             else
             {
-                await CreateAsync(input.Invoice);
+               return await CreateAsync(input.Invoice);
             }
         }
 
@@ -202,7 +199,7 @@ namespace HC.AbpCore.Invoices
         /// 编辑Invoice
         /// </summary>
 
-        protected virtual async Task UpdateAsync(InvoiceEditDto input)
+        protected virtual async Task<InvoiceEditDto> UpdateAsync(InvoiceEditDto input)
         {
             //TODO:更新前的逻辑判断，是否允许更新
 
@@ -210,7 +207,8 @@ namespace HC.AbpCore.Invoices
             input.MapTo(entity);
 
             // ObjectMapper.Map(input, entity);
-            await _entityRepository.UpdateAsync(entity);
+            var item=await _entityRepository.UpdateAsync(entity);
+            return item.MapTo<InvoiceEditDto>();
         }
 
 
