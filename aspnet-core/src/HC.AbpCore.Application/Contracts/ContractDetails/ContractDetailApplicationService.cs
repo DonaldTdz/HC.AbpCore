@@ -79,7 +79,7 @@ namespace HC.AbpCore.Contracts.ContractDetails
             var entityList = await query
                     .OrderBy(input.Sorting).AsNoTracking()
                     .OrderByDescending(aa=>aa.CreationTime)
-                    .PageBy(input)
+                    //.PageBy(input)
                     .ToListAsync();
 
             // var entityListDtos = ObjectMapper.Map<List<ContractDetailListDto>>(entityList);
@@ -109,7 +109,7 @@ namespace HC.AbpCore.Contracts.ContractDetails
                 contractDetailListDtos.Add(contractDetailListDto);
             }
 
-            return new PagedResultDto<ContractDetailListDto>(count, contractDetailListDtos);
+            return new PagedResultDto<ContractDetailListDto>(count,contractDetailListDtos);
         }
 
 

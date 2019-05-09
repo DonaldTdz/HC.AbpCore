@@ -72,7 +72,7 @@ namespace HC.AbpCore.Invoices.InvoiceDetails
 
 			var entityList = await query
 					.OrderBy(input.Sorting).AsNoTracking()
-					.PageBy(input)
+					//.PageBy(input)
 					.ToListAsync();
 
             // var entityListDtos = ObjectMapper.Map<List<InvoiceDetailListDto>>(entityList);

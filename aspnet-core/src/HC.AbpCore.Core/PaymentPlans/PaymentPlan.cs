@@ -1,4 +1,5 @@
 ﻿using Abp.Domain.Entities;
+using Abp.Domain.Entities.Auditing;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -8,7 +9,7 @@ using System.Text;
 namespace HC.AbpCore.PaymentPlans
 {
     [Table("PaymentPlans")]
-    public class PaymentPlan : Entity<Guid> //注意修改主键Id数据类型
+    public class PaymentPlan : Entity<Guid>, IHasCreationTime //注意修改主键Id数据类型
     {
         /// <summary>
         /// 所属项目 外键
@@ -32,15 +33,16 @@ namespace HC.AbpCore.PaymentPlans
         /// <summary>
         /// 回款状态 枚举（1、未回款 2、已回款）已回款需要更新公司账户
         /// </summary>
-        public virtual int? Status { get; set; }
+        public virtual PaymentPlanStatusEnum? Status { get; set; }
         /// <summary>
         /// 回款时间
         /// </summary>
         public virtual DateTime? PaymentTime { get; set; }
         /// <summary>
-        /// 
+        /// 创建时间
         /// </summary>
-        public virtual DateTime? CreationTime { get; set; }
+        [Required]
+        public virtual DateTime CreationTime { get; set; }
     }
 
 }

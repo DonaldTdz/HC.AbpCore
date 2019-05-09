@@ -27,6 +27,7 @@ using HC.AbpCore.Invoices.InvoiceDetails;
 using HC.AbpCore.Reimburses;
 using HC.AbpCore.Reimburses.ReimburseDetails;
 using HC.AbpCore.TimeSheets;
+using HC.AbpCore.PaymentPlans;
 
 namespace HC.AbpCore.EntityFrameworkCore
 {
@@ -86,5 +87,7 @@ namespace HC.AbpCore.EntityFrameworkCore
         public virtual DbSet<ReimburseDetail> ReimburseDetails { get; set; }
 
         public virtual DbSet<TimeSheet> TimeSheets { get; set; }
+
+        public virtual DbSet<PaymentPlan> PaymentPlans { get; set; }
     }
 }

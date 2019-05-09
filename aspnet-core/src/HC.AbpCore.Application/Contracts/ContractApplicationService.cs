@@ -70,8 +70,8 @@ namespace HC.AbpCore.Contracts
                 .WhereIf(!String.IsNullOrEmpty(input.ContractCode), aa => aa.ContractCode.Contains(input.ContractCode))
                 .WhereIf(input.RefId.HasValue, aa => aa.RefId == input.RefId.Value);
             // TODO:根据传入的参数添加过滤条件
-            var projects = await _projectRepository.GetAll().Select(aa => new { Id = aa.Id, Name = aa.Name }).AsNoTracking().ToListAsync();
-            var purchases = await _purchaseRepository.GetAll().Select(aa => new { aa.Id, aa.ProjectId }).AsNoTracking().ToListAsync();
+            var projects = await _projectRepository.GetAll().Select(aa => new { Id = aa.Id, Name = aa.Name,Code=aa.ProjectCode }).AsNoTracking().ToListAsync();
+            var purchases = await _purchaseRepository.GetAll().Select(aa => new { aa.Id, aa.ProjectId,Code=aa.Code }).AsNoTracking().ToListAsync();
 
             var count = await query.CountAsync();
 
@@ -90,15 +90,21 @@ namespace HC.AbpCore.Contracts
                 {
                     if (contractListDto.Type == ContractTypeEnum.销项)
                     {
-                        contractListDto.RefName = projects.Where(aa => aa.Id == contractListDto.RefId).FirstOrDefault()!= null?projects.Where(aa => aa.Id == contractListDto.RefId).FirstOrDefault().Name:null;
+                        var project = projects.Where(aa => aa.Id == contractListDto.RefId).FirstOrDefault();
+                        contractListDto.RefName = project.Name + "(" + project.Code + ")";
                     }
                     else
                     {
-                        var projectId = purchases.Where(aa => aa.Id == contractListDto.RefId).FirstOrDefault()!=null? purchases.Where(aa => aa.Id == contractListDto.RefId).FirstOrDefault().ProjectId:null;
-                        if (projectId.HasValue)
-                            contractListDto.RefName = projects.Where(aa => aa.Id == projectId.Value).FirstOrDefault() != null ? projects.Where(aa => aa.Id == projectId.Value).FirstOrDefault().Name : null;
+                        var purchase = purchases.Where(aa => aa.Id == contractListDto.RefId).FirstOrDefault();
+                        if (purchase.ProjectId.HasValue)
+                        {
+                            var project = projects.Where(aa => aa.Id == purchase.ProjectId.Value).FirstOrDefault();
+                            contractListDto.RefName = project.Name + "(" + purchase.Code + ")";
+                        }
                         else
+                        {
                             contractListDto.RefName = null;
+                        }
                     }
 
                     contractListDtos.Add(contractListDto);

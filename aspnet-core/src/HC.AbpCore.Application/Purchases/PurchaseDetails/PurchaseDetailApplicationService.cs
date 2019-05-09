@@ -90,12 +90,12 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
                         SupplierName = bb.SupplierId.HasValue ? suppliers.Where(aa => aa.Id == bb.SupplierId.Value).FirstOrDefault().Name : null,
                         ProjectDetailName = bb.ProjectDetailId.HasValue ? projectDetails.Where(aa => aa.Id == bb.ProjectDetailId.Value).FirstOrDefault().Name : null,
                     })
-                    .PageBy(input)
+                    //.PageBy(input)
                     .ToListAsync();
 
             // var entityListDtos = ObjectMapper.Map<List<PurchaseDetailListDto>>(entityList);
 
-            return new PagedResultDto<PurchaseDetailListDto>(count, entityList);
+            return new PagedResultDto<PurchaseDetailListDto>(count,entityList);
         }
 
 

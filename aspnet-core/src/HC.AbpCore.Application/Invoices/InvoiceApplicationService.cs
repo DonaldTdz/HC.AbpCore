@@ -72,8 +72,8 @@ namespace HC.AbpCore.Invoices
                 .WhereIf(input.Type.HasValue, aa => aa.Type == input.Type)
                 .WhereIf(input.RefId.HasValue, aa => aa.RefId == input.RefId.Value);
             // TODO:根据传入的参数添加过滤条件
-            var projects = await _projectRepository.GetAll().Select(aa => new { Id = aa.Id, Name = aa.Name }).AsNoTracking().ToListAsync();
-            var purchases = await _purchaseRepository.GetAll().Select(aa => new { aa.Id, aa.ProjectId }).AsNoTracking().ToListAsync();
+            var projects = await _projectRepository.GetAll().Select(aa => new { Id = aa.Id, Name = aa.Name,Code=aa.ProjectCode }).AsNoTracking().ToListAsync();
+            var purchases = await _purchaseRepository.GetAll().Select(aa => new { aa.Id, aa.ProjectId,Code=aa.Code }).AsNoTracking().ToListAsync();
 
             var count = await query.CountAsync();
 
@@ -92,15 +92,21 @@ namespace HC.AbpCore.Invoices
                 {
                     if (InvoiceListDto.Type == InvoiceTypeEnum.销项)
                     {
-                        InvoiceListDto.RefName = projects.Where(aa => aa.Id == InvoiceListDto.RefId).FirstOrDefault() != null ? projects.Where(aa => aa.Id == InvoiceListDto.RefId).FirstOrDefault().Name : null;
+                        var project = projects.Where(aa => aa.Id == InvoiceListDto.RefId).FirstOrDefault();
+                        InvoiceListDto.RefName = project.Name + "(" + project.Code + ")";
                     }
                     else
                     {
-                        var projectId = purchases.Where(aa => aa.Id == InvoiceListDto.RefId).FirstOrDefault() != null ? purchases.Where(aa => aa.Id == InvoiceListDto.RefId).FirstOrDefault().ProjectId : null;
-                        if (projectId.HasValue)
-                            InvoiceListDto.RefName = projects.Where(aa => aa.Id == projectId.Value).FirstOrDefault() != null ? projects.Where(aa => aa.Id == projectId.Value).FirstOrDefault().Name : null;
+                        var purchase = purchases.Where(aa => aa.Id == InvoiceListDto.RefId).FirstOrDefault();
+                        if (purchase.ProjectId.HasValue)
+                        {
+                            var project = projects.Where(aa => aa.Id == purchase.ProjectId.Value).FirstOrDefault();
+                            InvoiceListDto.RefName = project.Name + "(" + purchase.Code + ")";
+                        }
                         else
+                        {
                             InvoiceListDto.RefName = null;
+                        }
                     }
 
                     InvoiceListDtos.Add(InvoiceListDto);

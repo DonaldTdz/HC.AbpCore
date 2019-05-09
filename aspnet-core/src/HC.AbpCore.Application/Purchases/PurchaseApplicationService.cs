@@ -191,8 +191,10 @@ namespace HC.AbpCore.Purchases
 
 
             entity = await _entityRepository.InsertAsync(entity);
+            var item = entity.MapTo<PurchaseEditDto>();
+
             if (entity != null)
-                return new APIResultDto() { Code = 1, Msg = "保存成功" };
+                return new APIResultDto() { Code = 1, Msg = "保存成功",Data=item };
             else
                 return new APIResultDto() { Code = 0, Msg = "保存失败" };
         }
@@ -216,9 +218,9 @@ namespace HC.AbpCore.Purchases
 
             // ObjectMapper.Map(input, entity);
             entity = await _entityRepository.UpdateAsync(entity);
-
+            var item = entity.MapTo<PurchaseEditDto>();
             if (entity != null)
-                return new APIResultDto() { Code = 1, Msg = "保存成功" };
+                return new APIResultDto() { Code = 1, Msg = "保存成功", Data = item };
             else
                 return new APIResultDto() { Code = 0, Msg = "保存失败" };
         }
@@ -257,7 +259,7 @@ namespace HC.AbpCore.Purchases
             var query = _entityRepository.GetAll();
             var entityList = await query
                     .OrderBy(a => a.CreationTime).AsNoTracking()
-                    .Select(c => new DropDownDto() { Text = projects.Where(aa => aa.Id == c.ProjectId).FirstOrDefault().Name, Value = c.Id.ToString() })
+                    .Select(c => new DropDownDto() { Text = projects.Where(aa => aa.Id == c.ProjectId).FirstOrDefault().Name + "(" + c.Code + ")", Value = c.Id.ToString() })
                     .ToListAsync();
             return entityList;
         }
