@@ -87,5 +87,8 @@ namespace HC.AbpCore.DingTalk.Employees
         /// <returns></returns>
         //Task<FileDto> GetToExcel();
 
+        //获取钉钉用户信息
+        Task<DingDingUserDto> GetDingDingUserByCodeAsync(string code);
+
     }
 }

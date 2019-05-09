@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Senparc.CO2NET.HttpUtility;
+using HC.AbpCore.DingTalk.Dtos;
 
 namespace HC.AbpCore.DingTalk
 {
@@ -70,6 +71,13 @@ namespace HC.AbpCore.DingTalk
             }
 
             return config;
+        }
+
+        public string GetUserId(string accessToken, string code)
+        {
+            DingUserInfoDto user = Get.GetJson<DingUserInfoDto>(string.Format("https://oapi.dingtalk.com/user/getuserinfo?access_token={0}&code={1}", accessToken, code));
+            Logger.InfoFormat("Userid response errmsg:{0} body:{1}", user.errmsg, user.userid);
+            return user.userid;
         }
     }
 }
