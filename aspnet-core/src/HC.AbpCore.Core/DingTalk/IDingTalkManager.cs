@@ -11,5 +11,7 @@ namespace HC.AbpCore.DingTalk
         Task<string> GetAccessTokenByAppAsync(DingDingAppEnum app);
 
         Task<DingDingAppConfig> GetDingDingConfigByAppAsync(DingDingAppEnum app);
+
+        string GetUserId(string accessToken, string code);
     }
 }

@@ -6,6 +6,7 @@ using Abp.Domain.Entities.Auditing;
 using System.ComponentModel.DataAnnotations;
 using HC.AbpCore.DingTalk.Employees;
 using System.Collections.Generic;
+using Abp.AutoMapper;
 
 namespace HC.AbpCore.DingTalk.Employees.Dtos
 {
@@ -101,6 +102,7 @@ namespace HC.AbpCore.DingTalk.Employees.Dtos
 
     }
 
+    [AutoMapFrom(typeof(Employee))]
     public class DingDingUserDto
     {
         public string Id { get; set; }
@@ -111,9 +113,6 @@ namespace HC.AbpCore.DingTalk.Employees.Dtos
 
         public string Avatar { get; set; }
 
-        public string Area { get; set; }
-
-        //public AreaCodeEnum AreaCode { get; set; }
     }
 
     public class NzTreeNode

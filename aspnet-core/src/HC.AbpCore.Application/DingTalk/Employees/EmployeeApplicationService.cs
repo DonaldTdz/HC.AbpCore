@@ -22,6 +22,7 @@ using HC.AbpCore.DingTalk.Employees;
 using HC.AbpCore.DingTalk.Employees.Dtos;
 using HC.AbpCore.DingTalk.Employees.DomainService;
 using HC.AbpCore.Dtos;
+using Abp.Auditing;
 
 namespace HC.AbpCore.DingTalk.Employees
 {
@@ -35,16 +36,20 @@ namespace HC.AbpCore.DingTalk.Employees
 
         private readonly IEmployeeManager _entityManager;
 
+        private readonly IDingTalkManager _dingTalkManager;
+
         /// <summary>
         /// 构造函数 
         ///</summary>
         public EmployeeAppService(
         IRepository<Employee, string> entityRepository
         , IEmployeeManager entityManager
+        , IDingTalkManager dingTalkManager
         )
         {
             _entityRepository = entityRepository;
             _entityManager = entityManager;
+            _dingTalkManager = dingTalkManager;
         }
 
 
@@ -222,6 +227,19 @@ namespace HC.AbpCore.DingTalk.Employees
                     Value = aa.Id
                 }).ToListAsync();
             return DropDownDtoList;
+        }
+
+        [AbpAllowAnonymous]
+        [Audited]
+        public async Task<DingDingUserDto> GetDingDingUserByCodeAsync(string code)
+        {
+            var assessToken = await _dingTalkManager.GetAccessTokenByAppAsync(DingDingAppEnum.智能办公);
+            //var userId = _dingTalkManager.GetUserId(assessToken, code);
+            var userId = "165500493321719640";
+            var query = await _entityRepository.GetAsync(userId);
+            var dduser = query.MapTo<DingDingUserDto>();
+
+            return dduser;
         }
 
         /// <summary>
