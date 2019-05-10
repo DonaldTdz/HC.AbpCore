@@ -97,5 +97,20 @@ namespace HC.AbpCore.Reimburses.Dtos
         /// 审批人名称
         /// </summary>
         public string ApproverName { get; set; }
+
+        /// <summary>
+        /// 格式化申请日期
+        /// </summary>
+        public string SubmitDateFormat
+        {
+            get
+            {
+                if (SubmitDate.HasValue)
+                {
+                    return SubmitDate.Value.ToString("yyyy-MM-dd");
+                }
+                return string.Empty;
+            }
+        }
     }
 }

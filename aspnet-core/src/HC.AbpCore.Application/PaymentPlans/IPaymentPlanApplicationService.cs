@@ -33,13 +33,13 @@ namespace HC.AbpCore.PaymentPlans
 		///</summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<PagedResultDto<PaymentPlanListDto>> GetPaged(GetPaymentPlansInput input);
+        Task<PagedResultDto<PaymentPlanListDto>> GetPagedAsync(GetPaymentPlansInput input);
 
 
 		/// <summary>
 		/// 通过指定id获取PaymentPlanListDto信息
 		/// </summary>
-		Task<PaymentPlanListDto> GetById(EntityDto<Guid> input);
+		Task<PaymentPlanListDto> GetByIdAsync(EntityDto<Guid> input);
 
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace HC.AbpCore.PaymentPlans
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<GetPaymentPlanForEditOutput> GetForEdit(NullableIdDto<Guid> input);
+        Task<GetPaymentPlanForEditOutput> GetForEditAsync(NullableIdDto<Guid> input);
 
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace HC.AbpCore.PaymentPlans
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task CreateOrUpdate(CreateOrUpdatePaymentPlanInput input);
+        Task CreateOrUpdateAsync(CreateOrUpdatePaymentPlanInput input);
 
 
         /// <summary>
@@ -63,13 +63,13 @@ namespace HC.AbpCore.PaymentPlans
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task Delete(EntityDto<Guid> input);
+        Task DeleteAsync(EntityDto<Guid> input);
 
 
         /// <summary>
         /// 批量删除PaymentPlan
         /// </summary>
-        Task BatchDelete(List<Guid> input);
+        Task BatchDeleteAsync(List<Guid> input);
 
 
 		/// <summary>

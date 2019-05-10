@@ -23,6 +23,7 @@ using HC.AbpCore.Reimburses.Dtos;
 using HC.AbpCore.Reimburses.DomainService;
 using HC.AbpCore.Projects;
 using HC.AbpCore.DingTalk.Employees;
+using Abp.Auditing;
 
 namespace HC.AbpCore.Reimburses
 {
@@ -59,7 +60,8 @@ namespace HC.AbpCore.Reimburses
         ///</summary>
         /// <param name="input"></param>
         /// <returns></returns>
-		 
+        [AbpAllowAnonymous]
+        [Audited]
         public async Task<PagedResultDto<ReimburseListDto>> GetPagedAsync(GetReimbursesInput input)
 		{
 
@@ -70,7 +72,7 @@ namespace HC.AbpCore.Reimburses
             var projects = _projectRepository.GetAll();
             var employees = _employeeRepository.GetAll();
 
-			var count = await query.CountAsync();
+			//var count = await query.CountAsync();
 
             var entityList = from item in query
                              join project in projects on item.ProjectId equals project.Id
@@ -94,9 +96,12 @@ namespace HC.AbpCore.Reimburses
                                  CancelTime = item.CancelTime,
                                  CreationTime = item.CreationTime
                              };
-            var items = entityList.OrderByDescending(aa => aa.SubmitDate)
+            var count = await entityList.CountAsync();
+
+            var items = await entityList.OrderByDescending(aa => aa.SubmitDate)
                 .PageBy(input)
-                .ToList();
+                .AsNoTracking()
+                .ToListAsync();
             
 
 			return new PagedResultDto<ReimburseListDto>(count, items);

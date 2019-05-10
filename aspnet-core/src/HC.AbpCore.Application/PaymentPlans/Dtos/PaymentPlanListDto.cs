@@ -64,6 +64,12 @@ namespace HC.AbpCore.PaymentPlans.Dtos
 
 
 
-
+        /// <summary>
+        /// 状态名称
+        /// </summary>
+        public string StatusName
+        {
+            get { return Status.ToString(); }
+        }
     }
 }

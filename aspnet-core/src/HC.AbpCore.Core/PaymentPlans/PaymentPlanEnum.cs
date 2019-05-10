@@ -13,6 +13,6 @@ namespace HC.AbpCore.PaymentPlans
     /// </summary>
     public enum PaymentPlanStatusEnum
     {
-        未回款=1, 已回款=2
+        未回款=0, 已回款=1
     }
 }
