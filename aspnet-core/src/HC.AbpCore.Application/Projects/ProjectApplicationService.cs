@@ -24,6 +24,7 @@ using HC.AbpCore.Projects.DomainService;
 using HC.AbpCore.Dtos;
 using HC.AbpCore.Customers;
 using HC.AbpCore.DingTalk.Employees;
+using Abp.Auditing;
 
 namespace HC.AbpCore.Projects
 {
@@ -256,6 +257,8 @@ namespace HC.AbpCore.Projects
         /// 获取项目下拉列表
         /// </summary>
         /// <returns></returns>
+        [AbpAllowAnonymous]
+        [Audited]
         public async Task<List<DropDownDto>> GetDropDownsAsync()
         {
             var query = _entityRepository.GetAll();

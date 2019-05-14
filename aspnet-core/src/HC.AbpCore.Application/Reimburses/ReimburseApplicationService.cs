@@ -98,7 +98,9 @@ namespace HC.AbpCore.Reimburses
                              };
             var count = await entityList.CountAsync();
 
-            var items = await entityList.OrderByDescending(aa => aa.SubmitDate)
+            var items = await entityList
+                .OrderByDescending(aa => aa.SubmitDate)
+                //.OrderBy(aa => aa.Status)
                 .PageBy(input)
                 .AsNoTracking()
                 .ToListAsync();
@@ -108,11 +110,12 @@ namespace HC.AbpCore.Reimburses
 		}
 
 
-		/// <summary>
-		/// 通过指定id获取ReimburseListDto信息
-		/// </summary>
-		 
-		public async Task<ReimburseListDto> GetByIdAsync(EntityDto<Guid> input)
+        /// <summary>
+        /// 通过指定id获取ReimburseListDto信息
+        /// </summary>
+        [AbpAllowAnonymous]
+        [Audited]
+        public async Task<ReimburseListDto> GetByIdAsync(EntityDto<Guid> input)
 		{
 			var entity = await _entityRepository.GetAsync(input.Id);
             var item = entity.MapTo<ReimburseListDto>();
@@ -157,13 +160,14 @@ ReimburseEditDto editDto;
 		}
 
 
-		/// <summary>
-		/// 添加或者修改Reimburse的公共方法
-		/// </summary>
-		/// <param name="input"></param>
-		/// <returns></returns>
-		
-		public async Task CreateOrUpdateAsync(CreateOrUpdateReimburseInput input)
+        /// <summary>
+        /// 添加或者修改Reimburse的公共方法
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        [AbpAllowAnonymous]
+        [Audited]
+        public async Task CreateOrUpdateAsync(CreateOrUpdateReimburseInput input)
 		{
 
 			if (input.Reimburse.Id.HasValue)
@@ -187,7 +191,7 @@ ReimburseEditDto editDto;
 
             // var entity = ObjectMapper.Map <Reimburse>(input);
             var entity=input.MapTo<Reimburse>();
-			
+            entity.Status = ReimburseStatusEnum.草稿;
 
 			entity = await _entityRepository.InsertAsync(entity);
 			return entity.MapTo<ReimburseEditDto>();
@@ -210,13 +214,14 @@ ReimburseEditDto editDto;
 
 
 
-		/// <summary>
-		/// 删除Reimburse信息的方法
-		/// </summary>
-		/// <param name="input"></param>
-		/// <returns></returns>
-		
-		public async Task DeleteAsync(EntityDto<Guid> input)
+        /// <summary>
+        /// 删除Reimburse信息的方法
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        [AbpAllowAnonymous]
+        [Audited]
+        public async Task DeleteAsync(EntityDto<Guid> input)
 		{
 			//TODO:删除前的逻辑判断，是否允许删除
 			await _entityRepository.DeleteAsync(input.Id);

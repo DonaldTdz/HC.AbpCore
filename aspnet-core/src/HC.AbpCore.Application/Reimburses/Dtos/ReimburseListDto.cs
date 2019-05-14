@@ -112,5 +112,35 @@ namespace HC.AbpCore.Reimburses.Dtos
                 return string.Empty;
             }
         }
+
+        /// <summary>
+        /// 格式化取消日期
+        /// </summary>
+        public string CancelTimeFormat
+        {
+            get
+            {
+                if (CancelTime.HasValue)
+                {
+                    return CancelTime.Value.ToString("yyyy-MM-dd");
+                }
+                return string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// 格式化审批日期
+        /// </summary>
+        public string ApprovalTimeFormat
+        {
+            get
+            {
+                if (ApprovalTime.HasValue)
+                {
+                    return ApprovalTime.Value.ToString("yyyy-MM-dd");
+                }
+                return string.Empty;
+            }
+        }
     }
 }

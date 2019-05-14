@@ -95,6 +95,15 @@ namespace HC.AbpCore.Reimburses.ReimburseDetails.Dtos
 
 
 
-
+        /// <summary>
+        /// 格式化发生日期
+        /// </summary>
+        public string HappenDateFormat
+        {
+            get
+            {
+                    return HappenDate.ToString("yyyy-MM-dd");
+            }
+        }
     }
 }

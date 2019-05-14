@@ -23,6 +23,7 @@ using HC.AbpCore.DataDictionarys.Dtos;
 using HC.AbpCore.DataDictionarys.DomainService;
 using HC.AbpCore.Dtos;
 using static HC.AbpCore.DataDictionarys.DataDictionaryBase;
+using Abp.Auditing;
 
 namespace HC.AbpCore.DataDictionarys
 {
@@ -195,6 +196,8 @@ namespace HC.AbpCore.DataDictionarys
             await _entityRepository.DeleteAsync(s => input.Contains(s.Id));
         }
 
+        [AbpAllowAnonymous]
+        [Audited]
         public async Task<List<DropDownDto>> GetDropDownDtosByGroupAsync(DataDictionaryGroupEnum group)
         {
             var dropDownDtoList = await _entityRepository.GetAll().Where(aa => aa.Group == group)

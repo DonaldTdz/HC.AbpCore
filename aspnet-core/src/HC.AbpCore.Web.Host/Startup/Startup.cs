@@ -108,6 +108,7 @@ namespace HC.AbpCore.Web.Host.Startup
 
             app.UseAbpRequestLocalization();
 
+            app.UseJump404();//add by donald 2019-1-14 not found page code 404
 
             app.UseSignalR(routes =>
             {
