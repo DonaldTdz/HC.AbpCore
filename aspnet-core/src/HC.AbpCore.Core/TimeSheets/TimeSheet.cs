@@ -34,7 +34,7 @@ namespace HC.AbpCore.TimeSheets
         /// <summary>
         /// 工作内容
         /// </summary>
-        [StringLength(50)]
+        [StringLength(500)]
         public virtual string Content { get; set; }
         /// <summary>
         /// 状态枚举（1 提交 2 审批通过）

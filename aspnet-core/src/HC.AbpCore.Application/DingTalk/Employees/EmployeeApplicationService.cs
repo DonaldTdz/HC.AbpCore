@@ -234,8 +234,8 @@ namespace HC.AbpCore.DingTalk.Employees
         public async Task<DingDingUserDto> GetDingDingUserByCodeAsync(string code)
         {
             var assessToken = await _dingTalkManager.GetAccessTokenByAppAsync(DingDingAppEnum.智能办公);
-            //var userId = _dingTalkManager.GetUserId(assessToken, code);
-            var userId = "165500493321719640";
+            var userId = _dingTalkManager.GetUserId(assessToken, code);
+            //var userId = "165500493321719640";
             var query = await _entityRepository.GetAsync(userId);
             var dduser = query.MapTo<DingDingUserDto>();
 

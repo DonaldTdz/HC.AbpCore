@@ -25,4 +25,9 @@
     <PackageReference Include="Senparc.Weixin.MP" Version="16.6.14.2" />
     <PackageReference Include="Senparc.Weixin.WxOpen" Version="3.3.9.2" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="TopSdk">
+      <HintPath>..\..\SDK\TopSdk.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

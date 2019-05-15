@@ -5,9 +5,11 @@ using Abp.Application.Services.Dto;
 using Abp.Domain.Entities.Auditing;
 using System.ComponentModel.DataAnnotations;
 using HC.AbpCore.TimeSheets;
+using Abp.AutoMapper;
 
 namespace HC.AbpCore.TimeSheets.Dtos
 {
+    [AutoMapFrom(typeof(TimeSheet))]
     public class TimeSheetListDto : EntityDto<Guid>,IHasCreationTime 
     {
 
@@ -101,6 +103,32 @@ namespace HC.AbpCore.TimeSheets.Dtos
         /// 审批人名称
         /// </summary>
         public string ApproverName { get; set; }
+
+        /// <summary>
+        /// 格式化工作日期
+        /// </summary>
+        public string WorkeDateFormat
+        {
+            get
+            {
+                    return WorkeDate.ToString("yyyy-MM-dd");
+            }
+        }
+        
+        /// <summary>
+        /// 格式化审批日期
+        /// </summary>
+        public string ApprovalTimeFormat
+        {
+            get
+            {
+                if (ApprovalTime.HasValue)
+                {
+                    return ApprovalTime.Value.ToString("yyyy-MM-dd");
+                }
+                return string.Empty;
+            }
+        }
 
     }
 }

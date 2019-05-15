@@ -1,9 +1,11 @@
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Abp.Application.Services.Dto;
 using Abp.Domain.Entities.Auditing;
 using HC.AbpCore.Reimburses;
+using HC.AbpCore.Reimburses.ReimburseDetails.Dtos;
 
 namespace  HC.AbpCore.Reimburses.Dtos
 {
@@ -76,6 +78,10 @@ namespace  HC.AbpCore.Reimburses.Dtos
 
 
 
+        /// <summary>
+        /// 项目明细
+        /// </summary>
+        public List<ReimburseDetailEditDto> ReimburseDetailEditDto { get; set; }
 
     }
 }

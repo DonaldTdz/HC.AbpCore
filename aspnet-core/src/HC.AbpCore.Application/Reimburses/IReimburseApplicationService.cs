@@ -20,6 +20,7 @@ using Abp.Application.Services.Dto;
 
 using HC.AbpCore.Reimburses.Dtos;
 using HC.AbpCore.Reimburses;
+using HC.AbpCore.Dtos;
 
 namespace HC.AbpCore.Reimburses
 {
@@ -72,11 +73,19 @@ namespace HC.AbpCore.Reimburses
         Task BatchDeleteAsync(List<Guid> input);
 
 
-		/// <summary>
+        /// <summary>
+        /// 提交审批
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        Task<APIResultDto> SubmitApproval(CreateOrUpdateReimburseInput input);
+
+
+        /// <summary>
         /// 导出Reimburse为excel表
         /// </summary>
         /// <returns></returns>
-		//Task<FileDto> GetToExcel();
+        //Task<FileDto> GetToExcel();
 
     }
 }

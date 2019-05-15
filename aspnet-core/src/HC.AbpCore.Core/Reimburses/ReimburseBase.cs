@@ -4,7 +4,7 @@ using System.Text;
 
 namespace HC.AbpCore.Reimburses
 {
-    public class ReimburseEnum
+    public class ReimburseBase
     {
     }
 
@@ -12,4 +12,5 @@ namespace HC.AbpCore.Reimburses
     {
         草稿 = 0, 待审核 = 1, 审批通过 = 2, 拒绝 = 3
     }
+    
 }

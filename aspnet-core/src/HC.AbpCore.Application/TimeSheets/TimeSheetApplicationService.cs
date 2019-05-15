@@ -23,6 +23,8 @@ using HC.AbpCore.TimeSheets.Dtos;
 using HC.AbpCore.TimeSheets.DomainService;
 using HC.AbpCore.Projects;
 using HC.AbpCore.DingTalk.Employees;
+using HC.AbpCore.Dtos;
+using Abp.Auditing;
 
 namespace HC.AbpCore.TimeSheets
 {
@@ -59,7 +61,8 @@ namespace HC.AbpCore.TimeSheets
         ///</summary>
         /// <param name="input"></param>
         /// <returns></returns>
-		 
+        [AbpAllowAnonymous]
+        [Audited]
         public async Task<PagedResultDto<TimeSheetListDto>> GetPagedAsync(GetTimeSheetsInput input)
 		{
 
@@ -103,15 +106,21 @@ namespace HC.AbpCore.TimeSheets
 		}
 
 
-		/// <summary>
-		/// 通过指定id获取TimeSheetListDto信息
-		/// </summary>
-		 
-		public async Task<TimeSheetListDto> GetByIdAsync(EntityDto<Guid> input)
+        /// <summary>
+        /// 通过指定id获取TimeSheetListDto信息
+        /// </summary>
+        [AbpAllowAnonymous]
+        [Audited]
+        public async Task<TimeSheetListDto> GetByIdAsync(EntityDto<Guid> input)
 		{
 			var entity = await _entityRepository.GetAsync(input.Id);
 
-		    return entity.MapTo<TimeSheetListDto>();
+		    var item= entity.MapTo<TimeSheetListDto>();
+
+            var project = await _projectRepository.GetAsync(item.ProjectId);
+            item.ProjectName = project.Name + "(" + project.ProjectCode + ")";
+
+            return item;
 		}
 
 		/// <summary>
@@ -169,8 +178,7 @@ TimeSheetEditDto editDto;
 		
 		protected virtual async Task<TimeSheetEditDto> CreateAsync(TimeSheetEditDto input)
 		{
-			//TODO:新增前的逻辑判断，是否允许新增
-
+            //TODO:新增前的逻辑判断，是否允许新增
             // var entity = ObjectMapper.Map <TimeSheet>(input);
             var entity=input.MapTo<TimeSheet>();
 			
@@ -221,17 +229,32 @@ TimeSheetEditDto editDto;
 		}
 
 
-		/// <summary>
-		/// 导出TimeSheet为excel表,等待开发。
-		/// </summary>
-		/// <returns></returns>
-		//public async Task<FileDto> GetToExcel()
-		//{
-		//	var users = await UserManager.Users.ToListAsync();
-		//	var userListDtos = ObjectMapper.Map<List<UserListDto>>(users);
-		//	await FillRoleNames(userListDtos);
-		//	return _userListExcelExporter.ExportToFile(userListDtos);
-		//}
+
+        /// <summary>
+        /// 提交审批
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public async Task<APIResultDto> SubmitApproval(CreateOrUpdateTimeSheetInput input)
+        {
+            var item = input.TimeSheet.MapTo<TimeSheet>();
+            //var reimburse = await CreateAsync(input.TimeSheet);
+            var apiResult = await _entityManager.SubmitApproval(item);
+            return apiResult.MapTo<APIResultDto>();
+        }
+
+
+        /// <summary>
+        /// 导出TimeSheet为excel表,等待开发。
+        /// </summary>
+        /// <returns></returns>
+        //public async Task<FileDto> GetToExcel()
+        //{
+        //	var users = await UserManager.Users.ToListAsync();
+        //	var userListDtos = ObjectMapper.Map<List<UserListDto>>(users);
+        //	await FillRoleNames(userListDtos);
+        //	return _userListExcelExporter.ExportToFile(userListDtos);
+        //}
 
     }
 }
