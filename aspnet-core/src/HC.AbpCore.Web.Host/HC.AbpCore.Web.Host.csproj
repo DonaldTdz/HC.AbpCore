@@ -59,4 +59,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="TopSdk">
+      <HintPath>..\..\SDK\TopSdk.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

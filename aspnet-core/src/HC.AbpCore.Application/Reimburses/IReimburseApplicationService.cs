@@ -78,7 +78,7 @@ namespace HC.AbpCore.Reimburses
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<APIResultDto> SubmitApproval(CreateOrUpdateReimburseInput input);
+        Task<APIResultDto> SubmitApproval(EntityDto<Guid> input);
 
 
         /// <summary>

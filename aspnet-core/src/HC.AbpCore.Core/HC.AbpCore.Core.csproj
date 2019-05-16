@@ -26,6 +26,12 @@
     <PackageReference Include="Senparc.Weixin.WxOpen" Version="3.3.9.2" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Model">
+      <HintPath>..\..\Libs\Model.dll</HintPath>
+    </Reference>
+    <Reference Include="SubSonic">
+      <HintPath>..\..\Libs\SubSonic.dll</HintPath>
+    </Reference>
     <Reference Include="TopSdk">
       <HintPath>..\..\SDK\TopSdk.dll</HintPath>
     </Reference>

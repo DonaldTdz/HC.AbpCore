@@ -235,6 +235,8 @@ TimeSheetEditDto editDto;
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
+        [AbpAllowAnonymous]
+        [Audited]
         public async Task<APIResultDto> SubmitApproval(CreateOrUpdateTimeSheetInput input)
         {
             var item = input.TimeSheet.MapTo<TimeSheet>();

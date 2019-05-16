@@ -50,6 +50,10 @@ namespace HC.AbpCore.TimeSheets
         /// </summary>
         public virtual DateTime? ApprovalTime { get; set; }
         /// <summary>
+        /// 审批实例Id
+        /// </summary>
+        public virtual string ProcessInstanceId { get; set; }
+        /// <summary>
         /// 创建时间
         /// </summary>
         [Required]

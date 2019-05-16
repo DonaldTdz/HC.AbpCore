@@ -136,9 +136,17 @@ namespace HC.AbpCore.Reimburses.DomainService
             OapiProcessinstanceCreateResponse response = client.Execute(request, accessToken);
             //var depts=Post.PostGetJson<ApprovalReturn>(string.Format("https://oapi.dingtalk.com/topapi/processinstance/create?access_token={0}", accessToken), null)
             if (response.ErrCode == "0")
+            {
+                reimburse.ProcessInstanceId = response.ProcessInstanceId;
+                reimburse.Status = ReimburseStatusEnum.待审核;
+                await _repository.UpdateAsync(reimburse);
                 return new ResultCode() { Code = 0, Msg = "提交成功" };
+
+            }
             else
+            {
                 return new ResultCode() { Code = 4, Msg = "提交失败" };
+            }
         }
 
 

@@ -63,10 +63,17 @@ namespace  HC.AbpCore.Reimburses.Dtos
 
 
 
-		/// <summary>
-		/// CancelTime
-		/// </summary>
-		public DateTime? CancelTime { get; set; }
+        /// <summary>
+        /// 审批实例Id
+        /// </summary>
+        public string ProcessInstanceId { get; set; }
+
+
+
+        /// <summary>
+        /// CancelTime
+        /// </summary>
+        public DateTime? CancelTime { get; set; }
 
 
 
@@ -76,12 +83,7 @@ namespace  HC.AbpCore.Reimburses.Dtos
 		[Required(ErrorMessage="CreationTime不能为空")]
 		public DateTime CreationTime { get; set; }
 
-
-
-        /// <summary>
-        /// 项目明细
-        /// </summary>
-        public List<ReimburseDetailEditDto> ReimburseDetailEditDto { get; set; }
+        
 
     }
 }

@@ -42,6 +42,10 @@ namespace HC.AbpCore.Reimburses
         /// </summary>
         public virtual DateTime? ApprovalTime { get; set; }
         /// <summary>
+        /// 审批实例Id
+        /// </summary>
+        public virtual string ProcessInstanceId { get; set; }
+        /// <summary>
         /// 取消时间
         /// </summary>
         public virtual DateTime? CancelTime { get; set; }
@@ -50,6 +54,7 @@ namespace HC.AbpCore.Reimburses
         /// </summary>
         [Required]
         public virtual DateTime CreationTime { get; set; }
+
     }
 
 }

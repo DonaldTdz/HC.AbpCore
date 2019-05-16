@@ -74,7 +74,7 @@ namespace HC.AbpCore.TimeSheets.DomainService
         /// <returns></returns>
         public async Task<ResultCode> SubmitApproval(TimeSheet item)
         {
-            var timeSheetId = await _repository.InsertAndGetIdAsync(item);
+            var timeSheet = await _repository.InsertAsync(item);
             ResultCode resultCode = new ResultCode();
             var config = await _dingTalkManager.GetDingDingConfigByAppAsync(DingDingAppEnum.智能办公);
             string accessToken = await _dingTalkManager.GetAccessTokenByAppAsync(DingDingAppEnum.智能办公);
@@ -114,9 +114,14 @@ namespace HC.AbpCore.TimeSheets.DomainService
             request.FormComponentValues_ = formComponentValues;
             OapiProcessinstanceCreateResponse response = client.Execute(request, accessToken);
             if (response.ErrCode == "0")
-                return new ResultCode() { Code = 0,Msg="提交成功" };
+            {
+                timeSheet.ProcessInstanceId = response.ProcessInstanceId;
+                return new ResultCode() { Code = 0, Msg = "提交成功" };
+            }
             else
+            {
                 return new ResultCode() { Code = 4, Msg = "提交失败" };
+            }
         }
 
         

@@ -70,6 +70,13 @@ namespace HC.AbpCore.TimeSheets.Dtos
 
 
         /// <summary>
+        /// 审批实例Id
+        /// </summary>
+        public string ProcessInstanceId { get; set; }
+
+
+
+        /// <summary>
         /// CreationTime
         /// </summary>
         [Required(ErrorMessage = "CreationTime不能为空")]
