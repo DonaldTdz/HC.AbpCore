@@ -154,6 +154,16 @@ namespace HC.AbpCore.Web.Host.Controllers
         //    }
         //}
 
+
+        public async virtual Task GetCallBack()
+        {
+            string accessToken = await _dingTalkManager.GetAccessTokenByAppAsync(DingDingAppEnum.智能办公);
+            DefaultDingTalkClient client = new DefaultDingTalkClient("https://oapi.dingtalk.com/call_back/get_call_back");
+            OapiCallBackGetCallBackRequest request = new OapiCallBackGetCallBackRequest();
+            request.SetHttpMethod("GET");
+            OapiCallBackGetCallBackResponse response = client.Execute(request, accessToken);
+        }
+
         public static double GetTimeStamp()
         {
             DateTime dt1 = Convert.ToDateTime("1970-01-01 00:00:00");
@@ -163,19 +173,19 @@ namespace HC.AbpCore.Web.Host.Controllers
 
         private string GetPostParam(Stream stream)
         {
-                Stream sm = stream;//获取post正文
-                int len = (int)sm.Length;//post数据长度
-                byte[] inputByts = new byte[len];//字节数据,用于存储post数据
-                sm.Read(inputByts, 0, len);//将post数据写入byte数组中
-                sm.Close();//关闭IO流
+            Stream sm = stream;//获取post正文
+            int len = (int)sm.Length;//post数据长度
+            byte[] inputByts = new byte[len];//字节数据,用于存储post数据
+            sm.Read(inputByts, 0, len);//将post数据写入byte数组中
+            sm.Close();//关闭IO流
 
-                //**********下面是把字节数组类型转换成字符串**********
+            //**********下面是把字节数组类型转换成字符串**********
 
-                string data = Encoding.UTF8.GetString(inputByts);//转为String
-                data = data.Replace("{\"encrypt\":\"", "").Replace("\"}", "");
-                return data;
+            string data = Encoding.UTF8.GetString(inputByts);//转为String
+            data = data.Replace("{\"encrypt\":\"", "").Replace("\"}", "");
+            return data;
         }
     }
 
-   
+
 }
