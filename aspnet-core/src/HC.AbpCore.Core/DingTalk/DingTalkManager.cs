@@ -8,16 +8,45 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Senparc.CO2NET.HttpUtility;
 using HC.AbpCore.DingTalk.Dtos;
+using HC.AbpCore.PaymentPlans.DomainService;
+using Abp.Auditing;
+using HC.AbpCore.Reimburses.DomainService;
+using HC.AbpCore.TimeSheets.DomainService;
 
 namespace HC.AbpCore.DingTalk
 {
     public class DingTalkManager : AbpCoreDomainServiceBase, IDingTalkManager
     {
-        private readonly IRepository<DingTalkConfig> _dingTalkConfigRepository;
+        private readonly IRepository<DingTalkConfig, int> _dingTalkConfigRepository;
+        private readonly IPaymentPlanManager _paymentPlanManager;
+        private readonly IReimburseManager _reimburseManager;
+        private readonly ITimeSheetManager _timeSheetManager;
 
-        public DingTalkManager(IRepository<DingTalkConfig> dingTalkConfigRepository)
+        public DingTalkManager(IRepository<DingTalkConfig, int> dingTalkConfigRepository,
+            IPaymentPlanManager paymentPlanManager,
+            ITimeSheetManager timeSheetManager,
+            IReimburseManager reimburseManager)
         {
+            _timeSheetManager = timeSheetManager;
+            _reimburseManager = reimburseManager;
+            _paymentPlanManager = paymentPlanManager;
             _dingTalkConfigRepository = dingTalkConfigRepository;
+        }
+
+        /// <summary>
+        /// 工作消息通知  每天早上9点提醒
+        /// </summary>
+        /// <returns></returns>
+        public async Task AutoWorkNotificationMessageAsync()
+        {
+            var accessToken = await GetAccessTokenByAppAsync(DingDingAppEnum.智能办公);
+            var ddConfig = await GetDingDingConfigByAppAsync(DingDingAppEnum.智能办公);
+            //催款提醒
+            await _paymentPlanManager.PaymentRemindAsync(accessToken, ddConfig);
+            //报销审批提醒
+            await _reimburseManager.ReimburseApprovalRemind(accessToken, ddConfig);
+            //工时报销提醒
+            await _timeSheetManager.TimeSheetApprovalRemind(accessToken, ddConfig);
         }
 
         public async Task<string> GetAccessTokenByAppAsync(DingDingAppEnum app)

@@ -14,7 +14,7 @@ namespace HC.AbpCore.Messages
         /// 接收用户
         /// </summary>
         [Required]
-        public virtual Guid EmployeeId { get; set; }
+        public virtual string EmployeeId { get; set; }
         /// <summary>
         /// 发送时间
         /// </summary>
@@ -27,7 +27,7 @@ namespace HC.AbpCore.Messages
         /// <summary>
         /// 消息分类 枚举（0 暂无 以后扩展）
         /// </summary>
-        public virtual int? Type { get; set; }
+        public virtual MessageTypeEnum? Type { get; set; }
         /// <summary>
         /// 是否已读
         /// </summary>

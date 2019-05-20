@@ -75,7 +75,7 @@ namespace HC.AbpCore.Tenders
             var projects = _projectRepository.GetAll();
             var employeeList = await _employeeRepository.GetAll().AsNoTracking().ToListAsync();
 
-            var count = await query.CountAsync();
+            //var count = await query.CountAsync();
 
             var items= from item in query
                        join project in projects on item.ProjectId equals project.Id
@@ -97,7 +97,7 @@ namespace HC.AbpCore.Tenders
                            IsWinbid = item.IsWinbid,
                            Attachments = item.Attachments
                        };
-
+            var count = await items.CountAsync();
             var entityList = await items
                     .OrderBy(input.Sorting).AsNoTracking()
                     .OrderByDescending(a => a.TenderTime)

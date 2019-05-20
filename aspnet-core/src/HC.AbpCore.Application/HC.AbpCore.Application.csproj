@@ -11,6 +11,9 @@
     <RootNamespace>HC.AbpCore</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Abp.Quartz" Version="4.5.0" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\HC.AbpCore.Core\HC.AbpCore.Core.csproj" />
   </ItemGroup>
 </Project>

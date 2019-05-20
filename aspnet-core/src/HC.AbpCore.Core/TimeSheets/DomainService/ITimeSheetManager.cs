@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Abp;
 using Abp.Domain.Services;
 using HC.AbpCore.Common;
+using HC.AbpCore.DingTalk;
 using HC.AbpCore.TimeSheets;
 
 
@@ -29,5 +30,6 @@ namespace HC.AbpCore.TimeSheets.DomainService
 
 
 
+        Task TimeSheetApprovalRemind(string accessToken, DingDingAppConfig dingDingAppConfig);
     }
 }

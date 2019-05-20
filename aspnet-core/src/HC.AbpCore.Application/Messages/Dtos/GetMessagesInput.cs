@@ -19,5 +19,10 @@ namespace HC.AbpCore.Messages.Dtos
             }
         }
 
+
+        /// <summary>
+        /// 查询条件用户ID
+        /// </summary>
+        public string EmployeeId { get; set; }
     }
 }

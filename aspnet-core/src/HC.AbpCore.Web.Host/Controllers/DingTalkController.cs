@@ -38,18 +38,19 @@ namespace HC.AbpCore.Web.Host.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public async virtual Task CreateApprovalCallbackEventAsync()
+        public async Task<OapiCallBackRegisterCallBackResponse> CreateApprovalCallbackEventAsync()
         {
             string accessToken = await _dingTalkManager.GetAccessTokenByAppAsync(DingDingAppEnum.智能办公);
             DefaultDingTalkClient client = new DefaultDingTalkClient("https://oapi.dingtalk.com/call_back/register_call_back");
             OapiCallBackRegisterCallBackRequest request = new OapiCallBackRegisterCallBackRequest();
-            request.Url = "http://hcpm.vaiwan.com/DingTalk/ApprovalCallbackTestAsync";
-            request.AesKey = "1234567890123456789012345678901234567890123";
-            request.Token = "123456";
+            request.Url = "http://hcpmabc.vaiwan.com/DingTalk/ApprovalCallbackTestHCAsync";
+            request.AesKey = "45skhqweass5232345IUJKWEDL5251054DSFdsuhfW2";
+            request.Token = "123";
             List<string> items = new List<string>();
             items.Add("bpms_instance_change");
             request.CallBackTag = items;
             OapiCallBackRegisterCallBackResponse response = client.Execute(request, accessToken);
+            return response;
         }
 
 
@@ -59,109 +60,123 @@ namespace HC.AbpCore.Web.Host.Controllers
         /// <param name="approvalCallbackTestModel"></param>
         /// <returns></returns>
         [HttpPost]
-        public virtual Task<string> ApprovalCallbackTestAsync(ApprovalCallbackModel approvalCallbackModel)
+        public JsonResult ApprovalCallbackTestHCAsync(string msgSignature, string timestamp, string nonce)
         {
-            var bb = approvalCallbackModel;
+
+            string mToken = "123";
+            string mSuiteKey = "ding6f6f3ad4521c207335c2f4657eb6378f";
+            string mEncodingAesKey = "45skhqweass5232345IUJKWEDL5251054DSFdsuhfW2";
+
+            //post数据包数据中的加密数据
+            var encryptStr = GetPostParam(Request.GetRequestMemoryStream());
+
+            string newSignature = "";
+            DingTalkCrypt.GenerateSignature(mToken, timestamp, nonce, encryptStr, ref newSignature);
+            if (msgSignature != newSignature)
+            {
+                Logger.Error("消息有可能被篡改！签名验证错误！ ");
+            }
+
+            var sReplyEchoStr = "";
+            DingTalkCrypt suiteAuth = new DingTalkCrypt(mToken, mEncodingAesKey, mSuiteKey);
+            var ret = suiteAuth.VerifyURL(msgSignature, timestamp, nonce, encryptStr, ref sReplyEchoStr);
+
+            DingTalkCrypt dingTalk = new DingTalkCrypt(mToken, mEncodingAesKey, mSuiteKey);
+            string plainText = "";
+            dingTalk.DecryptMsg(msgSignature, timestamp, nonce, encryptStr, ref plainText);
+            Hashtable tb = (Hashtable)JsonConvert.DeserializeObject(plainText, typeof(Hashtable));
+            string eventType = tb["EventType"].ToString();
+            string result = "";
+            switch (eventType)
+            {
+                case "bpms_task_change"://审批通知
+                    break;
+                case "bpms_instance_change"://审批通知
+                    break;
+                case "check_url"://测试url
+                    string encrypt = "";
+                    string signature = "";
+                    dingTalk = new DingTalkCrypt(mToken, mEncodingAesKey, mSuiteKey);
+                    dingTalk.EncryptMsg("success", timestamp, nonce, ref encrypt, ref signature);
+                    Hashtable json = new Hashtable
+                        {
+                            {"msg_signature", signature},
+                            {"timeStamp", timestamp},
+                            {"nonce", nonce},
+                            {"encrypt", encrypt}
+                        };
+                    result = JsonConvert.SerializeObject(json);
+                    return Json(json);
+            }
             return null;
+            //接收encrypt参数
+            //string encryptStr = GetPostParam(Request.GetRequestMemoryStream());
+            //注册时填写的token、aes_key、suitekey
+            //string token = "123";
+            //token = "123456";//钉钉测试文档中的token
+            //string aes_key = "45skhqweass5232345IUJKWEDL5251054DSFdsuhfW2";
+            //aes_key = "4g5j64qlyl3zvetqxz5jiocdr586fn2zvjpa8zls3ij";//钉钉测试文档中的aes_key
+            //string suitekey = "";
+            //string suitekey = "ding6f6f3ad4521c207335c2f4657eb6378f";
+
+            //suitekey = "suite4xxxxxxxxxxxxxxx";//钉钉测试文档中的suitekey
+
+            //#region 验证回调的url
+            //DingTalkCrypt dingTalk = new DingTalkCrypt(token, aes_key, suitekey);
+            //string sEchoStr = "";
+            //int ret = dingTalk.VerifyURL(signature, timestamp, nonce, encryptStr, ref sEchoStr);
+            //#endregion
+
+            //#region 解密接受信息，进行事件处理
+            //string plainText = "";
+            //ret = dingTalk.DecryptMsg(signature, timestamp, nonce, encryptStr, ref plainText);
+
+            //Hashtable tb = (Hashtable)JsonConvert.DeserializeObject(plainText, typeof(Hashtable));
+            //string eventType = tb["EventType"].ToString();
+            //string res = "success";
+            //switch (eventType)
+            //{
+            //    case "user_modify_org"://用户信息修改，执行代码
+            //        #region 用户信息修改，执行代码
+
+            //        #endregion
+            //        break;
+            //    default:
+            //        break;
+            //}
+
+            //timestamp = GetTimeStamp().ToString();
+            //string encrypt = "";
+            //string signature2 = "";
+            //dingTalk = new DingTalkCrypt(token, aes_key, suitekey);
+            //ret = dingTalk.EncryptMsg(res, timestamp, nonce, ref encrypt, ref signature2);
+            //Hashtable jsonMap = new Hashtable
+            //    {
+            //        {"msg_signature", signature2},
+            //        {"encrypt", encrypt},
+            //        {"timeStamp", timestamp},
+            //        {"nonce", nonce}
+            //    };
+            //string bb = "";
+            //var aa = dingTalk.DecryptMsg(signature2, timestamp, nonce, encrypt, ref bb);
+            //return Json(jsonMap);
+            //#endregion
+
         }
-        //public async virtual Task<string> ApprovalCallbackTestAsync(ApprovalCallbackTestModel approvalCallbackTestModel)
-        //{
-        //    try
-        //    {
-        //        string mToken = "123456";
-        //        string mSuiteKey = "";
-        //        string mEncodingAesKey = "1234567890123456789012345678901234567890123";
 
-        //        #region 回调url里面的参数
-        //        //url中的签名
-        //        //string msgSignature = _httpContext.HttpContext.Request.Query["signature"];
-        //        string msgSignature = approvalCallbackTestModel.Signature;
-        //        //url中的时间戳
-        //        //string timeStamp = _httpContext.HttpContext.Request.Query["timestamp"];
-        //        string timeStamp = approvalCallbackTestModel.timestamp;
-        //        //url中的随机字符串
-        //        //string nonce = _httpContext.HttpContext.Request.Query["nonce"];
-        //        string nonce = approvalCallbackTestModel.nonce;
-        //        //post数据包数据中的加密数据
-        //        string encryptStr = GetPostParam(Request.GetRequestMemoryStream());
-        //        #endregion
-        //        string sEchoStr = "";
-
-        //        #region 验证回调的url
-        //        SuiteAuth suiteAuth = new SuiteAuth();
-
-        //        //var ret = suiteAuth.VerifyURL(mToken, mEncodingAesKey, msgSignature, timeStamp, nonce, encryptStr,
-        //        //    ref mSuiteKey);
-
-        //        //if (ret != 0)
-        //        //{
-        //            //Helper.WriteLog("ERR: VerifyURL fail, ret: " + ret);
-        //            //return null;
-        //        //}
-        //        #endregion
-        //        #region
-        //        //构造DingTalkCrypt
-        //        DingTalkCrypt dingTalk = new DingTalkCrypt(mToken, mEncodingAesKey, mSuiteKey);
-
-        //        string plainText = "";
-        //        dingTalk.DecryptMsg(msgSignature, timeStamp, nonce, encryptStr, ref plainText);
-        //        Hashtable tb = (Hashtable)JsonConvert.DeserializeObject(plainText, typeof(Hashtable));
-        //        string eventType = tb["EventType"].ToString();
-        //        string res = "success";
-        //        Logger.InfoFormat("plainText:" + plainText);
-        //        Logger.InfoFormat("eventType:" + eventType);
-        //        switch (eventType)
-        //        {
-        //            case "suite_ticket"://定时推送Ticket
-        //                //ConfigurationManager.AppSettings["SuiteTicket"] = tb["SuiteTicket"].ToString();
-        //                mSuiteKey = tb["SuiteKey"].ToString();
-        //                suiteAuth.SaveSuiteTicket(tb);
-        //                break;
-        //            case "tmp_auth_code"://钉钉推送过来的临时授权码
-        //                //ConfigurationManager.AppSettings["TmpAuthCode"] = tb["AuthCode"].ToString();
-        //                suiteAuth.SaveTmpAuthCode(tb);
-        //                break;
-        //            case "change_auth":// do something;
-        //                break;
-        //            case "check_update_suite_url":
-        //                res = tb["Random"].ToString();
-        //                mSuiteKey = tb["TestSuiteKey"].ToString();
-        //                break;
-        //        }
-
-        //        timeStamp = GetTimeStamp().ToString();
-        //        string encrypt = "";
-        //        string signature = "";
-        //        dingTalk = new DingTalkCrypt(mToken, mEncodingAesKey, mSuiteKey);
-        //        dingTalk.EncryptMsg(res, timeStamp, nonce, ref encrypt, ref signature);
-        //        Hashtable jsonMap = new Hashtable
-        //        {
-        //            {"msg_signature", signature},
-        //            {"encrypt", encrypt},
-        //            {"timeStamp", timeStamp},
-        //            {"nonce", nonce}
-        //        };
-        //        string result = JsonConvert.SerializeObject(jsonMap);
-        //        //context.Response.Write(result);
-        //        return result;
-        //        #endregion
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        //Helper.WriteLog(DateTime.Now + ex.Message);
-        //        Logger.InfoFormat(DateTime.Now + ex.Message);
-        //        return null;
-        //    }
-        //}
-
-
-        public async virtual Task GetCallBack()
+        /// <summary>
+        /// 查询已创建事件
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<OapiCallBackGetCallBackResponse> GetCallBackAsync()
         {
             string accessToken = await _dingTalkManager.GetAccessTokenByAppAsync(DingDingAppEnum.智能办公);
             DefaultDingTalkClient client = new DefaultDingTalkClient("https://oapi.dingtalk.com/call_back/get_call_back");
             OapiCallBackGetCallBackRequest request = new OapiCallBackGetCallBackRequest();
             request.SetHttpMethod("GET");
             OapiCallBackGetCallBackResponse response = client.Execute(request, accessToken);
+            return response;
         }
 
         public static double GetTimeStamp()

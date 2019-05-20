@@ -30,6 +30,10 @@ using Senparc.CO2NET.HttpUtility;
 using DingTalk.Api;
 using DingTalk.Api.Response;
 using DingTalk.Api.Request;
+using HC.AbpCore.Messages;
+using Senparc.CO2NET.Helpers;
+using System.Text;
+using HC.AbpCore.Messages.DomainService;
 
 namespace HC.AbpCore.Reimburses.DomainService
 {
@@ -44,6 +48,7 @@ namespace HC.AbpCore.Reimburses.DomainService
         private readonly IRepository<Project, Guid> _projectRepository;
         private readonly IRepository<Employee, string> _employeeRepository;
         private readonly IDingTalkManager _dingTalkManager;
+        private readonly IMessageManager _messageManager;
 
         /// <summary>
         /// Reimburse的构造方法
@@ -53,7 +58,8 @@ namespace HC.AbpCore.Reimburses.DomainService
             IRepository<Project, Guid> projectRepository,
             IRepository<Employee, string> employeeRepository,
             IRepository<ReimburseDetail, Guid> detailRepository,
-            IDingTalkManager dingTalkManager
+            IDingTalkManager dingTalkManager,
+            IMessageManager messageManager
         )
         {
             _dingTalkManager = dingTalkManager;
@@ -61,6 +67,7 @@ namespace HC.AbpCore.Reimburses.DomainService
             _projectRepository = projectRepository;
             _detailRepository = detailRepository;
             _repository = repository;
+            _messageManager = messageManager;
         }
 
 
@@ -76,6 +83,69 @@ namespace HC.AbpCore.Reimburses.DomainService
 
 
         // TODO:编写领域业务代码
+
+
+        /// <summary>
+        /// 报销审批提醒
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <param name="dingDingAppConfig"></param>
+        /// <returns></returns>
+        public async Task ReimburseApprovalRemind(string accessToken, DingDingAppConfig dingDingAppConfig)
+        {
+            var projects = _projectRepository.GetAll();
+            var employees = _employeeRepository.GetAll();
+            var query = _repository.GetAll()
+                .Where(aa => aa.Status == ReimburseStatusEnum.待审核);
+            var reimburses = from reimburse in query
+                             join project in projects on reimburse.ProjectId equals project.Id
+                             join employee in employees on reimburse.EmployeeId equals employee.Id
+                             select new
+                             {
+                                 ProjectName = project.Name + "(" + project.ProjectCode + ")",
+                                 reimburse.Amount,
+                                 reimburse.SubmitDate,
+                                 employee.Name,
+                                 employee.Department,
+                             };
+            var items = await reimburses.AsNoTracking().ToListAsync();
+            var url = string.Format("https://oapi.dingtalk.com/topapi/message/corpconversation/asyncsend_v2?access_token={0}", accessToken);
+            foreach (var item in items)
+            {
+                // TODO:提醒人后期需要完善
+                var employeeIdList = await _employeeRepository.GetAll().Where(aa => aa.IsLeaderInDepts == "key:73354253value:True" || aa.IsLeaderInDepts== "key:"+item.Department+ "value:True").Select(aa => aa.Id)
+                                     .Distinct().AsNoTracking().ToListAsync();
+                string employeeIds = string.Join(",", employeeIdList.ToArray());
+                Message message = new Message();
+                message.Content = string.Format("您好! 项目:{0}有一笔报销费用，报销人:{1}，报销金额:{2},申请时间:{3}", item.ProjectName, item.Name,item.Amount,item.SubmitDate.Value.ToString("yyyy-MM-dd"));
+                message.SendTime = DateTime.Now;
+                message.Type = MessageTypeEnum.审批提醒;
+                message.IsRead = false;
+                DingMsgs dingMsgs = new DingMsgs();
+                dingMsgs.userid_list = employeeIds;
+                dingMsgs.to_all_user = false;
+                dingMsgs.agent_id = dingDingAppConfig.AgentID;
+                dingMsgs.msg.msgtype = "link";
+                dingMsgs.msg.link.title = "审批提醒";
+                dingMsgs.msg.link.text = string.Format("您好! 项目:{0}有一笔报销费用，报销人:{1},点击查看详情", item.ProjectName, item.Name);
+                dingMsgs.msg.link.picUrl = "eapp://";
+                dingMsgs.msg.link.messageUrl = "eapp://";
+                var jsonString = SerializerHelper.GetJsonString(dingMsgs, null);
+                MessageResponseResult response = new MessageResponseResult();
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    var bytes = Encoding.UTF8.GetBytes(jsonString);
+                    ms.Write(bytes, 0, bytes.Length);
+                    ms.Seek(0, SeekOrigin.Begin);
+                    response = Post.PostGetJson<MessageResponseResult>(url, null, ms);
+                };
+                //新增到消息中心
+                if (response.errcode == 0 && response.task_id != 0)
+                {
+                    await _messageManager.CreateByTaskId(response.task_id, message, dingDingAppConfig.AgentID, accessToken, employeeIdList);
+                }
+            }
+        }
 
 
         /// <summary>

@@ -20,7 +20,7 @@ namespace  HC.AbpCore.Messages.Dtos
 		/// EmployeeId
 		/// </summary>
 		[Required(ErrorMessage="EmployeeId不能为空")]
-		public Guid EmployeeId { get; set; }
+		public string EmployeeId { get; set; }
 
 
 
@@ -41,7 +41,7 @@ namespace  HC.AbpCore.Messages.Dtos
 		/// <summary>
 		/// Type
 		/// </summary>
-		public int? Type { get; set; }
+		public MessageTypeEnum? Type { get; set; }
 
 
 

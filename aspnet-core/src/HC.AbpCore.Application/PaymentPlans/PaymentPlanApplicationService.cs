@@ -24,6 +24,14 @@ using HC.AbpCore.PaymentPlans.DomainService;
 using HC.AbpCore.Companys;
 using HC.AbpCore.Companys.Accounts;
 using HC.AbpCore.Companys.Accounts.Dtos;
+using HC.AbpCore.Projects;
+using HC.AbpCore.DingTalk;
+using HC.AbpCore.Common;
+using Senparc.CO2NET.Helpers;
+using System.IO;
+using System.Text;
+using Senparc.CO2NET.HttpUtility;
+using Abp.Auditing;
 
 namespace HC.AbpCore.PaymentPlans
 {
@@ -37,6 +45,7 @@ namespace HC.AbpCore.PaymentPlans
         private readonly IRepository<Company, int> _companyRepository;
         private readonly IRepository<Account, long> _accountRepository;
         private readonly IPaymentPlanManager _entityManager;
+        private readonly IDingTalkManager _dingTalkManager;
 
         /// <summary>
         /// 构造函数 
@@ -46,8 +55,10 @@ namespace HC.AbpCore.PaymentPlans
             , IRepository<Company, int> companyRepository
             , IRepository<Account, long> accountRepository
         , IPaymentPlanManager entityManager
+                    , IDingTalkManager dingTalkManager
         )
         {
+            _dingTalkManager = dingTalkManager;
             _accountRepository = accountRepository;
             _companyRepository = companyRepository;
             _entityRepository = entityRepository;
@@ -280,7 +291,6 @@ namespace HC.AbpCore.PaymentPlans
             // TODO:批量删除前的逻辑判断，是否允许删除
             await _entityRepository.DeleteAsync(s => input.Contains(s.Id));
         }
-
 
         /// <summary>
         /// 导出PaymentPlan为excel表,等待开发。

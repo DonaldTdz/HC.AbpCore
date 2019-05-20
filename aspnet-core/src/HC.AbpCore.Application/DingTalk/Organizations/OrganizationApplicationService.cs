@@ -266,7 +266,7 @@ namespace HC.AbpCore.DingTalk.Organizations
                     Name = e.name,
                     Mobile = e.mobile,
                     Position = e.position,
-                    Department = e.departmentStr,
+                    Department = e.departmentStr.Replace("[","").Replace("]",""),
                     Email = e.email,
                     IsLeaderInDepts = "key:" + departId + "value:" + e.isLeader,
                     HiredDate = NewDate(e.hiredDate),

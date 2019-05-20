@@ -58,14 +58,15 @@ namespace HC.AbpCore.Messages
         public async Task<PagedResultDto<MessageListDto>> GetPaged(GetMessagesInput input)
 		{
 
-		    var query = _entityRepository.GetAll();
+		    var query = _entityRepository.GetAll().WhereIf(!String.IsNullOrEmpty(input.EmployeeId),aa=>aa.EmployeeId==input.EmployeeId);
 			// TODO:根据传入的参数添加过滤条件
-            
 
 			var count = await query.CountAsync();
 
 			var entityList = await query
-					.OrderBy(input.Sorting).AsNoTracking()
+					.OrderBy(aa=>aa.IsRead==false)
+                    .OrderByDescending(aa=>aa.SendTime)
+                    .AsNoTracking()
 					.PageBy(input)
 					.ToListAsync();
 

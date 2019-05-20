@@ -1,25 +1,10 @@
 
 using System;
-using System.Data;
-using System.Linq;
-using System.Linq.Dynamic;
-using System.Linq.Dynamic.Core;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
-
-using Abp.UI;
-using Abp.AutoMapper;
-using Abp.Authorization;
-using Abp.Linq.Extensions;
-using Abp.Domain.Repositories;
 using Abp.Application.Services;
 using Abp.Application.Services.Dto;
-
-
 using HC.AbpCore.PaymentPlans.Dtos;
-using HC.AbpCore.PaymentPlans;
 
 namespace HC.AbpCore.PaymentPlans
 {
@@ -71,12 +56,13 @@ namespace HC.AbpCore.PaymentPlans
         /// </summary>
         Task BatchDeleteAsync(List<Guid> input);
 
+        
 
-		/// <summary>
+        /// <summary>
         /// 导出PaymentPlan为excel表
         /// </summary>
         /// <returns></returns>
-		//Task<FileDto> GetToExcel();
+        //Task<FileDto> GetToExcel();
 
     }
 }
