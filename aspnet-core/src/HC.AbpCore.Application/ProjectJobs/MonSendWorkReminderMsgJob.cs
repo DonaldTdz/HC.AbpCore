@@ -9,17 +9,17 @@ using System.Threading.Tasks;
 
 namespace HC.AbpCore.ProjectJobs
 {
-    public class MondaySendWorkReminderMsgJob : JobBase, ITransientDependency
+    public class MonSendWorkReminderMsgJob : JobBase, ITransientDependency
     {
         private readonly IDingTalkAppService _dingTalkAppService;
 
-        public MondaySendWorkReminderMsgJob(IDingTalkAppService dingTalkAppService)
+        public MonSendWorkReminderMsgJob(IDingTalkAppService dingTalkAppService)
         {
             _dingTalkAppService = dingTalkAppService;
         }
-        public override Task Execute(IJobExecutionContext context)
+        public override async Task Execute(IJobExecutionContext context)
         {
-            throw new NotImplementedException();
+            await _dingTalkAppService.MonWorkNotificationMessageAsync();
         }
     }
 }

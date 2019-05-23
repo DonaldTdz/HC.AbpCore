@@ -38,5 +38,14 @@ namespace HC.AbpCore.Reimburses.DomainService
         Task ReimburseApprovalRemind(string accessToken, DingDingAppConfig dingDingAppConfig);
 
 
+        /// <summary>
+        /// 根据审批实例Id修改报销状态
+        /// </summary>
+        /// <param name="processInstanceId">审批实例ID</param>
+        /// <param name="result">审批结束状态</param>
+        /// <returns></returns>
+        Task UpdateReimburseByPIIdAsync(string processInstanceId, string result);
+
+
     }
 }

@@ -96,7 +96,7 @@ namespace HC.AbpCore.Reimburses.DomainService
             var projects = _projectRepository.GetAll();
             var employees = _employeeRepository.GetAll();
             var query = _repository.GetAll()
-                .Where(aa => aa.Status == ReimburseStatusEnum.待审核);
+                .Where(aa => aa.Status == ReimburseStatusEnum.提交);
             var reimburses = from reimburse in query
                              join project in projects on reimburse.ProjectId equals project.Id
                              join employee in employees on reimburse.EmployeeId equals employee.Id
@@ -174,41 +174,60 @@ namespace HC.AbpCore.Reimburses.DomainService
                 return resultCode;
             }
             var reimburseDetails = await _detailRepository.GetAll().Where(aa => aa.ReimburseId == Id).AsNoTracking().ToListAsync();
-            var deptId = employee.Department.Replace("[", "").Replace("]", "");
 
-            DefaultDingTalkClient client = new DefaultDingTalkClient("https://oapi.dingtalk.com/topapi/processinstance/create");
-            OapiProcessinstanceCreateRequest request = new OapiProcessinstanceCreateRequest();
-            request.ProcessCode = "PROC-0AA374CC-7381-46EA-BB8F-3BF4B2BFDEA2";
-            request.OriginatorUserId = reimburse.EmployeeId;
-            request.AgentId = config.AgentID;
-            request.DeptId = Convert.ToInt32(deptId);
-            List<OapiProcessinstanceCreateRequest.FormComponentValueVoDomain> formComponentValues = new List<OapiProcessinstanceCreateRequest.FormComponentValueVoDomain>();
+            //DefaultDingTalkClient client = new DefaultDingTalkClient("https://oapi.dingtalk.com/topapi/processinstance/create");
+            var url = string.Format("https://oapi.dingtalk.com/topapi/processinstance/create?access_token={0}", accessToken);
+            SubmitApprovalEntity request = new SubmitApprovalEntity();
+            //OapiProcessinstanceCreateRequest request = new OapiProcessinstanceCreateRequest();
+            request.process_code = "PROC-0AA374CC-7381-46EA-BB8F-3BF4B2BFDEA2";
+            request.originator_user_id= reimburse.EmployeeId;
+            request.agent_id = config.AgentID;
+            request.dept_id= Convert.ToInt32(employee.Department);
+            List<Approval> approvalList = new List<Approval>();
+            approvalList.Add(new Approval() { name = "所属项目", value = project.Name + "(" + project.ProjectCode + ")" });
+            approvalList.Add(new Approval() { name = "报销总金额", value = reimburse.Amount.Value.ToString() });
+            approvalList.Add(new Approval() { name = "报销人", value = employee.Name });
+            approvalList.Add(new Approval() { name = "申请日期", value = reimburse.SubmitDate.Value.ToString() });
+            //request.ProcessCode = "PROC-0AA374CC-7381-46EA-BB8F-3BF4B2BFDEA2";
+            //request.OriginatorUserId = reimburse.EmployeeId;
+            //request.AgentId = config.AgentID;
+            //request.DeptId = Convert.ToInt32(deptId);
+            //List<OapiProcessinstanceCreateRequest.FormComponentValueVoDomain> formComponentValues = new List<OapiProcessinstanceCreateRequest.FormComponentValueVoDomain>();
 
-            OapiProcessinstanceCreateRequest.FormComponentValueVoDomain vo = new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain();
-            formComponentValues.Add(new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain() { Name = "所属项目", Value = project.Name + "(" + project.ProjectCode + ")" });
-            formComponentValues.Add(new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain() { Name = "报销总金额", Value = reimburse.Amount.Value.ToString() });
-            formComponentValues.Add(new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain() { Name = "报销人", Value = employee.Name });
-            formComponentValues.Add(new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain() { Name = "申请日期", Value = reimburse.SubmitDate.Value.ToString() });
+            //OapiProcessinstanceCreateRequest.FormComponentValueVoDomain vo = new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain();
+            //formComponentValues.Add(new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain() { Name = "所属项目", Value = project.Name + "(" + project.ProjectCode + ")" });
+            //formComponentValues.Add(new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain() { Name = "报销总金额", Value = reimburse.Amount.Value.ToString() });
+            //formComponentValues.Add(new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain() { Name = "报销人", Value = employee.Name });
+            //formComponentValues.Add(new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain() { Name = "申请日期", Value = reimburse.SubmitDate.Value.ToString() });
             ArrayList items = new ArrayList();
             foreach (var item in reimburseDetails)
             {
                 ArrayList approvalReimburseDetail = new ArrayList();
-                approvalReimburseDetail.Add(new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain() { Name = "客户", Value = item.Customer });
-                approvalReimburseDetail.Add(new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain() { Name = "发生日期", Value = item.HappenDate.ToString() });
-                approvalReimburseDetail.Add(new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain() { Name = "报销类型", Value = item.Type });
-                approvalReimburseDetail.Add(new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain() { Name = "金额", Value = item.Amount.ToString() });
-                approvalReimburseDetail.Add(new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain() { Name = "发生地点", Value = item.Place });
-                approvalReimburseDetail.Add(new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain() { Name = "费用说明", Value = item.Desc });
+                approvalReimburseDetail.Add(new Approval() { name = "客户", value = item.Customer });
+                approvalReimburseDetail.Add(new Approval() { name = "发生日期", value = item.HappenDate.ToString() });
+                approvalReimburseDetail.Add(new Approval() { name = "报销类型", value = item.Type });
+                approvalReimburseDetail.Add(new Approval() { name = "金额", value = item.Amount.ToString() });
+                approvalReimburseDetail.Add(new Approval() { name = "发生地点", value = item.Place });
+                approvalReimburseDetail.Add(new Approval() { name = "费用说明", value = item.Desc });
                 items.Add(approvalReimburseDetail);
             }
-            formComponentValues.Add(new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain() { Name = "明细", Value = JsonConvert.SerializeObject(items) });
-            request.FormComponentValues_ = formComponentValues;
-            OapiProcessinstanceCreateResponse response = client.Execute(request, accessToken);
-            //var depts=Post.PostGetJson<ApprovalReturn>(string.Format("https://oapi.dingtalk.com/topapi/processinstance/create?access_token={0}", accessToken), null)
-            if (response.ErrCode == "0")
+            approvalList.Add(new Approval() { name = "明细", value = JsonConvert.SerializeObject(items) });
+            request.form_component_values = approvalList;
+            //OapiProcessinstanceCreateResponse response = client.Execute(request, accessToken);
+            //var depts = Post.PostGetJson<ApprovalReturn>(string.Format("https://oapi.dingtalk.com/topapi/processinstance/create?access_token={0}", accessToken), null)
+            ApprovalReturn approvalReturn = new ApprovalReturn();
+            var jsonString = SerializerHelper.GetJsonString(request, null);
+            using (MemoryStream ms = new MemoryStream())
             {
-                reimburse.ProcessInstanceId = response.ProcessInstanceId;
-                reimburse.Status = ReimburseStatusEnum.待审核;
+                var bytes = Encoding.UTF8.GetBytes(jsonString);
+                ms.Write(bytes, 0, bytes.Length);
+                ms.Seek(0, SeekOrigin.Begin);
+                approvalReturn = Post.PostGetJson<ApprovalReturn>(url, null, ms);
+            };
+            if (approvalReturn.errcode == 0)
+            {
+                reimburse.ProcessInstanceId = approvalReturn.process_instance_id;
+                reimburse.Status = ReimburseStatusEnum.提交;
                 await _repository.UpdateAsync(reimburse);
                 return new ResultCode() { Code = 0, Msg = "提交成功" };
 
@@ -219,8 +238,26 @@ namespace HC.AbpCore.Reimburses.DomainService
             }
         }
 
-
-
-
+        /// <summary>
+        /// 根据审批实例Id修改报销状态
+        /// </summary>
+        /// <param name="processInstanceId"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public async Task UpdateReimburseByPIIdAsync(string processInstanceId, string result)
+        {
+            var item = await _repository.FirstOrDefaultAsync(aa => aa.ProcessInstanceId == processInstanceId);
+            var employee = await _employeeRepository.GetAsync(item.EmployeeId);
+            var employeeIdList = await _employeeRepository.GetAll()
+                .Where(aa => aa.IsLeaderInDepts == "key:73354253value:True" || aa.IsLeaderInDepts == "key:" + employee.Department + "value:True")
+                .Select(aa => aa.Id).Distinct().AsNoTracking().ToListAsync();
+            item.ApprovalTime = DateTime.Now;
+            item.ApproverId = String.Join(",", employeeIdList);
+            if (result == "agree")
+                item.Status = ReimburseStatusEnum.审批通过;
+            else
+                item.Status = ReimburseStatusEnum.拒绝;
+            await _repository.UpdateAsync(item);
+        }
     }
 }

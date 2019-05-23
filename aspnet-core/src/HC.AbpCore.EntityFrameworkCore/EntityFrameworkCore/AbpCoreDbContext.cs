@@ -29,6 +29,8 @@ using HC.AbpCore.Reimburses.ReimburseDetails;
 using HC.AbpCore.TimeSheets;
 using HC.AbpCore.PaymentPlans;
 using HC.AbpCore.Messages;
+using System.Threading.Tasks;
+using HC.AbpCore.Tasks;
 
 namespace HC.AbpCore.EntityFrameworkCore
 {
@@ -92,5 +94,7 @@ namespace HC.AbpCore.EntityFrameworkCore
         public virtual DbSet<PaymentPlan> PaymentPlans { get; set; }
 
         public virtual DbSet<Message> Messages { get; set; }
+
+        public virtual DbSet<CompletedTask> CompletedTasks { get; set; }
     }
 }

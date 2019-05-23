@@ -70,7 +70,7 @@ namespace HC.AbpCore.Customers
             var count = await query.CountAsync();
 
             var entityList = await query
-
+               .OrderByDescending(aa => aa.CreationTime)
                .OrderBy(input.Sorting).AsNoTracking()
                .PageBy(input)
                .ToListAsync();

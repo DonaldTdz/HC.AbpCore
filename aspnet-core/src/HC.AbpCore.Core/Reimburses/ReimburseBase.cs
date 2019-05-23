@@ -10,7 +10,7 @@ namespace HC.AbpCore.Reimburses
 
     public enum ReimburseStatusEnum
     {
-        草稿 = 0, 待审核 = 1, 审批通过 = 2, 拒绝 = 3
+        提交 = 1, 审批通过 = 2, 拒绝 = 3
     }
     
 }

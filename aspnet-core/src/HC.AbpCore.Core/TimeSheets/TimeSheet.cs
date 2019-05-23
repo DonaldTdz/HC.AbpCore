@@ -37,7 +37,7 @@ namespace HC.AbpCore.TimeSheets
         [StringLength(500)]
         public virtual string Content { get; set; }
         /// <summary>
-        /// 状态枚举（1 提交 2 审批通过）
+        /// 状态枚举（1 提交 2 审批通过 3拒绝）
         /// </summary>
         public virtual TimeSheetStatusEnum? Status { get; set; }
         /// <summary>

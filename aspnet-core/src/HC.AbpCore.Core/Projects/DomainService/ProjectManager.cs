@@ -18,7 +18,13 @@ using Abp.Domain.Services;
 
 using HC.AbpCore;
 using HC.AbpCore.Projects;
-
+using HC.AbpCore.DingTalk;
+using static HC.AbpCore.Projects.ProjectBase;
+using HC.AbpCore.Messages;
+using HC.AbpCore.Common;
+using Senparc.CO2NET.Helpers;
+using System.Text;
+using Senparc.CO2NET.HttpUtility;
 
 namespace HC.AbpCore.Projects.DomainService
 {
@@ -29,15 +35,18 @@ namespace HC.AbpCore.Projects.DomainService
     {
 		
 		private readonly IRepository<Project,Guid> _repository;
+        private readonly IRepository<Message, Guid> _message;
 
-		/// <summary>
-		/// Project的构造方法
-		///</summary>
-		public ProjectManager(
-			IRepository<Project, Guid> repository
-		)
+        /// <summary>
+        /// Project的构造方法
+        ///</summary>
+        public ProjectManager(
+			IRepository<Project, Guid> repository,
+                IRepository<Message, Guid> message
+        )
 		{
-			_repository =  repository;
+            _message = message;
+            _repository =  repository;
 		}
 
 
@@ -49,13 +58,51 @@ namespace HC.AbpCore.Projects.DomainService
 			throw new NotImplementedException();
 		}
 
-		// TODO:编写领域业务代码
+        public async Task ProjectStatusRemind(string accessToken, DingDingAppConfig dingDingAppConfig)
+        {
+            var url = string.Format("https://oapi.dingtalk.com/topapi/message/corpconversation/asyncsend_v2?access_token={0}", accessToken);
+            var projects =await _repository.GetAll().Where(aa => aa.Status != ProjectStatus.取消 && aa.Status != ProjectStatus.已回款).AsNoTracking().ToListAsync();
+            foreach (var project in projects)
+            {
+                Message message = new Message();
+                message.Content = string.Format("您好! 项目:{0}，当前进度为:{1},描述{2}", project.Name + "(" + project.ProjectCode + ")",project.Status.ToString(),project.Desc);
+                message.SendTime = DateTime.Now;
+                message.Type = MessageTypeEnum.审批提醒;
+                message.IsRead = false;
+                message.EmployeeId = project.EmployeeId;
+                DingMsgs dingMsgs = new DingMsgs();
+                dingMsgs.userid_list = project.EmployeeId;
+                dingMsgs.to_all_user = false;
+                dingMsgs.agent_id = dingDingAppConfig.AgentID;
+                dingMsgs.msg.msgtype = "link";
+                dingMsgs.msg.link.title = "审批提醒";
+                dingMsgs.msg.link.text = string.Format("您好! 项目:{0}，当前进度为:{1},点击查看详情", project.Name + "(" + project.ProjectCode + ")", project.Status.ToString());
+                dingMsgs.msg.link.picUrl = "eapp://";
+                dingMsgs.msg.link.messageUrl = "eapp://";
+                var jsonString = SerializerHelper.GetJsonString(dingMsgs, null);
+                MessageResponseResult response = new MessageResponseResult();
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    var bytes = Encoding.UTF8.GetBytes(jsonString);
+                    ms.Write(bytes, 0, bytes.Length);
+                    ms.Seek(0, SeekOrigin.Begin);
+                    response = Post.PostGetJson<MessageResponseResult>(url, null, ms);
+                };
+                //新增到消息中心
+                if (response.errcode == 0 && response.task_id != 0)
+                {
+                    await _message.InsertAsync(message);
+                }
+            }
+        }
+
+        // TODO:编写领域业务代码
 
 
 
-		 
-		  
-		 
 
-	}
+
+
+
+    }
 }

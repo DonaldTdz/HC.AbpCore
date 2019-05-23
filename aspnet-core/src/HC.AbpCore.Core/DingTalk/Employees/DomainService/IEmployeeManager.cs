@@ -18,10 +18,16 @@ namespace HC.AbpCore.DingTalk.Employees.DomainService
         void InitEmployee();
 
 
+        /// <summary>
+        /// 员工周报提醒 
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <param name="dingDingAppConfig"></param>
+        /// <returns></returns>
+        Task EmployeeWeeklyRemind(string accessToken, DingDingAppConfig dingDingAppConfig);
 
-		 
-      
-         
+
+
 
     }
 }

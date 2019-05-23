@@ -5,28 +5,31 @@ using System.Threading.Tasks;
 using Abp;
 using Abp.Domain.Services;
 using HC.AbpCore.DingTalk;
-using HC.AbpCore.Projects;
+using HC.AbpCore.Tasks;
 
 
-namespace HC.AbpCore.Projects.DomainService
+namespace HC.AbpCore.Tasks.DomainService
 {
-    public interface IProjectManager : IDomainService
+    public interface ICompletedTaskManager : IDomainService
     {
 
         /// <summary>
         /// 初始化方法
         ///</summary>
-        void InitProject();
+        void InitCompletedTask();
 
 
         /// <summary>
-        /// 项目进度提醒
+        /// 待完成任务提醒
         /// </summary>
         /// <param name="accessToken"></param>
         /// <param name="dingDingAppConfig"></param>
-        Task ProjectStatusRemind(string accessToken, DingDingAppConfig dingDingAppConfig);
+        /// <returns></returns>
+        Task TaskRemind(string accessToken, DingDingAppConfig dingDingAppConfig);
 
-            
+
+
+
 
     }
 }

@@ -24,6 +24,8 @@ using HC.AbpCore.Tenders.DomainService;
 using HC.AbpCore.DingTalk.Employees;
 using HC.AbpCore.Projects;
 using HC.AbpCore.DingTalk;
+using HC.AbpCore.Tasks;
+using HC.AbpCore.CompletedTasks;
 
 namespace HC.AbpCore.Tenders
 {
@@ -36,6 +38,7 @@ namespace HC.AbpCore.Tenders
         private readonly IRepository<Tender, Guid> _entityRepository;
         private readonly IRepository<Employee, string> _employeeRepository;
         private readonly IRepository<Project, Guid> _projectRepository;
+        private readonly IRepository<CompletedTask, Guid> _taskRepository;
         private readonly IDingTalkManager _dingTalkManager;
 
         private readonly ITenderManager _entityManager;
@@ -48,6 +51,7 @@ namespace HC.AbpCore.Tenders
             , IDingTalkManager dingTalkManager
             , IRepository<Employee, string> employeeRepository
             , IRepository<Project, Guid> projectRepository
+            , IRepository<CompletedTask, Guid> taskRepository
         , ITenderManager entityManager
         )
         {
@@ -56,6 +60,7 @@ namespace HC.AbpCore.Tenders
             _projectRepository = projectRepository;
             _entityManager = entityManager;
             _dingTalkManager = dingTalkManager;
+            _taskRepository = taskRepository;
         }
 
 
@@ -209,11 +214,26 @@ namespace HC.AbpCore.Tenders
         {
             //TODO:新增前的逻辑判断，是否允许新增
 
+
             // var entity = ObjectMapper.Map <Tender>(input);
             var entity = input.MapTo<Tender>();
+            if (!entity.IsPayBond.HasValue)
+                entity.IsPayBond = false;
+            if (!entity.IsReady.HasValue)
+                entity.IsReady = false;
 
 
             entity = await _entityRepository.InsertAsync(entity);
+            //添加到任务列表
+            await _taskRepository.InsertAsync(new CompletedTask() { Status = TaskStatusEnum.招标, IsCompleted = entity.IsPayBond, RefId = entity.Id, EmployeeId = entity.EmployeeId, ProjectId = entity.ProjectId,ClosingDate=entity.TenderTime.Value });
+            await _taskRepository.InsertAsync(new CompletedTask() { Status = TaskStatusEnum.招标保证金缴纳, IsCompleted = entity.IsPayBond, RefId = entity.Id, EmployeeId = entity.EmployeeId,ProjectId=entity.ProjectId, ClosingDate = entity.BondTime.Value });
+            await _taskRepository.InsertAsync(new CompletedTask() { Status = TaskStatusEnum.招标准备, IsCompleted = entity.IsReady, RefId = entity.Id, EmployeeId = entity.EmployeeId, ProjectId = entity.ProjectId,ClosingDate = entity.ReadyTime.Value });
+            var employeeIds = entity.ReadyEmployeeIds.Split(",");
+            foreach (var employeeId in employeeIds)
+            {
+                await _taskRepository.InsertAsync(new CompletedTask() { Status = TaskStatusEnum.招标准备, IsCompleted = entity.IsPayBond, RefId = entity.Id, EmployeeId = employeeId, ProjectId = entity.ProjectId, ClosingDate = entity.ReadyTime.Value });
+            }
+
             return entity.MapTo<TenderEditDto>();
         }
 
@@ -226,6 +246,8 @@ namespace HC.AbpCore.Tenders
             //TODO:更新前的逻辑判断，是否允许更新
 
             var entity = await _entityRepository.GetAsync(input.Id.Value);
+            //TODO:更新任务列表
+
             input.MapTo(entity);
 
             // ObjectMapper.Map(input, entity);
@@ -243,6 +265,9 @@ namespace HC.AbpCore.Tenders
         public async Task DeleteAsync(EntityDto<Guid> input)
         {
             //TODO:删除前的逻辑判断，是否允许删除
+            //同时删除任务列表
+            await _taskRepository.DeleteAsync(s => s.RefId == input.Id);
+
             await _entityRepository.DeleteAsync(input.Id);
         }
 

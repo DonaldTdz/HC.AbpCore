@@ -15,10 +15,6 @@ namespace HC.AbpCore.DingTalk
 
         string GetUserId(string accessToken, string code);
 
-        /// <summary>
-        /// 工作消息通知
-        /// </summary>
-        /// <returns></returns>
-        Task AutoWorkNotificationMessageAsync();
+
     }
 }

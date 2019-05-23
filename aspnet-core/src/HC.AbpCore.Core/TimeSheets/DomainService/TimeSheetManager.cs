@@ -52,14 +52,15 @@ namespace HC.AbpCore.TimeSheets.DomainService
             IRepository<Project, Guid> projectRepository,
             IRepository<Employee, string> employeeRepository,
             IDingTalkManager dingTalkManager,
-            IMessageManager _messageManager
+            IMessageManager messageManager
 
         )
 		{
-			_repository =  repository;
+            _repository =  repository;
             _employeeRepository = employeeRepository;
             _projectRepository = projectRepository;
             _dingTalkManager = dingTalkManager;
+            _messageManager = messageManager;
         }
 
 
@@ -81,7 +82,7 @@ namespace HC.AbpCore.TimeSheets.DomainService
         /// <returns></returns>
         public async Task<ResultCode> SubmitApproval(TimeSheet item)
         {
-            var timeSheet = await _repository.InsertAsync(item);
+            //var timeSheet = await _repository.InsertAsync(item);
             ResultCode resultCode = new ResultCode();
             var config = await _dingTalkManager.GetDingDingConfigByAppAsync(DingDingAppEnum.智能办公);
             string accessToken = await _dingTalkManager.GetAccessTokenByAppAsync(DingDingAppEnum.智能办公);
@@ -100,29 +101,41 @@ namespace HC.AbpCore.TimeSheets.DomainService
                 resultCode.Msg = "员工不存在";
                 return resultCode;
             }
-            var deptId = employee.Department.Replace("[", "").Replace("]", "");
             //entity.dept_id = deptIds[1];
             //entity.form_component_values = approvals;
 
-            DefaultDingTalkClient client = new DefaultDingTalkClient("https://oapi.dingtalk.com/topapi/processinstance/create");
-            OapiProcessinstanceCreateRequest request = new OapiProcessinstanceCreateRequest();
-            request.ProcessCode = "PROC-0AA374CC-7381-46EA-BB8F-3BF4B2BFDEA2";
-            request.OriginatorUserId = item.EmployeeId;
-            request.AgentId = config.AgentID;
-            request.DeptId = Convert.ToInt32(deptId);
-            List<OapiProcessinstanceCreateRequest.FormComponentValueVoDomain> formComponentValues = new List<OapiProcessinstanceCreateRequest.FormComponentValueVoDomain>();
+            //DefaultDingTalkClient client = new DefaultDingTalkClient("https://oapi.dingtalk.com/topapi/processinstance/create");
+            var url = string.Format("https://oapi.dingtalk.com/topapi/processinstance/create?access_token={0}", accessToken);
+            //OapiProcessinstanceCreateRequest request = new OapiProcessinstanceCreateRequest();
+            SubmitApprovalEntity request = new SubmitApprovalEntity();
+            request.process_code = "PROC-A9C47A1B-D617-42BE-A041-6C0CB767A79F";
+            request.originator_user_id = item.EmployeeId;
+            request.agent_id = config.AgentID;
+            request.dept_id = Convert.ToInt32(employee.Department);
+            List<Approval> formComponentValues = new List<Approval>();
 
-            OapiProcessinstanceCreateRequest.FormComponentValueVoDomain vo = new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain();
-            formComponentValues.Add(new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain() { Name = "所属项目", Value = project.Name + "(" + project.ProjectCode + ")" });
-            formComponentValues.Add(new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain() { Name = "工作日期", Value = item.WorkeDate.ToString("yyyy-MM-dd") });
-            formComponentValues.Add(new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain() { Name = "员工", Value = employee.Name });
-            formComponentValues.Add(new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain() { Name = "工时", Value = item.Hour.HasValue? item.Hour.Value.ToString():null });
-            formComponentValues.Add(new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain() { Name = "工作内容", Value = item.Content});
-            request.FormComponentValues_ = formComponentValues;
-            OapiProcessinstanceCreateResponse response = client.Execute(request, accessToken);
-            if (response.ErrCode == "0")
+            //OapiProcessinstanceCreateRequest.FormComponentValueVoDomain vo = new OapiProcessinstanceCreateRequest.FormComponentValueVoDomain();
+            formComponentValues.Add(new Approval() { name = "所属项目", value = project.Name + "(" + project.ProjectCode + ")" });
+            formComponentValues.Add(new Approval() { name = "工作日期", value = item.WorkeDate.ToString("yyyy-MM-dd") });
+            formComponentValues.Add(new Approval() { name = "员工", value = employee.Name });
+            formComponentValues.Add(new Approval() { name = "工时", value = item.Hour.HasValue? item.Hour.Value.ToString():null });
+            formComponentValues.Add(new Approval() { name = "工作内容", value = item.Content});
+            request.form_component_values = formComponentValues;
+            //OapiProcessinstanceCreateResponse response = client.Execute(request, accessToken);
+            ApprovalReturn approvalReturn = new ApprovalReturn();
+            var jsonString = SerializerHelper.GetJsonString(request, null);
+            using (MemoryStream ms = new MemoryStream())
             {
-                timeSheet.ProcessInstanceId = response.ProcessInstanceId;
+                var bytes = Encoding.UTF8.GetBytes(jsonString);
+                ms.Write(bytes, 0, bytes.Length);
+                ms.Seek(0, SeekOrigin.Begin);
+                approvalReturn = Post.PostGetJson<ApprovalReturn>(url, null, ms);
+            };
+            if (approvalReturn.errcode == 0)
+            {
+                item.ProcessInstanceId = approvalReturn.process_instance_id;
+                item.Status = TimeSheetStatusEnum.提交;
+                await _repository.InsertAsync(item);
                 return new ResultCode() { Code = 0, Msg = "提交成功" };
             }
             else
@@ -186,6 +199,28 @@ namespace HC.AbpCore.TimeSheets.DomainService
                     await _messageManager.CreateByTaskId(response.task_id, message, dingDingAppConfig.AgentID, accessToken, employeeIdList);
                 }
             }
+        }
+
+        /// <summary>
+        /// 根据审批实例Id修改工时状态
+        /// </summary>
+        /// <param name="processInstanceId"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public async Task UpdateTimeSheetByPIIdAsync(string processInstanceId, string result)
+        {
+            var item = await _repository.FirstOrDefaultAsync(aa => aa.ProcessInstanceId == processInstanceId);
+            var employee = await _employeeRepository.GetAsync(item.EmployeeId);
+            var employeeId = (await _employeeRepository.FirstOrDefaultAsync(aa => aa.IsLeaderInDepts == "key:" + employee.Department + "value:True")).Id;
+                //.Where(aa =>aa.IsLeaderInDepts == "key:" + employee.Department + "value:True")
+                //.Select(aa => aa.Id).Distinct().AsNoTracking().ToListAsync();
+            item.ApprovalTime = DateTime.Now;
+            item.ApproverId = employeeId;
+            if (result == "agree")
+                item.Status = TimeSheetStatusEnum.审批通过;
+            else
+                item.Status = TimeSheetStatusEnum.拒绝;
+            await _repository.UpdateAsync(item);
         }
     }
 }

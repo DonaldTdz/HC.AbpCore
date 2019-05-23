@@ -18,34 +18,28 @@ using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 
 
-using HC.AbpCore.Messages.Dtos;
-using HC.AbpCore.Messages;
+using HC.AbpCore.Tasks.Dtos;
+using HC.AbpCore.Tasks;
 
-namespace HC.AbpCore.Messages
+namespace HC.AbpCore.Tasks
 {
     /// <summary>
-    /// Message应用层服务的接口方法
+    /// CompletedTask应用层服务的接口方法
     ///</summary>
-    public interface IMessageAppService : IApplicationService
+    public interface ICompletedTaskAppService : IApplicationService
     {
         /// <summary>
-		/// 获取Message的分页列表信息
+		/// 获取CompletedTask的分页列表信息
 		///</summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<PagedResultDto<MessageListDto>> GetPagedAsync(GetMessagesInput input);
+        Task<PagedResultDto<CompletedTaskListDto>> GetPagedAsync(GetCompletedTasksInput input);
 
 
 		/// <summary>
-		/// 通过指定id获取MessageListDto信息
+		/// 通过指定id获取CompletedTaskListDto信息
 		/// </summary>
-		Task<MessageListDto> GetByIdAsync(EntityDto<Guid> input);
-
-
-        /// <summary>
-		/// 通过指定id修改是否已读
-		/// </summary>
-		Task<MessageListDto> ModifyReadByIdAsync(EntityDto<Guid> input);
+		Task<CompletedTaskListDto> GetByIdAsync(EntityDto<Guid> input);
 
 
         /// <summary>
@@ -53,19 +47,19 @@ namespace HC.AbpCore.Messages
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<GetMessageForEditOutput> GetForEditAsync(NullableIdDto<Guid> input);
+        Task<GetCompletedTaskForEditOutput> GetForEditAsync(NullableIdDto<Guid> input);
 
 
         /// <summary>
-        /// 添加或者修改Message的公共方法
+        /// 添加或者修改CompletedTask的公共方法
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task CreateOrUpdateAsync(CreateOrUpdateMessageInput input);
+        Task CreateOrUpdateAsync(CreateOrUpdateCompletedTaskInput input);
 
 
         /// <summary>
-        /// 删除Message信息的方法
+        /// 删除CompletedTask信息的方法
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
@@ -73,13 +67,13 @@ namespace HC.AbpCore.Messages
 
 
         /// <summary>
-        /// 批量删除Message
+        /// 批量删除CompletedTask
         /// </summary>
         Task BatchDeleteAsync(List<Guid> input);
 
 
 		/// <summary>
-        /// 导出Message为excel表
+        /// 导出CompletedTask为excel表
         /// </summary>
         /// <returns></returns>
 		//Task<FileDto> GetToExcel();

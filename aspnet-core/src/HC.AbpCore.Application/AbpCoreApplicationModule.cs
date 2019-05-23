@@ -65,7 +65,7 @@ namespace HC.AbpCore
                               .Build();
               }));
 
-            AsyncHelper.RunSync(() => jobManager.ScheduleAsync<MondaySendWorkReminderMsgJob>(job =>
+            AsyncHelper.RunSync(() => jobManager.ScheduleAsync<MonSendWorkReminderMsgJob>(job =>
             {
                 job.WithIdentity("MondaySendWorkReminderMsgJob", "WorkGroup").WithDescription("A job to send msg.");
             },

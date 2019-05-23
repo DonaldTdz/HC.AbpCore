@@ -29,7 +29,21 @@ namespace HC.AbpCore.TimeSheets.DomainService
         Task<ResultCode> SubmitApproval(TimeSheet item);
 
 
-
+        /// <summary>
+        /// 工时审批提醒
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <param name="dingDingAppConfig"></param>
+        /// <returns></returns>
         Task TimeSheetApprovalRemind(string accessToken, DingDingAppConfig dingDingAppConfig);
+
+
+        /// <summary>
+        /// 根据审批实例Id修改工时状态
+        /// </summary>
+        /// <param name="processInstanceId"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        Task UpdateTimeSheetByPIIdAsync(string processInstanceId, string result);
     }
 }

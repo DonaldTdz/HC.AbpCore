@@ -86,9 +86,9 @@ namespace HC.AbpCore.Reimburses
             var entityList = from item in query
                              join project in projects on item.ProjectId equals project.Id
                              join employee in employees on item.EmployeeId equals employee.Id into employeeName
-                             join approver in employees on item.ApproverId equals approver.Id into approverName
+                             //join approver in employees on item.ApproverId equals approver.Id into approverName
                              from bb in employeeName.DefaultIfEmpty()
-                             from cc in approverName.DefaultIfEmpty()
+                             //from cc in approverName.DefaultIfEmpty()
                              select new ReimburseListDto()
                              {
                                  Id = item.Id,
@@ -101,7 +101,7 @@ namespace HC.AbpCore.Reimburses
                                  SubmitDate = item.SubmitDate,
                                  ApproverId = item.ApproverId,
                                  ApprovalTime = item.ApprovalTime,
-                                 ApproverName = cc.Name,
+                                 //ApproverName = cc.Name,
                                  CancelTime = item.CancelTime,
                                  CreationTime = item.CreationTime
                              };
@@ -109,12 +109,21 @@ namespace HC.AbpCore.Reimburses
 
             var items = await entityList
                 .OrderByDescending(aa => aa.SubmitDate)
-                //.OrderBy(aa => aa.Status)
+                .OrderBy(aa => aa.Status)
                 .PageBy(input)
                 .AsNoTracking()
                 .ToListAsync();
-
-
+            //List<ReimburseListDto> reimburseListDto = new List<ReimburseListDto>();
+            //foreach (var item in items)
+            //{
+            //    if (!String.IsNullOrEmpty(item.ApproverId))
+            //    {
+            //        var approverIds = item.ApproverId.Split(",");
+            //        var employeesList = await employees.Where(aa => approverIds.Contains(aa.Id)).Select(aa => new { aa.Name }).AsNoTracking().ToListAsync();
+            //        item.ApproverName = String.Join(",", employeesList);
+            //    }
+            //    reimburseListDto.Add(item);
+            //}
             return new PagedResultDto<ReimburseListDto>(count, items);
         }
 
@@ -136,7 +145,12 @@ namespace HC.AbpCore.Reimburses
             if (!String.IsNullOrEmpty(item.EmployeeId))
                 item.EmployeeName = (await _employeeRepository.FirstOrDefaultAsync(aa => aa.Id == item.EmployeeId)).Name;
             if (!String.IsNullOrEmpty(item.ApproverId))
-                item.ApproverName = (await _employeeRepository.FirstOrDefaultAsync(aa => aa.Id == item.ApproverId)).Name;
+            {
+                var approverIds = item.ApproverId.Split(",");
+                var employeesList = await _employeeRepository.GetAll().Where(aa => approverIds.Contains(aa.Id)).Select(aa=>aa.Name).AsNoTracking().ToListAsync();
+                item.ApproverName = String.Join(",", employeesList);
+            }
+                //item.ApproverName = (await _employeeRepository.FirstOrDefaultAsync(aa => aa.Id == item.ApproverId)).Name;
             return item;
         }
 
@@ -176,16 +190,16 @@ namespace HC.AbpCore.Reimburses
         /// <returns></returns>
         [AbpAllowAnonymous]
         [Audited]
-        public async Task CreateOrUpdateAsync(CreateOrUpdateReimburseInput input)
+        public async Task<ReimburseEditDto> CreateOrUpdateAsync(CreateOrUpdateReimburseInput input)
         {
 
             if (input.Reimburse.Id.HasValue)
             {
-                await UpdateAsync(input.Reimburse);
+               return await UpdateAsync(input.Reimburse);
             }
             else
             {
-                await CreateAsync(input.Reimburse);
+                return await CreateAsync(input.Reimburse);
             }
         }
 
@@ -200,7 +214,7 @@ namespace HC.AbpCore.Reimburses
 
             // var entity = ObjectMapper.Map <Reimburse>(input);
             var entity = input.MapTo<Reimburse>();
-            entity.Status = ReimburseStatusEnum.草稿;
+            entity.Status = ReimburseStatusEnum.提交;
 
             entity = await _entityRepository.InsertAsync(entity);
             return entity.MapTo<ReimburseEditDto>();
@@ -210,7 +224,7 @@ namespace HC.AbpCore.Reimburses
         /// 编辑Reimburse
         /// </summary>
 
-        protected virtual async Task UpdateAsync(ReimburseEditDto input)
+        protected virtual async Task<ReimburseEditDto> UpdateAsync(ReimburseEditDto input)
         {
             //TODO:更新前的逻辑判断，是否允许更新
 
@@ -218,7 +232,8 @@ namespace HC.AbpCore.Reimburses
             input.MapTo(entity);
 
             // ObjectMapper.Map(input, entity);
-            await _entityRepository.UpdateAsync(entity);
+            entity=await _entityRepository.UpdateAsync(entity);
+            return entity.MapTo<ReimburseEditDto>();
         }
 
 

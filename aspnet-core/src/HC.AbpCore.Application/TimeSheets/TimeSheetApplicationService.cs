@@ -71,17 +71,15 @@ namespace HC.AbpCore.TimeSheets
                .WhereIf(!String.IsNullOrEmpty(input.EmployeeId),aa=>aa.EmployeeId==input.EmployeeId);
             // TODO:根据传入的参数添加过滤条件
 
+            var counts = await query.CountAsync();
+
             var projects = _projectRepository.GetAll();
             var employees = _employeeRepository.GetAll();
-
-            var count = await query.CountAsync();
 
             var entityList = from item in query
                              join project in projects on item.ProjectId equals project.Id
                              join employee in employees on item.EmployeeId equals employee.Id into employeeName
-                             join approver in employees on item.ApproverId equals approver.Id into approverName
                              from bb in employeeName.DefaultIfEmpty()
-                             from cc in approverName.DefaultIfEmpty()
                              select new TimeSheetListDto()
                              {
                                  Id = item.Id,
@@ -94,11 +92,15 @@ namespace HC.AbpCore.TimeSheets
                                  Hour = item.Hour,
                                  ApproverId = item.ApproverId,
                                  ApprovalTime = item.ApprovalTime,
-                                 ApproverName = cc.Name,
                                  Content = item.Content,
                                  CreationTime = item.CreationTime
                              };
-            var items = entityList.OrderByDescending(aa => aa.WorkeDate)
+
+
+            var count = await entityList.CountAsync();
+            var items = entityList
+                .OrderByDescending(aa => aa.WorkeDate)
+                .OrderBy(aa=>aa.Status)
                 .PageBy(input)
                 .ToList();
 
@@ -119,7 +121,8 @@ namespace HC.AbpCore.TimeSheets
 
             var project = await _projectRepository.GetAsync(item.ProjectId);
             item.ProjectName = project.Name + "(" + project.ProjectCode + ")";
-
+            if(!String.IsNullOrEmpty(item.ApproverId))
+                item.ApproverName = (await _employeeRepository.GetAsync(item.ApproverId)).Name;
             return item;
 		}
 
@@ -152,13 +155,14 @@ TimeSheetEditDto editDto;
 		}
 
 
-		/// <summary>
-		/// 添加或者修改TimeSheet的公共方法
-		/// </summary>
-		/// <param name="input"></param>
-		/// <returns></returns>
-		
-		public async Task CreateOrUpdateAsync(CreateOrUpdateTimeSheetInput input)
+        /// <summary>
+        /// 添加或者修改TimeSheet的公共方法
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        [AbpAllowAnonymous]
+        [Audited]
+        public async Task CreateOrUpdateAsync(CreateOrUpdateTimeSheetInput input)
 		{
 
 			if (input.TimeSheet.Id.HasValue)

@@ -56,7 +56,7 @@ namespace HC.AbpCore.Reimburses
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task CreateOrUpdateAsync(CreateOrUpdateReimburseInput input);
+        Task<ReimburseEditDto> CreateOrUpdateAsync(CreateOrUpdateReimburseInput input);
 
 
         /// <summary>
