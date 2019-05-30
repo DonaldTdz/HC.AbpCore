@@ -198,10 +198,17 @@ namespace HC.AbpCore.Tasks
         {
             //TODO:更新前的逻辑判断，是否允许更新
             var item = await _tenderRepository.GetAsync(input.RefId.Value);
+            
             if (input.Status == TaskStatusEnum.招标保证金缴纳)
                 item.IsPayBond = input.IsCompleted;
             if (input.Status == TaskStatusEnum.招标准备)
-                item.IsReady = input.IsCompleted;
+            {
+                int incompleteCount = await _entityRepository.CountAsync(aa => aa.RefId == item.Id && aa.Status == TaskStatusEnum.招标准备 && aa.Id != input.Id&&aa.IsCompleted==false);
+                if (incompleteCount == 0)
+                {
+                    item.IsReady = input.IsCompleted;
+                }
+            }
             await _tenderRepository.UpdateAsync(item);
             var entity = await _entityRepository.GetAsync(input.Id.Value);
             input.MapTo(entity);

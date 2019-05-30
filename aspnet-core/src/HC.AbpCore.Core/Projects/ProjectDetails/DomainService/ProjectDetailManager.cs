@@ -18,44 +18,95 @@ using Abp.Domain.Services;
 
 using HC.AbpCore;
 using HC.AbpCore.Projects.ProjectDetails;
-
+using HC.AbpCore.Products;
+using Abp.AutoMapper;
 
 namespace HC.AbpCore.Projects.ProjectDetails.DomainService
 {
     /// <summary>
     /// ProjectDetail领域层的业务管理
     ///</summary>
-    public class ProjectDetailManager :AbpCoreDomainServiceBase, IProjectDetailManager
+    public class ProjectDetailManager : AbpCoreDomainServiceBase, IProjectDetailManager
     {
-		
-		private readonly IRepository<ProjectDetail,Guid> _repository;
 
-		/// <summary>
-		/// ProjectDetail的构造方法
-		///</summary>
-		public ProjectDetailManager(
-			IRepository<ProjectDetail, Guid> repository
-		)
-		{
-			_repository =  repository;
-		}
+        private readonly IRepository<ProjectDetail, Guid> _repository;
+        private readonly IRepository<Product, int> _productRepository;
 
-
-		/// <summary>
-		/// 初始化
-		///</summary>
-		public void InitProjectDetail()
-		{
-			throw new NotImplementedException();
-		}
-
-		// TODO:编写领域业务代码
+        /// <summary>
+        /// ProjectDetail的构造方法
+        ///</summary>
+        public ProjectDetailManager(
+            IRepository<ProjectDetail, Guid> repository,
+            IRepository<Product, int> productRepository
+        )
+        {
+            _repository = repository;
+            _productRepository = productRepository;
+        }
 
 
+        /// <summary>
+        /// 初始化
+        ///</summary>
+        public void InitProjectDetail()
+        {
+            throw new NotImplementedException();
+        }
 
-		 
-		  
-		 
 
-	}
+        // TODO:编写领域业务代码
+
+
+
+        public async Task<ProjectDetail> CreateAsync(ProjectDetail projectDetail)
+        {
+            if (projectDetail.Type == "商品采购")
+            {
+                if (projectDetail.ProductId.HasValue)
+                {
+                    var product = await _productRepository.GetAsync(projectDetail.ProductId.Value);
+                    if (product.Unit != projectDetail.Unit)
+                    {
+                        product.Unit = projectDetail.Unit;
+                        await _productRepository.UpdateAsync(product);
+                    }
+                }
+                else
+                {
+                    projectDetail.ProductId = await _productRepository.InsertAndGetIdAsync(new Product() { Name = projectDetail.Name.Trim(), Specification = projectDetail.Specification.Trim(), Unit = projectDetail.Unit, Type = 0, IsEnabled = true, CreationTime = DateTime.Now });
+                }
+            }
+
+            projectDetail = await _repository.InsertAsync(projectDetail);
+            return projectDetail;
+        }
+
+
+        public async Task<ProjectDetail> UpdateAsync(ProjectDetail projectDetail)
+        {
+            //TODO:更新前的逻辑判断，是否允许更新
+            if (projectDetail.ProductId.HasValue)
+            {
+                var product = await _productRepository.GetAsync(projectDetail.ProductId.Value);
+                if (product.Unit != projectDetail.Unit)
+                {
+                    product.Unit = projectDetail.Unit;
+                    await _productRepository.UpdateAsync(product);
+                }
+            }
+
+            var entity = await _repository.GetAsync(projectDetail.Id);
+            entity.Name = projectDetail.Name;
+            entity.Num = projectDetail.Num;
+            entity.Price = projectDetail.Price;
+            entity.ProductId = projectDetail.ProductId;
+            entity.Specification = projectDetail.Specification;
+            entity.Unit = projectDetail.Unit;
+            // ObjectMapper.Map(input, entity);
+            projectDetail = await _repository.UpdateAsync(entity);
+            return projectDetail;
+        }
+
+
+    }
 }

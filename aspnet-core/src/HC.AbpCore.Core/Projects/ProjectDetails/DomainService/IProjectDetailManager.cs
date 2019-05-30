@@ -17,11 +17,22 @@ namespace HC.AbpCore.Projects.ProjectDetails.DomainService
         ///</summary>
         void InitProjectDetail();
 
+        /// <summary>
+        /// 新增
+        /// </summary>
+        /// <param name="projectDetail"></param>
+        /// <returns></returns>
+        Task<ProjectDetail> CreateAsync(ProjectDetail projectDetail);
+
+        /// <summary>
+        /// 编辑
+        /// </summary>
+        /// <param name="projectDetail"></param>
+        /// <returns></returns>
+        Task<ProjectDetail> UpdateAsync(ProjectDetail projectDetail);
 
 
-		 
-      
-         
+
 
     }
 }

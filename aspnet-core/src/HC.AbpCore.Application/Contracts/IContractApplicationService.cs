@@ -61,6 +61,14 @@ namespace HC.AbpCore.Contracts
 
 
         /// <summary>
+        /// 添加Contract以及ContractDetail的公共方法
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        Task<APIResultDto> CreateContractAndDetailAsync(CreateContractAndDetailInput input);
+
+
+        /// <summary>
         /// 删除Contract信息的方法
         /// </summary>
         /// <param name="input"></param>

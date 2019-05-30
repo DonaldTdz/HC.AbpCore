@@ -214,7 +214,7 @@ namespace HC.AbpCore.Reimburses
 
             // var entity = ObjectMapper.Map <Reimburse>(input);
             var entity = input.MapTo<Reimburse>();
-            entity.Status = ReimburseStatusEnum.提交;
+            //entity.Status = ReimburseStatusEnum.提交;
 
             entity = await _entityRepository.InsertAsync(entity);
             return entity.MapTo<ReimburseEditDto>();

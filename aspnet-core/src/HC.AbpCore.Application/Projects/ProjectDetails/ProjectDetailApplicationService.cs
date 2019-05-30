@@ -33,19 +33,19 @@ namespace HC.AbpCore.Projects.ProjectDetails
     public class ProjectDetailAppService : AbpCoreAppServiceBase, IProjectDetailAppService
     {
         private readonly IRepository<ProjectDetail, Guid> _entityRepository;
-        private readonly IRepository<Product, int> _productRepository;
+        //private readonly IRepository<Product, int> _productRepository;
         private readonly IProjectDetailManager _entityManager;
 
         /// <summary>
         /// 构造函数 
         ///</summary>
         public ProjectDetailAppService(
-        IRepository<ProjectDetail, Guid> entityRepository,
-          IRepository<Product, int> productRepository
+        IRepository<ProjectDetail, Guid> entityRepository
+          //IRepository<Product, int> productRepository
         , IProjectDetailManager entityManager
         )
         {
-            _productRepository = productRepository;
+            //_productRepository = productRepository;
             _entityRepository = entityRepository;
             _entityManager = entityManager;
         }
@@ -76,19 +76,22 @@ namespace HC.AbpCore.Projects.ProjectDetails
             List<ProjectDetailListDto> projectDetailListDtos = new List<ProjectDetailListDto>();
             decimal? totalSum=0;
             decimal? totalQuantity = 0;
-            foreach (var item in entityList)
+            if (count > 0)
             {
-                ProjectDetailListDto projectDetailListDto = item.MapTo<ProjectDetailListDto>();
-                projectDetailListDto.TotalSum = projectDetailListDto.Num * projectDetailListDto.Price;
-                totalSum += projectDetailListDto.TotalSum;
-                totalQuantity += projectDetailListDto.Num;
-                projectDetailListDtos.Add(projectDetailListDto);
+                foreach (var item in entityList)
+                {
+                    ProjectDetailListDto projectDetailListDto = item.MapTo<ProjectDetailListDto>();
+                    projectDetailListDto.TotalSum = projectDetailListDto.Num * projectDetailListDto.Price;
+                    totalSum += projectDetailListDto.TotalSum;
+                    totalQuantity += projectDetailListDto.Num;
+                    projectDetailListDtos.Add(projectDetailListDto);
+                }
+                ProjectDetailListDto entity = new ProjectDetailListDto();
+                entity.Name = "合计";
+                entity.Num = totalQuantity;
+                entity.TotalSum = totalSum;
+                projectDetailListDtos.Add(entity);
             }
-            ProjectDetailListDto entity = new ProjectDetailListDto();
-            entity.Name = "合计";
-            entity.Num = totalQuantity;
-            entity.TotalSum = totalSum;
-            projectDetailListDtos.Add(entity);
 
             // var entityListDtos = ObjectMapper.Map<List<ProjectDetailListDto>>(entityList);
             //var entityListDtos = entityList.MapTo<List<ProjectDetailListDto>>();
@@ -166,29 +169,32 @@ namespace HC.AbpCore.Projects.ProjectDetails
             //TODO:新增前的逻辑判断，是否允许新增
 
             // var entity = ObjectMapper.Map <ProjectDetail>(input);
-            //更新产品表
-            if(input.Type=="商品采购")
-            {
-                if (input.ProductId.HasValue)
-                {
-                    var product = await _productRepository.GetAsync(input.ProductId.Value);
-                    if (product.Unit != input.Unit)
-                    {
-                        product.Unit = input.Unit;
-                        await _productRepository.UpdateAsync(product);
-                    }
-                }
-                else
-                {
-                    input.ProductId = await _productRepository.InsertAndGetIdAsync(new Product() { Name = input.Name.Trim(), Specification = input.Specification.Trim(),Unit=input.Unit, Type = 0, IsEnabled = true, CreationTime = DateTime.Now });
-                }
-            }
-
             var entity = input.MapTo<ProjectDetail>();
+            var ProjectDetail = await _entityManager.CreateAsync(entity);
+            return ProjectDetail.MapTo<ProjectDetailEditDto>();
+            //更新产品表
+            //if(input.Type=="商品采购")
+            //{
+            //    if (input.ProductId.HasValue)
+            //    {
+            //        var product = await _productRepository.GetAsync(input.ProductId.Value);
+            //        if (product.Unit != input.Unit)
+            //        {
+            //            product.Unit = input.Unit;
+            //            await _productRepository.UpdateAsync(product);
+            //        }
+            //    }
+            //    else
+            //    {
+            //        input.ProductId = await _productRepository.InsertAndGetIdAsync(new Product() { Name = input.Name.Trim(), Specification = input.Specification.Trim(),Unit=input.Unit, Type = 0, IsEnabled = true, CreationTime = DateTime.Now });
+            //    }
+            //}
+
+            //var entity = input.MapTo<ProjectDetail>();
 
 
-            entity = await _entityRepository.InsertAsync(entity);
-            return entity.MapTo<ProjectDetailEditDto>();
+            //entity = await _entityRepository.InsertAsync(entity);
+            //return entity.MapTo<ProjectDetailEditDto>();
         }
 
         /// <summary>
@@ -197,31 +203,24 @@ namespace HC.AbpCore.Projects.ProjectDetails
 
         protected virtual async Task UpdateAsync(ProjectDetailEditDto input)
         {
+            var entity = input.MapTo<ProjectDetail>();
+            await _entityManager.UpdateAsync(entity);
             //TODO:更新前的逻辑判断，是否允许更新
-            if (input.ProductId.HasValue)
-            {
-                //var product = await _productRepository.GetAll().Where(aa => aa.Name == input.Name.Trim() && aa.Specification == input.Specification.Trim() && aa.IsEnabled == true).FirstOrDefaultAsync();
-                //if (product == null)
-                //    input.ProductId = await _productRepository.InsertAndGetIdAsync(new Product() { Name = input.Name.Trim(), Specification = input.Specification.Trim(), Type = 0, IsEnabled = true,CreationTime=DateTime.Now });
-                //else
-                //{
-                //    product.Unit = input.Unit;
-                //    await _productRepository.UpdateAsync(product);
-                //    input.ProductId = product.Id;
-                //}
-                var product = await _productRepository.GetAsync(input.ProductId.Value);
-                if (product.Unit != input.Unit)
-                {
-                    product.Unit = input.Unit;
-                    await _productRepository.UpdateAsync(product);
-                }
-            }
+            //if (input.ProductId.HasValue)
+            //{
+            //    var product = await _productRepository.GetAsync(input.ProductId.Value);
+            //    if (product.Unit != input.Unit)
+            //    {
+            //        product.Unit = input.Unit;
+            //        await _productRepository.UpdateAsync(product);
+            //    }
+            //}
 
-            var entity = await _entityRepository.GetAsync(input.Id.Value);
-            input.MapTo(entity);
+            //var entity = await _entityRepository.GetAsync(input.Id.Value);
+            //input.MapTo(entity);
 
-            // ObjectMapper.Map(input, entity);
-            await _entityRepository.UpdateAsync(entity);
+            //// ObjectMapper.Map(input, entity);
+            //await _entityRepository.UpdateAsync(entity);
         }
 
 

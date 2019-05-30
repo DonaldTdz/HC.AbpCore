@@ -1,4 +1,5 @@
-﻿using Abp.Auditing;
+﻿using Abp.Application.Services;
+using Abp.Auditing;
 using Abp.Authorization;
 using Abp.Domain.Repositories;
 using HC.AbpCore.DingTalk.Employees.DomainService;
@@ -58,6 +59,7 @@ namespace HC.AbpCore.DingTalk
         /// <returns></returns>
         [AbpAllowAnonymous]
         [Audited]
+        [RemoteService(false)]
         public async Task AutoWorkNotificationMessageAsync()
         {
             var accessToken = await _dingTalkManager.GetAccessTokenByAppAsync(DingDingAppEnum.智能办公);
@@ -69,13 +71,16 @@ namespace HC.AbpCore.DingTalk
             //工时报销提醒
             await _timeSheetManager.TimeSheetApprovalRemind(accessToken, ddConfig);
             //任务提醒
-            await _completedTaskManager.TaskRemind(accessToken, ddConfig);
+            await _completedTaskManager.TaskRemindAsync(accessToken, ddConfig);
         }
 
         /// <summary>
         /// 工作消息通知  周一早上9点提醒
         /// </summary>
         /// <returns></returns>
+        [AbpAllowAnonymous]
+        [Audited]
+        [RemoteService(false)]
         public async Task MonWorkNotificationMessageAsync()
         {
             var accessToken = await _dingTalkManager.GetAccessTokenByAppAsync(DingDingAppEnum.智能办公);

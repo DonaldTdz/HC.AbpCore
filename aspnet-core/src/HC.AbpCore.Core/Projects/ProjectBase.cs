@@ -11,9 +11,9 @@ namespace HC.AbpCore.Projects
         /// </summary>
         public enum ProjectMode
         {
-            内部=1,
-            合伙=2,
-            外部=3
+            内部 = 1,
+            合伙 = 2,
+            外部 = 3
         }
 
         /// <summary>
@@ -21,12 +21,12 @@ namespace HC.AbpCore.Projects
         /// </summary>
         public enum ProjectStatus
         {
-            线索=1,
-            立项=2,
-            进行中=3,
-            已完成=4,
-            已回款=5,
-            取消
+            立项 = 1,
+            招标 = 2,
+            合同 = 3,
+            收款 = 4,
+            已完成 = 5,
+            丢单 = 6
         }
     }
 }

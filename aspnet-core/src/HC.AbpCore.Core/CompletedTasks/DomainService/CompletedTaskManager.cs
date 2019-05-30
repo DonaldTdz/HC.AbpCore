@@ -65,10 +65,15 @@ namespace HC.AbpCore.Tasks.DomainService
 			throw new NotImplementedException();
 		}
 
-		// TODO:编写领域业务代码
+        // TODO:编写领域业务代码
 
-
-        public async Task TaskRemind(string accessToken, DingDingAppConfig dingDingAppConfig)
+        /// <summary>
+        /// 待完成任务提醒
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <param name="dingDingAppConfig"></param>
+        /// <returns></returns>
+        public async Task TaskRemindAsync(string accessToken, DingDingAppConfig dingDingAppConfig)
         {
             var query = _repository.GetAll().Where(aa => aa.IsCompleted == false);
             var projects = _projectRepository.GetAll();
@@ -104,8 +109,8 @@ namespace HC.AbpCore.Tasks.DomainService
                 dingMsgs.msg.msgtype = "link";
                 dingMsgs.msg.link.title = "待办提醒";
                 dingMsgs.msg.link.text = string.Format("您好! 项目:{0}，{1}:日期即将到达，点击查看详情", item.ProjectName,item.Status.ToString() );
-                dingMsgs.msg.link.picUrl = "eapp://";
-                dingMsgs.msg.link.messageUrl = "eapp://";
+                dingMsgs.msg.link.picUrl = "@lALPBY0V4-AiG7vMgMyA";
+                dingMsgs.msg.link.messageUrl = "eapp://messages";
                 var jsonString = SerializerHelper.GetJsonString(dingMsgs, null);
                 MessageResponseResult response = new MessageResponseResult();
                 using (MemoryStream ms = new MemoryStream())

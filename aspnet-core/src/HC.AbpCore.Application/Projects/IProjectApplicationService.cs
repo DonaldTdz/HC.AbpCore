@@ -21,6 +21,7 @@ using Abp.Application.Services.Dto;
 using HC.AbpCore.Projects.Dtos;
 using HC.AbpCore.Projects;
 using HC.AbpCore.Dtos;
+using static HC.AbpCore.Projects.ProjectBase;
 
 namespace HC.AbpCore.Projects
 {
@@ -66,6 +67,14 @@ namespace HC.AbpCore.Projects
 
 
         /// <summary>
+        /// 添加project以及projectDetail的公共方法
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        Task<APIResultDto> CreateProjectAndDetailAsync(CreateProjectAndDetailInput input);
+
+
+        /// <summary>
         /// 删除Project信息的方法
         /// </summary>
         /// <param name="input"></param>
@@ -79,11 +88,19 @@ namespace HC.AbpCore.Projects
         Task BatchDeleteAsync(List<Guid> input);
 
 
-		/// <summary>
+        /// <summary>
+        /// 修改项目状态
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="projectStatus"></param>
+        /// <returns></returns>
+        Task ModifyProjectStatusAsync(EntityDto<Guid> input, ProjectStatus projectStatus);
+
+        /// <summary>
         /// 导出Project为excel表
         /// </summary>
         /// <returns></returns>
-		//Task<FileDto> GetToExcel();
+        //Task<FileDto> GetToExcel();
 
     }
 }

@@ -25,7 +25,7 @@ namespace HC.AbpCore.Tasks.DomainService
         /// <param name="accessToken"></param>
         /// <param name="dingDingAppConfig"></param>
         /// <returns></returns>
-        Task TaskRemind(string accessToken, DingDingAppConfig dingDingAppConfig);
+        Task TaskRemindAsync(string accessToken, DingDingAppConfig dingDingAppConfig);
 
 
 

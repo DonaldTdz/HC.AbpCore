@@ -36,10 +36,10 @@ namespace HC.AbpCore.Tenders
         Task<PagedResultDto<TenderListDto>> GetPagedAsync(GetTendersInput input);
 
 
-		/// <summary>
-		/// 通过指定id获取TenderListDto信息
-		/// </summary>
-		Task<TenderListDto> GetByIdAsync(EntityDto<Guid> input);
+        /// <summary>
+        /// 通过指定id或者projectId获取TenderListDto信息
+        /// </summary>
+        Task<TenderListDto> GetByIdAsync(EntityDto<Guid?> input, Guid? projectId);
 
 
         /// <summary>

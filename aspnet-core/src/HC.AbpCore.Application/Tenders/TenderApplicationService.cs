@@ -26,6 +26,7 @@ using HC.AbpCore.Projects;
 using HC.AbpCore.DingTalk;
 using HC.AbpCore.Tasks;
 using HC.AbpCore.CompletedTasks;
+using static HC.AbpCore.Projects.ProjectBase;
 
 namespace HC.AbpCore.Tenders
 {
@@ -82,26 +83,26 @@ namespace HC.AbpCore.Tenders
 
             //var count = await query.CountAsync();
 
-            var items= from item in query
-                       join project in projects on item.ProjectId equals project.Id
-                       select new TenderListDto()
-                       {
-                           Id = item.Id,
-                           ProjectName = project.Name + "(" + project.ProjectCode + ")",
-                           ProjectId = item.ProjectId,
-                           TenderTime = item.TenderTime,
-                           Bond = item.Bond,
-                           BondTime = item.BondTime,
-                           ReadyTime = item.ReadyTime,
-                           IsPayBond = item.IsPayBond,
-                           IsReady = item.IsReady,
-                           EmployeeId = item.EmployeeId,
-                           EmployeeName = employeeList.Where(bb => bb.Id == item.EmployeeId).FirstOrDefault().Name,
-                           ReadyEmployeeIds = item.ReadyEmployeeIds,
-                           ReadyEmployeeNames = !String.IsNullOrEmpty(item.ReadyEmployeeIds) ? ReadyEmployeeNames(employeeList, item.ReadyEmployeeIds).ToString() : item.ReadyEmployeeIds,
-                           IsWinbid = item.IsWinbid,
-                           Attachments = item.Attachments
-                       };
+            var items = from item in query
+                        join project in projects on item.ProjectId equals project.Id
+                        select new TenderListDto()
+                        {
+                            Id = item.Id,
+                            ProjectName = project.Name + "(" + project.ProjectCode + ")",
+                            ProjectId = item.ProjectId,
+                            TenderTime = item.TenderTime,
+                            Bond = item.Bond,
+                            BondTime = item.BondTime,
+                            ReadyTime = item.ReadyTime,
+                            IsPayBond = item.IsPayBond,
+                            IsReady = item.IsReady,
+                            EmployeeId = item.EmployeeId,
+                            EmployeeName = employeeList.Where(bb => bb.Id == item.EmployeeId).FirstOrDefault().Name,
+                            ReadyEmployeeIds = item.ReadyEmployeeIds,
+                            ReadyEmployeeNames = !String.IsNullOrEmpty(item.ReadyEmployeeIds) ? ReadyEmployeeNames(employeeList, item.ReadyEmployeeIds).ToString() : item.ReadyEmployeeIds,
+                            IsWinbid = item.IsWinbid,
+                            Attachments = item.Attachments
+                        };
             var count = await items.CountAsync();
             var entityList = await items
                     .OrderBy(input.Sorting).AsNoTracking()
@@ -141,14 +142,20 @@ namespace HC.AbpCore.Tenders
 
 
         /// <summary>
-        /// 通过指定id获取TenderListDto信息
+        /// 通过指定id或者projectId获取TenderListDto信息
         /// </summary>
 
-        public async Task<TenderListDto> GetByIdAsync(EntityDto<Guid> input)
+        public async Task<TenderListDto> GetByIdAsync(EntityDto<Guid?> input, Guid? projectId)
         {
-            var entity = await _entityRepository.GetAsync(input.Id);
-            var employeeList = await _employeeRepository.GetAll().AsNoTracking().ToListAsync();
+            Tender entity = new Tender();
+            if (projectId.HasValue)
+                entity = await _entityRepository.FirstOrDefaultAsync(aa => aa.ProjectId == projectId.Value);
+            else
+                entity = await _entityRepository.GetAsync(input.Id.Value);
             var item = entity.MapTo<TenderListDto>();
+            if (item == null)
+                return item;
+            var employeeList = await _employeeRepository.GetAll().AsNoTracking().ToListAsync();
             item.ProjectName = (await _projectRepository.GetAsync(item.ProjectId)).Name;
             if (!String.IsNullOrEmpty(item.EmployeeId))
                 item.EmployeeName = (await _employeeRepository.GetAsync(item.EmployeeId)).Name;
@@ -200,7 +207,6 @@ namespace HC.AbpCore.Tenders
             }
             else
             {
-                input.Tender.IsWinbid = false;
                 await CreateAsync(input.Tender);
             }
         }
@@ -225,9 +231,9 @@ namespace HC.AbpCore.Tenders
 
             entity = await _entityRepository.InsertAsync(entity);
             //添加到任务列表
-            await _taskRepository.InsertAsync(new CompletedTask() { Status = TaskStatusEnum.招标, IsCompleted = entity.IsPayBond, RefId = entity.Id, EmployeeId = entity.EmployeeId, ProjectId = entity.ProjectId,ClosingDate=entity.TenderTime.Value });
-            await _taskRepository.InsertAsync(new CompletedTask() { Status = TaskStatusEnum.招标保证金缴纳, IsCompleted = entity.IsPayBond, RefId = entity.Id, EmployeeId = entity.EmployeeId,ProjectId=entity.ProjectId, ClosingDate = entity.BondTime.Value });
-            await _taskRepository.InsertAsync(new CompletedTask() { Status = TaskStatusEnum.招标准备, IsCompleted = entity.IsReady, RefId = entity.Id, EmployeeId = entity.EmployeeId, ProjectId = entity.ProjectId,ClosingDate = entity.ReadyTime.Value });
+            await _taskRepository.InsertAsync(new CompletedTask() { Status = TaskStatusEnum.招标, IsCompleted = entity.IsPayBond, RefId = entity.Id, EmployeeId = entity.EmployeeId, ProjectId = entity.ProjectId, ClosingDate = entity.TenderTime.Value });
+            await _taskRepository.InsertAsync(new CompletedTask() { Status = TaskStatusEnum.招标保证金缴纳, IsCompleted = entity.IsPayBond, RefId = entity.Id, EmployeeId = entity.EmployeeId, ProjectId = entity.ProjectId, ClosingDate = entity.BondTime.Value });
+            //await _taskRepository.InsertAsync(new CompletedTask() { Status = TaskStatusEnum.招标准备, IsCompleted = entity.IsReady, RefId = entity.Id, EmployeeId = entity.EmployeeId, ProjectId = entity.ProjectId,ClosingDate = entity.ReadyTime.Value });
             var employeeIds = entity.ReadyEmployeeIds.Split(",");
             foreach (var employeeId in employeeIds)
             {
@@ -244,6 +250,12 @@ namespace HC.AbpCore.Tenders
         protected virtual async Task UpdateAsync(TenderEditDto input)
         {
             //TODO:更新前的逻辑判断，是否允许更新
+            if (input.IsWinbid.HasValue)
+            {
+                var project = await _projectRepository.GetAsync(input.ProjectId);
+                project.Status = input.IsWinbid.Value == true ? ProjectStatus.合同 : ProjectStatus.丢单;
+                await _projectRepository.UpdateAsync(project);
+            }
 
             var entity = await _entityRepository.GetAsync(input.Id.Value);
             //TODO:更新任务列表

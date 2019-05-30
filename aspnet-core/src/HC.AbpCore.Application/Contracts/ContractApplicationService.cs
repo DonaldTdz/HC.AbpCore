@@ -25,6 +25,9 @@ using HC.AbpCore.Projects;
 using HC.AbpCore.Purchases;
 using static HC.AbpCore.Contracts.ContractEnum;
 using HC.AbpCore.Dtos;
+using HC.AbpCore.Contracts.ContractDetails;
+using HC.AbpCore.Contracts.ContractDetails.DomainService;
+using static HC.AbpCore.Projects.ProjectBase;
 
 namespace HC.AbpCore.Contracts
 {
@@ -37,8 +40,8 @@ namespace HC.AbpCore.Contracts
         private readonly IRepository<Contract, Guid> _entityRepository;
         private readonly IRepository<Project, Guid> _projectRepository;
         private readonly IRepository<Purchase, Guid> _purchaseRepository;
-
         private readonly IContractManager _entityManager;
+        private readonly IContractDetailManager _contractDetailManager;
 
         /// <summary>
         /// 构造函数 
@@ -47,9 +50,11 @@ namespace HC.AbpCore.Contracts
         IRepository<Contract, Guid> entityRepository
             , IRepository<Project, Guid> projectRepository
             , IRepository<Purchase, Guid> purchaseRepository
+            , IContractDetailManager contractDetailManager
         , IContractManager entityManager
         )
         {
+            _contractDetailManager = contractDetailManager;
             _entityRepository = entityRepository;
             _projectRepository = projectRepository;
             _purchaseRepository = purchaseRepository;
@@ -70,8 +75,8 @@ namespace HC.AbpCore.Contracts
                 .WhereIf(!String.IsNullOrEmpty(input.ContractCode), aa => aa.ContractCode.Contains(input.ContractCode))
                 .WhereIf(input.RefId.HasValue, aa => aa.RefId == input.RefId.Value);
             // TODO:根据传入的参数添加过滤条件
-            var projects = await _projectRepository.GetAll().Select(aa => new { Id = aa.Id, Name = aa.Name,Code=aa.ProjectCode }).AsNoTracking().ToListAsync();
-            var purchases = await _purchaseRepository.GetAll().Select(aa => new { aa.Id, aa.ProjectId,Code=aa.Code }).AsNoTracking().ToListAsync();
+            var projects = await _projectRepository.GetAll().Select(aa => new {  aa.Id,  aa.Name,Code=aa.ProjectCode }).AsNoTracking().ToListAsync();
+            var purchases = await _purchaseRepository.GetAll().Select(aa => new { aa.Id, aa.ProjectId,aa.Code }).AsNoTracking().ToListAsync();
 
             var count = await query.CountAsync();
 
@@ -194,6 +199,12 @@ namespace HC.AbpCore.Contracts
         {
             //TODO:新增前的逻辑判断，是否允许新增
             input.Amount = 0;
+            if (input.Type == ContractTypeEnum.销项)
+            {
+                var project = await _projectRepository.GetAsync(input.RefId.Value);
+                project.Status = ProjectStatus.收款;
+                await _projectRepository.UpdateAsync(project);
+            }
             //判断合同编号是否重复
             var contractCount = await _entityRepository.GetAll().Where(aa => aa.ContractCode == input.ContractCode).CountAsync();
             if (contractCount > 0)
@@ -282,6 +293,40 @@ namespace HC.AbpCore.Contracts
                     contractCode = "HC-X-RJ" + DateTime.Now.ToString("yyyyMMdd") + "001";
             }
             return contractCode;
+        }
+
+
+        /// <summary>
+        /// 添加Contract以及ContractDetail的公共方法
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public async Task<APIResultDto> CreateContractAndDetailAsync(CreateContractAndDetailInput input)
+        {
+            input.Contract.Amount = 0;
+            //判断合同编号是否重复
+            var contractCount = await _entityRepository.GetAll().Where(aa => aa.ContractCode == input.Contract.ContractCode).CountAsync();
+            if (contractCount > 0)
+                return new APIResultDto() { Code = 0, Msg = "保存失败,合同编号已存在" };
+            var entity = input.Contract.MapTo<Contract>();
+            entity = await _entityRepository.InsertAsync(entity);
+            foreach (var contractDetail in input.ContractDetails)
+            {
+                contractDetail.ContractId = entity.Id;
+                var detail = contractDetail.MapTo<ContractDetail>();
+                await _contractDetailManager.CreateAsync(detail);
+            }
+            if (input.Contract.Type == ContractTypeEnum.销项)
+            {
+                var project = await _projectRepository.GetAsync(input.Contract.RefId.Value);
+                project.Status = ProjectStatus.收款;
+                await _projectRepository.UpdateAsync(project);
+            }
+            var item = entity.MapTo<ContractEditDto>();
+            if (entity != null)
+                return new APIResultDto() { Code = 1, Msg = "保存成功", Data = item };
+            else
+                return new APIResultDto() { Code = 0, Msg = "保存失败" };
         }
 
         /// <summary>

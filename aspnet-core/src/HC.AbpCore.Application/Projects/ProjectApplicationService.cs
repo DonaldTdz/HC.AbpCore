@@ -25,6 +25,9 @@ using HC.AbpCore.Dtos;
 using HC.AbpCore.Customers;
 using HC.AbpCore.DingTalk.Employees;
 using Abp.Auditing;
+using HC.AbpCore.Projects.ProjectDetails;
+using HC.AbpCore.Projects.ProjectDetails.DomainService;
+using static HC.AbpCore.Projects.ProjectBase;
 
 namespace HC.AbpCore.Projects
 {
@@ -37,7 +40,7 @@ namespace HC.AbpCore.Projects
         private readonly IRepository<Project, Guid> _entityRepository;
         private readonly IRepository<Customer, int> _customerRepository;
         private readonly IRepository<Employee, string> _employeeRepository;
-
+        private readonly IProjectDetailManager _projectDetailManager;
         private readonly IProjectManager _entityManager;
 
         /// <summary>
@@ -46,10 +49,12 @@ namespace HC.AbpCore.Projects
         public ProjectAppService(
         IRepository<Project, Guid> entityRepository,
         IRepository<Customer, int> customerRepository,
-        IRepository<Employee, string> employeeRepository
+        IRepository<Employee, string> employeeRepository,
+        IProjectDetailManager projectDetailManager
         , IProjectManager entityManager
         )
         {
+            _projectDetailManager = projectDetailManager;
             _entityRepository = entityRepository;
             _entityManager = entityManager;
             _customerRepository = customerRepository;
@@ -175,6 +180,34 @@ namespace HC.AbpCore.Projects
 
 
         /// <summary>
+        /// 添加project以及projectDetail的公共方法
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public async Task<APIResultDto> CreateProjectAndDetailAsync(CreateProjectAndDetailInput input)
+        {
+            var projectCount = await _entityRepository.GetAll().Where(aa => aa.ProjectCode == input.Project.ProjectCode).CountAsync();
+            if (projectCount > 0)
+                return new APIResultDto() { Code = 0, Msg = "保存失败,项目编号已存在" };
+            
+            var entity = input.Project.MapTo<Project>();
+            entity = await _entityRepository.InsertAsync(entity);
+
+            foreach (var projectDetail in input.ProjectDetails)
+            {
+                projectDetail.ProjectId = entity.Id;
+                var detail = projectDetail.MapTo<ProjectDetail>();
+                await _projectDetailManager.CreateAsync(detail);
+            }
+            var item = entity.MapTo<ProjectEditDto>();
+            if (entity != null)
+                return new APIResultDto() { Code = 1, Msg = "保存成功", Data = item };
+            else
+                return new APIResultDto() { Code = 0, Msg = "保存失败" };
+        }
+
+
+        /// <summary>
         /// 新增Project
         /// </summary>
 
@@ -267,6 +300,19 @@ namespace HC.AbpCore.Projects
                     .Select(c => new DropDownDto() { Text = c.Name+"("+c.ProjectCode+")", Value = c.Id.ToString() })
                     .ToListAsync();
             return entityList;
+        }
+
+        /// <summary>
+        /// 修改项目状态
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="projectStatus"></param>
+        /// <returns></returns>
+        public async Task ModifyProjectStatusAsync(EntityDto<Guid> input, ProjectStatus projectStatus)
+        {
+            var entity = await _entityRepository.GetAsync(input.Id);
+            entity.Status = projectStatus;
+            await _entityRepository.UpdateAsync(entity);
         }
 
         /// <summary>

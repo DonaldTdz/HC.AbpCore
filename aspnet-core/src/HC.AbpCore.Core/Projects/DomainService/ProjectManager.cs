@@ -61,7 +61,7 @@ namespace HC.AbpCore.Projects.DomainService
         public async Task ProjectStatusRemind(string accessToken, DingDingAppConfig dingDingAppConfig)
         {
             var url = string.Format("https://oapi.dingtalk.com/topapi/message/corpconversation/asyncsend_v2?access_token={0}", accessToken);
-            var projects =await _repository.GetAll().Where(aa => aa.Status != ProjectStatus.取消 && aa.Status != ProjectStatus.已回款).AsNoTracking().ToListAsync();
+            var projects =await _repository.GetAll().Where(aa => aa.Status != ProjectStatus.丢单 && aa.Status != ProjectStatus.已完成).AsNoTracking().ToListAsync();
             foreach (var project in projects)
             {
                 Message message = new Message();
