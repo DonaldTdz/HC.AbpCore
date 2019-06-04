@@ -231,13 +231,13 @@ namespace HC.AbpCore.Tenders
 
             entity = await _entityRepository.InsertAsync(entity);
             //添加到任务列表
-            await _taskRepository.InsertAsync(new CompletedTask() { Status = TaskStatusEnum.招标, IsCompleted = entity.IsPayBond, RefId = entity.Id, EmployeeId = entity.EmployeeId, ProjectId = entity.ProjectId, ClosingDate = entity.TenderTime.Value });
+            await _taskRepository.InsertAsync(new CompletedTask() { Status = TaskStatusEnum.招标, IsCompleted = entity.IsWinbid, RefId = entity.Id, EmployeeId = entity.EmployeeId, ProjectId = entity.ProjectId, ClosingDate = entity.TenderTime.Value });
             await _taskRepository.InsertAsync(new CompletedTask() { Status = TaskStatusEnum.招标保证金缴纳, IsCompleted = entity.IsPayBond, RefId = entity.Id, EmployeeId = entity.EmployeeId, ProjectId = entity.ProjectId, ClosingDate = entity.BondTime.Value });
             //await _taskRepository.InsertAsync(new CompletedTask() { Status = TaskStatusEnum.招标准备, IsCompleted = entity.IsReady, RefId = entity.Id, EmployeeId = entity.EmployeeId, ProjectId = entity.ProjectId,ClosingDate = entity.ReadyTime.Value });
             var employeeIds = entity.ReadyEmployeeIds.Split(",");
             foreach (var employeeId in employeeIds)
             {
-                await _taskRepository.InsertAsync(new CompletedTask() { Status = TaskStatusEnum.招标准备, IsCompleted = entity.IsPayBond, RefId = entity.Id, EmployeeId = employeeId, ProjectId = entity.ProjectId, ClosingDate = entity.ReadyTime.Value });
+                await _taskRepository.InsertAsync(new CompletedTask() { Status = TaskStatusEnum.招标准备, IsCompleted = entity.IsReady, RefId = entity.Id, EmployeeId = employeeId, ProjectId = entity.ProjectId, ClosingDate = entity.ReadyTime.Value });
             }
 
             return entity.MapTo<TenderEditDto>();

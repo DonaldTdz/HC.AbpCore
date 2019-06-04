@@ -20,6 +20,7 @@ using Abp.Application.Services.Dto;
 
 using HC.AbpCore.TimeSheets.Dtos;
 using HC.AbpCore.TimeSheets;
+using HC.AbpCore.Dtos;
 
 namespace HC.AbpCore.TimeSheets
 {
@@ -72,11 +73,18 @@ namespace HC.AbpCore.TimeSheets
         Task BatchDeleteAsync(List<Guid> input);
 
 
-		/// <summary>
+        /// <summary>
+        /// 提交审批
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="messageId">对应消息中心Id</param>
+        /// <returns></returns>
+        Task<APIResultDto> SubmitApproval(CreateOrUpdateTimeSheetInput input);
+        /// <summary>
         /// 导出TimeSheet为excel表
         /// </summary>
         /// <returns></returns>
-		//Task<FileDto> GetToExcel();
+        //Task<FileDto> GetToExcel();
 
     }
 }

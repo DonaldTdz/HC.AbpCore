@@ -41,8 +41,8 @@ namespace HC.AbpCore.TimeSheets.DomainService
         private readonly IRepository<Project, Guid> _projectRepository;
         private readonly IRepository<Employee, string> _employeeRepository;
         private readonly IRepository<TimeSheet,Guid> _repository;
+        private readonly IRepository<Message, Guid> _messageRepository;
         private readonly IDingTalkManager _dingTalkManager;
-        private readonly IMessageManager _messageManager;
 
         /// <summary>
         /// TimeSheet的构造方法
@@ -51,8 +51,8 @@ namespace HC.AbpCore.TimeSheets.DomainService
 			IRepository<TimeSheet, Guid> repository,
             IRepository<Project, Guid> projectRepository,
             IRepository<Employee, string> employeeRepository,
-            IDingTalkManager dingTalkManager,
-            IMessageManager messageManager
+            IRepository<Message, Guid> messageRepository,
+            IDingTalkManager dingTalkManager
 
         )
 		{
@@ -60,7 +60,7 @@ namespace HC.AbpCore.TimeSheets.DomainService
             _employeeRepository = employeeRepository;
             _projectRepository = projectRepository;
             _dingTalkManager = dingTalkManager;
-            _messageManager = messageManager;
+            _messageRepository = messageRepository;
         }
 
 
@@ -82,7 +82,6 @@ namespace HC.AbpCore.TimeSheets.DomainService
         /// <returns></returns>
         public async Task<ResultCode> SubmitApproval(TimeSheet item)
         {
-            //var timeSheet = await _repository.InsertAsync(item);
             ResultCode resultCode = new ResultCode();
             var config = await _dingTalkManager.GetDingDingConfigByAppAsync(DingDingAppEnum.智能办公);
             string accessToken = await _dingTalkManager.GetAccessTokenByAppAsync(DingDingAppEnum.智能办公);
@@ -169,34 +168,41 @@ namespace HC.AbpCore.TimeSheets.DomainService
                 // TODO:提醒人后期需要完善
                 var employeeIdList = await _employeeRepository.GetAll().Where(aa => aa.IsLeaderInDepts == "key:" + item.Department + "value:True").Select(aa => aa.Id)
                                      .Distinct().AsNoTracking().ToListAsync();
-                string employeeIds = string.Join(",", employeeIdList.ToArray());
-                Message message = new Message();
-                message.Content = string.Format("您好! 项目:{0}工时审批，员工:{1}，工作日期:{2},工时:{3},工作内容:{4}", item.ProjectName, item.Name, item.WorkeDate.ToString("yyyy-MM-dd"), item.Hour,item.Content);
-                message.SendTime = DateTime.Now;
-                message.Type = MessageTypeEnum.审批提醒;
-                message.IsRead = false;
-                DingMsgs dingMsgs = new DingMsgs();
-                dingMsgs.userid_list = employeeIds;
-                dingMsgs.to_all_user = false;
-                dingMsgs.agent_id = dingDingAppConfig.AgentID;
-                dingMsgs.msg.msgtype = "link";
-                dingMsgs.msg.link.title = "审批提醒";
-                dingMsgs.msg.link.text = string.Format("您好! 项目:{0}工时审批，员工:{1}，工作日期:{2},点击查看详情", item.ProjectName, item.Name, item.WorkeDate.ToString("yyyy-MM-dd"));
-                dingMsgs.msg.link.picUrl = "eapp://";
-                dingMsgs.msg.link.messageUrl = "eapp://";
-                var jsonString = SerializerHelper.GetJsonString(dingMsgs, null);
-                MessageResponseResult response = new MessageResponseResult();
-                using (MemoryStream ms = new MemoryStream())
+                //string employeeIds = string.Join(",", employeeIdList.ToArray());
+                foreach (var employeeId in employeeIdList)
                 {
-                    var bytes = Encoding.UTF8.GetBytes(jsonString);
-                    ms.Write(bytes, 0, bytes.Length);
-                    ms.Seek(0, SeekOrigin.Begin);
-                    response = Post.PostGetJson<MessageResponseResult>(url, null, ms);
-                };
-                //新增到消息中心
-                if (response.errcode == 0 && response.task_id != 0)
-                {
-                    await _messageManager.CreateByTaskId(response.task_id, message, dingDingAppConfig.AgentID, accessToken, employeeIdList);
+                    Message message = new Message();
+                    message.Content = string.Format("您好! 项目:{0}工时审批，员工:{1}，工作日期:{2},工时:{3},工作内容:{4}", item.ProjectName, item.Name, item.WorkeDate.ToString("yyyy-MM-dd"), item.Hour, item.Content);
+                    message.SendTime = DateTime.Now;
+                    message.Type = MessageTypeEnum.审批提醒;
+                    message.IsRead = false;
+                    message.EmployeeId = employeeId;
+                    //新增到消息中心
+                    var messageId = await _messageRepository.InsertAndGetIdAsync(message);
+
+                    DingMsgs dingMsgs = new DingMsgs();
+                    dingMsgs.userid_list = employeeId;
+                    dingMsgs.to_all_user = false;
+                    dingMsgs.agent_id = dingDingAppConfig.AgentID;
+                    dingMsgs.msg.msgtype = "link";
+                    dingMsgs.msg.link.title = "审批提醒";
+                    dingMsgs.msg.link.text = string.Format("您好! 项目:{0}工时审批，员工:{1}，工作日期:{2},点击查看详情", item.ProjectName, item.Name, item.WorkeDate.ToString("yyyy-MM-dd"));
+                    dingMsgs.msg.link.picUrl = "eapp://";
+                    dingMsgs.msg.link.messageUrl = "eapp://page/messages/detail-messages/detail-messages?id=" + messageId;
+                    var jsonString = SerializerHelper.GetJsonString(dingMsgs, null);
+                    MessageResponseResult response = new MessageResponseResult();
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        var bytes = Encoding.UTF8.GetBytes(jsonString);
+                        ms.Write(bytes, 0, bytes.Length);
+                        ms.Seek(0, SeekOrigin.Begin);
+                        response = Post.PostGetJson<MessageResponseResult>(url, null, ms);
+                    };
+                    //发送失败则自动删除消息中心对应数据
+                    if (response.errcode != 0)
+                    {
+                        await _messageRepository.DeleteAsync(messageId);
+                    }
                 }
             }
         }

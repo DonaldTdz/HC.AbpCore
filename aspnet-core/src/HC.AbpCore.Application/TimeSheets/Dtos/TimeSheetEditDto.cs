@@ -29,7 +29,7 @@ namespace HC.AbpCore.TimeSheets.Dtos
         /// <summary>
         /// EmployeeId
         /// </summary>
-        [Required(ErrorMessage = "EmployeeId不能为空")]
+        //[Required(ErrorMessage = "EmployeeId不能为空")]
         public string EmployeeId { get; set; }
 
 

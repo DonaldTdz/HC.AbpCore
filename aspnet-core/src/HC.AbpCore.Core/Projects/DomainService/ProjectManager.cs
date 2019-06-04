@@ -67,18 +67,19 @@ namespace HC.AbpCore.Projects.DomainService
                 Message message = new Message();
                 message.Content = string.Format("您好! 项目:{0}，当前进度为:{1},描述{2}", project.Name + "(" + project.ProjectCode + ")",project.Status.ToString(),project.Desc);
                 message.SendTime = DateTime.Now;
-                message.Type = MessageTypeEnum.审批提醒;
+                message.Type = MessageTypeEnum.项目进度提醒;
                 message.IsRead = false;
                 message.EmployeeId = project.EmployeeId;
+                message= await _message.InsertAsync(message);
                 DingMsgs dingMsgs = new DingMsgs();
                 dingMsgs.userid_list = project.EmployeeId;
                 dingMsgs.to_all_user = false;
                 dingMsgs.agent_id = dingDingAppConfig.AgentID;
                 dingMsgs.msg.msgtype = "link";
-                dingMsgs.msg.link.title = "审批提醒";
+                dingMsgs.msg.link.title = "项目进度提醒";
                 dingMsgs.msg.link.text = string.Format("您好! 项目:{0}，当前进度为:{1},点击查看详情", project.Name + "(" + project.ProjectCode + ")", project.Status.ToString());
                 dingMsgs.msg.link.picUrl = "eapp://";
-                dingMsgs.msg.link.messageUrl = "eapp://";
+                dingMsgs.msg.link.messageUrl = "eapp://page/messages/detail-messages/detail-messages?id="+message.Id;
                 var jsonString = SerializerHelper.GetJsonString(dingMsgs, null);
                 MessageResponseResult response = new MessageResponseResult();
                 using (MemoryStream ms = new MemoryStream())
@@ -88,10 +89,10 @@ namespace HC.AbpCore.Projects.DomainService
                     ms.Seek(0, SeekOrigin.Begin);
                     response = Post.PostGetJson<MessageResponseResult>(url, null, ms);
                 };
-                //新增到消息中心
-                if (response.errcode == 0 && response.task_id != 0)
+                //发送消息失败则删除消息中心对应数据
+                if (response.errcode != 0)
                 {
-                    await _message.InsertAsync(message);
+                    await _message.DeleteAsync(message.Id);
                 }
             }
         }

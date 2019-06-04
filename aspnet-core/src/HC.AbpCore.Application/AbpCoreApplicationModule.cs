@@ -73,7 +73,7 @@ namespace HC.AbpCore
            {
                trigger//.StartAt(new DateTimeOffset(startTime))
                 .StartNow()//一旦加入scheduler，立即生效
-                           .WithCronSchedule("0 0 9 ? * MON")//每周一上午9点
+                           .WithCronSchedule("0 37 18 * * ?")//每周一上午9点? * MON
                            .Build();
            }));
         }

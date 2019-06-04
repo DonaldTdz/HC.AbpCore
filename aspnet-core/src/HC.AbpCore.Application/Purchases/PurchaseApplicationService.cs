@@ -24,6 +24,7 @@ using HC.AbpCore.Purchases.DomainService;
 using HC.AbpCore.DingTalk.Employees;
 using HC.AbpCore.Projects;
 using HC.AbpCore.Dtos;
+using HC.AbpCore.Purchases.PurchaseDetails;
 
 namespace HC.AbpCore.Purchases
 {
@@ -34,6 +35,7 @@ namespace HC.AbpCore.Purchases
     public class PurchaseAppService : AbpCoreAppServiceBase, IPurchaseAppService
     {
         private readonly IRepository<Purchase, Guid> _entityRepository;
+        private readonly IRepository<PurchaseDetail, Guid> _purchaseDetailRepository;
         private readonly IRepository<Employee, string> _employeeRepository;
         private readonly IRepository<Project, Guid> _projectRepository;
         private readonly IPurchaseManager _entityManager;
@@ -43,11 +45,13 @@ namespace HC.AbpCore.Purchases
         ///</summary>
         public PurchaseAppService(
         IRepository<Purchase, Guid> entityRepository,
-         IRepository<Employee, string> employeeRepository,
-          IRepository<Project, Guid> projectRepository
-        , IPurchaseManager entityManager
+        IRepository<Employee, string> employeeRepository,
+        IRepository<Project, Guid> projectRepository,
+        IRepository<PurchaseDetail, Guid> purchaseDetailRepository,
+        IPurchaseManager entityManager
         )
         {
+            _purchaseDetailRepository = purchaseDetailRepository;
             _employeeRepository = employeeRepository;
             _projectRepository = projectRepository;
             _entityRepository = entityRepository;
@@ -86,7 +90,7 @@ namespace HC.AbpCore.Purchases
                                  EmployeeName = !String.IsNullOrEmpty(item.EmployeeId) ? employeeList.Where(bb => bb.Id == item.EmployeeId).FirstOrDefault().Name : null,
                                  CreationTime = item.CreationTime
                              };
-            var items =await entityList.OrderByDescending(aa => aa.PurchaseDate)
+            var items = await entityList.OrderByDescending(aa => aa.PurchaseDate)
                 .PageBy(input)
                 .ToListAsync();
 
@@ -177,6 +181,34 @@ namespace HC.AbpCore.Purchases
 
 
         /// <summary>
+        /// 添加Purchase以及PurchaseDetail的公共方法
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public async Task<APIResultDto> CreatePurchaseAndDetailAsync(CreatePurchaseAndDetailInput input)
+        {
+            var purchaseCount = await _entityRepository.GetAll().Where(aa => aa.Code == input.Purchase.Code).CountAsync();
+            if (purchaseCount > 0)
+                return new APIResultDto() { Code = 0, Msg = "保存失败,采购编号已存在" };
+
+            var entity = input.Purchase.MapTo<Purchase>();
+            entity = await _entityRepository.InsertAsync(entity);
+
+            foreach (var purchaseDetail in input.PurchaseDetails)
+            {
+                purchaseDetail.PurchaseId = entity.Id;
+                var detail = purchaseDetail.MapTo<PurchaseDetail>();
+                await _purchaseDetailRepository.InsertAsync(detail);
+            }
+            var item = entity.MapTo<PurchaseEditDto>();
+            if (entity != null)
+                return new APIResultDto() { Code = 1, Msg = "保存成功", Data = item };
+            else
+                return new APIResultDto() { Code = 0, Msg = "保存失败" };
+        }
+
+
+        /// <summary>
         /// 新增Purchase
         /// </summary>
         protected virtual async Task<APIResultDto> CreateAsync(PurchaseEditDto input)
@@ -194,7 +226,7 @@ namespace HC.AbpCore.Purchases
             var item = entity.MapTo<PurchaseEditDto>();
 
             if (entity != null)
-                return new APIResultDto() { Code = 1, Msg = "保存成功",Data=item };
+                return new APIResultDto() { Code = 1, Msg = "保存成功", Data = item };
             else
                 return new APIResultDto() { Code = 0, Msg = "保存失败" };
         }

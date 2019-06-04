@@ -20,6 +20,7 @@ using Abp.Application.Services.Dto;
 
 using HC.AbpCore.Tasks.Dtos;
 using HC.AbpCore.Tasks;
+using HC.AbpCore.Dtos;
 
 namespace HC.AbpCore.Tasks
 {
@@ -51,11 +52,11 @@ namespace HC.AbpCore.Tasks
 
 
         /// <summary>
-        /// 添加或者修改CompletedTask的公共方法
+        /// 添加或者修改CompletedTask的公共方法同时修改消息中心状态
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task CreateOrUpdateAsync(CreateOrUpdateCompletedTaskInput input);
+        Task<APIResultDto> CreateOrUpdateAsync(CreateOrUpdateCompletedTaskInput input);
 
 
         /// <summary>

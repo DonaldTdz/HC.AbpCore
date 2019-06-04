@@ -15,7 +15,7 @@ namespace HC.AbpCore.Projects.Dtos
         public ProjectEditDto Project { get; set; }
 
         /// <summary>
-        /// 项目详情
+        /// 项目明细
         /// </summary>
         public List<ProjectDetailEditDto> ProjectDetails { get; set; }
     }

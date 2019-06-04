@@ -60,6 +60,14 @@ namespace HC.AbpCore.Purchases
 
 
         /// <summary>
+        /// 添加Purchase以及PurchaseDetail的公共方法
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        Task<APIResultDto> CreatePurchaseAndDetailAsync(CreatePurchaseAndDetailInput input);
+
+
+        /// <summary>
         /// 删除Purchase信息的方法
         /// </summary>
         /// <param name="input"></param>

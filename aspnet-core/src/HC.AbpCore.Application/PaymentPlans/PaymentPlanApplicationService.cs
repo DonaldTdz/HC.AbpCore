@@ -210,28 +210,30 @@ namespace HC.AbpCore.PaymentPlans
                 account = await _accountRepository.GetAll().FirstOrDefaultAsync(aa => aa.RefId == input.Id.Value.ToString());
                 if (account != null)
                 {
-                    account.Initial = company.Balance;
+                    //account.Initial = company.Balance;
                     account.Amount = input.Amount;
-                    account.Ending = company.Balance + input.Amount;
+                    account.Ending = account.Initial + input.Amount;
                     account.Desc = input.Desc;
                     //更新账户流水
                     await _accountRepository.UpdateAsync(account);
-                    input.Amount -= entity.Amount;
+                    //input.Amount -= entity.Amount;
                 }
                 else
-                { 
-                account.CompanyId = company.Id;
-                account.Type = AccountType.入账;
-                account.Initial = company.Balance;
-                account.Amount = input.Amount;
-                account.Ending = company.Balance + input.Amount;
-                account.Desc = input.Desc;
-                account.RefId = input.Id.Value.ToString();
-                account.CreationTime = DateTime.Now;
-                //添加账户流水
-                await _accountRepository.InsertAsync(account);
+                {
+                    account.CompanyId =company.Id;
+                    account.Type = AccountType.入账;
+                    if (company.Balance.HasValue)
+                        account.Initial = company.Balance.Value;
+                    if (input.Amount.HasValue)
+                        account.Amount = input.Amount.Value;
+                    account.Ending = company.Balance + input.Amount;
+                    account.Desc = input.Desc;
+                    account.RefId = input.Id.Value.ToString();
+                    account.CreationTime = DateTime.Now;
+                    //添加账户流水
+                    await _accountRepository.InsertAsync(account);
                 }
-                company.Balance += input.Amount;
+                company.Balance = account.Ending;
                 //更新公司账户余额
                 await _companyRepository.UpdateAsync(company);
             }
@@ -249,7 +251,6 @@ namespace HC.AbpCore.PaymentPlans
                 }
             }
             input.MapTo(entity);
-
             // ObjectMapper.Map(input, entity);
             await _entityRepository.UpdateAsync(entity);
         }

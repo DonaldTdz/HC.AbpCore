@@ -30,7 +30,7 @@ namespace HC.AbpCore.PaymentPlans.DomainService
         private readonly IRepository<PaymentPlan, Guid> _repository;
         private readonly IRepository<Employee, string> _employeeRepository;
         private readonly IRepository<Project, Guid> _projectRepository;
-        private readonly IMessageManager _messageManager;
+        private readonly IRepository<Message, Guid> _messageRepository;
 
         /// <summary>
         /// PaymentPlan的构造方法
@@ -38,13 +38,13 @@ namespace HC.AbpCore.PaymentPlans.DomainService
         public PaymentPlanManager(
             IRepository<PaymentPlan, Guid> repository,
             IRepository<Employee, string> employeeRepository,
-            IMessageManager messageManager,
-            IRepository<Project, Guid> projectRepository
+            IRepository<Project, Guid> projectRepository,
+            IRepository<Message, Guid> messageRepository
         )
         {
+            _messageRepository = messageRepository;
             _projectRepository = projectRepository;
             _employeeRepository = employeeRepository;
-            _messageManager = messageManager;
             _repository = repository;
         }
 
@@ -82,38 +82,45 @@ namespace HC.AbpCore.PaymentPlans.DomainService
             var items = await paymentPlans.AsNoTracking().ToListAsync();
             var employeeIdList = await _employeeRepository.GetAll().Where(aa => aa.IsLeaderInDepts == "key:73354253value:True").Select(aa => aa.Id)
                 .Distinct().AsNoTracking().ToListAsync();
-            string employeeIds = string.Join(",", employeeIdList.ToArray());
+            //string employeeIds = string.Join(",", employeeIdList.ToArray());
             var url = string.Format("https://oapi.dingtalk.com/topapi/message/corpconversation/asyncsend_v2?access_token={0}", accessToken);
             foreach (var item in items)
             {
-                Message message = new Message();
-                message.Content = string.Format("您好! 项目:{0}计划回款时间即将达到，计划回款时间为:{1}", item.ProjectName, item.PlanTime.ToString("yyyy-MM-dd"));
-                message.SendTime = DateTime.Now;
-                message.Type = MessageTypeEnum.催款提醒;
-                message.IsRead = false;
-                DingMsgs dingMsgs = new DingMsgs();
-                dingMsgs.userid_list = employeeIds + "," + item.EmployeeId;
-                dingMsgs.to_all_user = false;
-                dingMsgs.agent_id = dingDingAppConfig.AgentID;
-                dingMsgs.msg.msgtype = "link";
-                dingMsgs.msg.link.title = "催款提醒";
-                dingMsgs.msg.link.text = string.Format("所属项目:{0}，点击查看详情", item.ProjectName, item.PlanTime.ToString("yyyy-MM-dd"));
-                dingMsgs.msg.link.picUrl = "eapp://";
-                dingMsgs.msg.link.messageUrl = "eapp://";
-                var jsonString = SerializerHelper.GetJsonString(dingMsgs, null);
-                MessageResponseResult response = new MessageResponseResult();
-                using (MemoryStream ms = new MemoryStream())
+                employeeIdList.Add(item.EmployeeId);
+                foreach (var employeeId in employeeIdList)
                 {
-                    var bytes = Encoding.UTF8.GetBytes(jsonString);
-                    ms.Write(bytes, 0, bytes.Length);
-                    ms.Seek(0, SeekOrigin.Begin);
-                    response = Post.PostGetJson<MessageResponseResult>(url, null, ms);
-                };
-                //新增到消息中心
-                if (response.errcode == 0 && response.task_id != 0)
-                {
-                    employeeIdList.Add(item.EmployeeId);
-                    await _messageManager.CreateByTaskId(response.task_id, message, dingDingAppConfig.AgentID, accessToken, employeeIdList);
+                    Message message = new Message();
+                    message.Content = string.Format("您好! 项目:{0}计划回款时间即将达到，计划回款时间为:{1}", item.ProjectName, item.PlanTime.ToString("yyyy-MM-dd"));
+                    message.SendTime = DateTime.Now;
+                    message.Type = MessageTypeEnum.催款提醒;
+                    message.IsRead = false;
+                    message.EmployeeId = employeeId;
+                    //新增到消息中心
+                    var messageId = await _messageRepository.InsertAndGetIdAsync(message);
+
+                    DingMsgs dingMsgs = new DingMsgs();
+                    dingMsgs.userid_list = employeeId;
+                    dingMsgs.to_all_user = false;
+                    dingMsgs.agent_id = dingDingAppConfig.AgentID;
+                    dingMsgs.msg.msgtype = "link";
+                    dingMsgs.msg.link.title = "催款提醒";
+                    dingMsgs.msg.link.text = string.Format("所属项目:{0}，点击查看详情", item.ProjectName, item.PlanTime.ToString("yyyy-MM-dd"));
+                    dingMsgs.msg.link.picUrl = "eapp://";
+                    dingMsgs.msg.link.messageUrl = "eapp://page/messages/detail-messages/detail-messages?id=" + messageId;
+                    var jsonString = SerializerHelper.GetJsonString(dingMsgs, null);
+                    MessageResponseResult response = new MessageResponseResult();
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        var bytes = Encoding.UTF8.GetBytes(jsonString);
+                        ms.Write(bytes, 0, bytes.Length);
+                        ms.Seek(0, SeekOrigin.Begin);
+                        response = Post.PostGetJson<MessageResponseResult>(url, null, ms);
+                    };
+                    //发送失败则自动删除消息中心对应数据
+                    if (response.errcode != 0)
+                    {
+                        await _messageRepository.DeleteAsync(messageId);
+                    }
                 }
             }
 

@@ -26,6 +26,8 @@ using HC.AbpCore.DingTalk.Employees;
 using Abp.Auditing;
 using HC.AbpCore.Tenders;
 using HC.AbpCore.CompletedTasks;
+using static HC.AbpCore.Projects.ProjectBase;
+using HC.AbpCore.Dtos;
 
 namespace HC.AbpCore.Tasks
 {
@@ -119,7 +121,7 @@ namespace HC.AbpCore.Tasks
 
 
             var project = await _projectRepository.GetAsync(entity.ProjectId);
-            var item= entity.MapTo<CompletedTaskListDto>();
+            var item = entity.MapTo<CompletedTaskListDto>();
             item.ProjectName = project.Name + "(" + project.ProjectCode + ")";
             return item;
         }
@@ -160,16 +162,16 @@ namespace HC.AbpCore.Tasks
         /// <returns></returns>
         [AbpAllowAnonymous]
         [Audited]
-        public async Task CreateOrUpdateAsync(CreateOrUpdateCompletedTaskInput input)
+        public async Task<APIResultDto> CreateOrUpdateAsync(CreateOrUpdateCompletedTaskInput input)
         {
-
+             
             if (input.CompletedTask.Id.HasValue)
             {
-                await UpdateAsync(input.CompletedTask);
+                return await UpdateAsync(input.CompletedTask, input.bond, input.isWinbid, input.messageId);
             }
             else
             {
-                await CreateAsync(input.CompletedTask);
+                return await CreateAsync(input.CompletedTask);
             }
         }
 
@@ -178,7 +180,7 @@ namespace HC.AbpCore.Tasks
         /// 新增CompletedTask
         /// </summary>
 
-        protected virtual async Task<CompletedTaskEditDto> CreateAsync(CompletedTaskEditDto input)
+        protected virtual async Task<APIResultDto> CreateAsync(CompletedTaskEditDto input)
         {
             //TODO:新增前的逻辑判断，是否允许新增
 
@@ -187,27 +189,52 @@ namespace HC.AbpCore.Tasks
 
 
             entity = await _entityRepository.InsertAsync(entity);
-            return entity.MapTo<CompletedTaskEditDto>();
+            entity.MapTo<CompletedTaskEditDto>();
+            return new APIResultDto() { Code = 0, Data = entity, Msg = "保存成功" };
         }
 
         /// <summary>
         /// 编辑CompletedTask
         /// </summary>
 
-        protected virtual async Task UpdateAsync(CompletedTaskEditDto input)
+        protected virtual async Task<APIResultDto> UpdateAsync(CompletedTaskEditDto input, string bond, bool? isWinbid, Guid? messageId)
         {
             //TODO:更新前的逻辑判断，是否允许更新
             var item = await _tenderRepository.GetAsync(input.RefId.Value);
-            
+
             if (input.Status == TaskStatusEnum.招标保证金缴纳)
-                item.IsPayBond = input.IsCompleted;
-            if (input.Status == TaskStatusEnum.招标准备)
             {
-                int incompleteCount = await _entityRepository.CountAsync(aa => aa.RefId == item.Id && aa.Status == TaskStatusEnum.招标准备 && aa.Id != input.Id&&aa.IsCompleted==false);
+                item.IsPayBond = input.IsCompleted;
+                if (!string.IsNullOrEmpty(bond))
+                    item.Bond = decimal.Parse(bond);
+                else
+                    return new APIResultDto() { Code = 2, Msg = "请输入保证金" };
+            }
+            else if (input.Status == TaskStatusEnum.招标准备)
+            {
+                int incompleteCount = await _entityRepository.CountAsync(aa => aa.RefId == item.Id && aa.Status == TaskStatusEnum.招标准备 && aa.Id != input.Id && aa.IsCompleted == false);
                 if (incompleteCount == 0)
                 {
                     item.IsReady = input.IsCompleted;
                 }
+            }
+            else if (input.Status == TaskStatusEnum.招标)
+            {
+                if (item.IsReady == true && item.IsPayBond == true)
+                {
+                    var project = await _projectRepository.GetAsync(input.ProjectId);
+                    project.Status = isWinbid == true ? ProjectStatus.合同 : ProjectStatus.丢单;
+                    await _projectRepository.UpdateAsync(project);
+                    item.IsWinbid = isWinbid;
+                }
+                else
+                {
+                    return new APIResultDto() { Code = 1, Msg = "请先完成招标准备与保证金缴纳" };
+                }
+            }
+            else
+            {
+
             }
             await _tenderRepository.UpdateAsync(item);
             var entity = await _entityRepository.GetAsync(input.Id.Value);
@@ -215,6 +242,7 @@ namespace HC.AbpCore.Tasks
 
             // ObjectMapper.Map(input, entity);
             await _entityRepository.UpdateAsync(entity);
+            return new APIResultDto() { Code = 0, Msg = "保存成功" };
         }
 
 

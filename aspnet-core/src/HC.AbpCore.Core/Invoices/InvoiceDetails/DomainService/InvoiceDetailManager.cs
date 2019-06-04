@@ -18,7 +18,7 @@ using Abp.Domain.Services;
 
 using HC.AbpCore;
 using HC.AbpCore.Invoices.InvoiceDetails;
-
+using Abp.AutoMapper;
 
 namespace HC.AbpCore.Invoices.InvoiceDetails.DomainService
 {
@@ -94,7 +94,7 @@ namespace HC.AbpCore.Invoices.InvoiceDetails.DomainService
         {
             //TODO:更新前的逻辑判断，是否允许更新
 
-            //var entity = await _repository.GetAsync(input.Id);
+            var entity = await _repository.GetAsync(input.Id);
             //修改合同金额
             if (input.InvoiceId.HasValue)
             {
@@ -102,13 +102,18 @@ namespace HC.AbpCore.Invoices.InvoiceDetails.DomainService
                 decimal detailAmount = 0;
                 if (input.Num.HasValue && input.Price.HasValue)
                     detailAmount = input.Num.Value * input.Price.Value;
-                invoice.Amount += detailAmount;
+                invoice.Amount += detailAmount-entity.Num.Value*entity.Price.Value;
                 await _invoicerepository.UpdateAsync(invoice);
             }
-
-
-            // ObjectMapper.Map(input, entity);
-            await _repository.UpdateAsync(input);
+            entity.Price = input.Price;
+            entity.Num = input.Num;
+            entity.Name = input.Name;
+            entity.RefId = input.RefId;
+            entity.Specification = input.Specification;
+            entity.TaxRate = input.TaxRate;
+            entity.Unit = input.Unit;
+            //ObjectMapper.Map(input, entity);
+            await _repository.UpdateAsync(entity);
         }
 
 

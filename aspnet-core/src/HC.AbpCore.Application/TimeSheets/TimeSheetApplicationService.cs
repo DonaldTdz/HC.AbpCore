@@ -25,6 +25,8 @@ using HC.AbpCore.Projects;
 using HC.AbpCore.DingTalk.Employees;
 using HC.AbpCore.Dtos;
 using Abp.Auditing;
+using Abp.Runtime.Session;
+using HC.AbpCore.Messages.DomainService;
 
 namespace HC.AbpCore.TimeSheets
 {
@@ -37,20 +39,24 @@ namespace HC.AbpCore.TimeSheets
         private readonly IRepository<TimeSheet, Guid> _entityRepository;
         private readonly IRepository<Project, Guid> _projectRepository;
         private readonly IRepository<Employee, string> _employeeRepository;
+        private readonly IMessageManager _messageManager;
         private readonly ITimeSheetManager _entityManager;
+   
 
         /// <summary>
         /// 构造函数 
         ///</summary>
         public TimeSheetAppService(
         IRepository<TimeSheet, Guid> entityRepository
-               , IRepository<Project, Guid> projectRepository
+        , IRepository<Project, Guid> projectRepository
         , IRepository<Employee, string> employeeRepository
+        , IMessageManager messageManager
         , ITimeSheetManager entityManager
         )
         {
+            _messageManager = messageManager;
             _entityRepository = entityRepository; 
-             _entityManager=entityManager;
+            _entityManager=entityManager;
             _projectRepository = projectRepository;
             _employeeRepository = employeeRepository;
         }
@@ -243,6 +249,8 @@ TimeSheetEditDto editDto;
         [Audited]
         public async Task<APIResultDto> SubmitApproval(CreateOrUpdateTimeSheetInput input)
         {
+            if (input.messageId.HasValue)
+                await _messageManager.ModifyDoReadById(input.messageId.Value);
             var item = input.TimeSheet.MapTo<TimeSheet>();
             //var reimburse = await CreateAsync(input.TimeSheet);
             var apiResult = await _entityManager.SubmitApproval(item);
