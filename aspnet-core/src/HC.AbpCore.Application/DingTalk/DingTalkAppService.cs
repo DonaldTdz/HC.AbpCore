@@ -87,7 +87,7 @@ namespace HC.AbpCore.DingTalk
             var accessToken = await _dingTalkManager.GetAccessTokenByAppAsync(DingDingAppEnum.智能办公);
             var ddConfig = await _dingTalkManager.GetDingDingConfigByAppAsync(DingDingAppEnum.智能办公);
             //项目进度提醒
-            //await _projectManager.ProjectStatusRemind(accessToken, ddConfig);
+            await _projectManager.ProjectStatusRemind(accessToken, ddConfig);
             //周报提醒  
             await _employeeManager.EmployeeWeeklyRemind(accessToken, ddConfig);
         }

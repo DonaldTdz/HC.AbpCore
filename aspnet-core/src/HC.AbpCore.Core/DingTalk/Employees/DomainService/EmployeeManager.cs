@@ -61,27 +61,27 @@ namespace HC.AbpCore.DingTalk.Employees.DomainService
             List<string> employeeIdList = await _repository.GetAll().Select(aa => aa.Id).Distinct().AsNoTracking().ToListAsync();
 
             //string employeeIds = string.Join(",", employeeIdList.ToArray());
-            //foreach (var employeeId in employeeIdList)
-            //{
+            foreach (var employeeId in employeeIdList)
+            {
                 List<string> employees = new List<string>();
                 Message message = new Message();
                 message.Content = "您好! 请按时填写上周周报并且提交审批";
                 message.SendTime = DateTime.Now;
                 message.Type = MessageTypeEnum.周报填写提醒;
                 message.IsRead = false;
-                message.EmployeeId = "155405465635858465";
+                message.EmployeeId = employeeId;
                 //新增到消息中心
                 var messageId = await _messageRepository.InsertAndGetIdAsync(message);
 
                 DingMsgs dingMsgs = new DingMsgs();
-                dingMsgs.userid_list = "155405465635858465";
+                dingMsgs.userid_list = employeeId;
                 dingMsgs.to_all_user = false;
                 dingMsgs.agent_id = dingDingAppConfig.AgentID;
                 dingMsgs.msg.msgtype = "link";
                 dingMsgs.msg.link.title = "周报填写提醒";
                 dingMsgs.msg.link.text = "您好!请按时填写上周周报并且提交审批,点击查看消息详情";
                 dingMsgs.msg.link.picUrl = "images/warn_y.png";
-                dingMsgs.msg.link.messageUrl = "eapp://page/timesheet/create-timesheet/create-timesheet?employeeId=" + "155405465635858465&messageId=" + messageId;
+                dingMsgs.msg.link.messageUrl = "eapp://page/timesheet/create-timesheet/create-timesheet?employeeId=" + employeeId + "&messageId=" + messageId;
                 var jsonString = SerializerHelper.GetJsonString(dingMsgs, null);
                 MessageResponseResult response = new MessageResponseResult();
                 using (MemoryStream ms = new MemoryStream())
@@ -91,10 +91,10 @@ namespace HC.AbpCore.DingTalk.Employees.DomainService
                     ms.Seek(0, SeekOrigin.Begin);
                     response = Post.PostGetJson<MessageResponseResult>(url, null, ms);
                 };
-            //发送失败则自动删除消息中心对应数据
-            if (response.errcode != 0)
-                await _messageRepository.DeleteAsync(messageId);
-          //}
+                //发送失败则自动删除消息中心对应数据
+                if (response.errcode != 0)
+                    await _messageRepository.DeleteAsync(messageId);
+            }
         }
 
 

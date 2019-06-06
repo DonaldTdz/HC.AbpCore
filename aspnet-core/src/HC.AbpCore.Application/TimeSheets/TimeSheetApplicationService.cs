@@ -77,7 +77,7 @@ namespace HC.AbpCore.TimeSheets
                .WhereIf(!String.IsNullOrEmpty(input.EmployeeId),aa=>aa.EmployeeId==input.EmployeeId);
             // TODO:根据传入的参数添加过滤条件
 
-            var counts = await query.CountAsync();
+            //var counts = await query.CountAsync();
 
             var projects = _projectRepository.GetAll();
             var employees = _employeeRepository.GetAll();
@@ -104,11 +104,12 @@ namespace HC.AbpCore.TimeSheets
 
 
             var count = await entityList.CountAsync();
-            var items = entityList
+            var items = await entityList
                 .OrderByDescending(aa => aa.WorkeDate)
-                .OrderBy(aa=>aa.Status)
+                .OrderBy(aa => aa.Status)
                 .PageBy(input)
-                .ToList();
+                .AsNoTracking()
+                .ToListAsync();
 
             return new PagedResultDto<TimeSheetListDto>(count, items);
 		}
