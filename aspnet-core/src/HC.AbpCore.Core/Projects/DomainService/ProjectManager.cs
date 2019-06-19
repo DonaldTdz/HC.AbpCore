@@ -69,10 +69,10 @@ namespace HC.AbpCore.Projects.DomainService
                 message.SendTime = DateTime.Now;
                 message.Type = MessageTypeEnum.项目进度提醒;
                 message.IsRead = false;
-                message.EmployeeId = project.EmployeeId;
+                message.EmployeeId = project.ProjectSalesId;
                 message= await _message.InsertAsync(message);
                 DingMsgs dingMsgs = new DingMsgs();
-                dingMsgs.userid_list = project.EmployeeId;
+                dingMsgs.userid_list = project.ProjectSalesId;
                 dingMsgs.to_all_user = false;
                 dingMsgs.agent_id = dingDingAppConfig.AgentID;
                 dingMsgs.msg.msgtype = "link";

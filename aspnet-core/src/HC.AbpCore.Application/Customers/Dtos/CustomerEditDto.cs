@@ -18,10 +18,10 @@ namespace  HC.AbpCore.Customers.Dtos
 
 
 
-		/// <summary>
-		/// Type
-		/// </summary>
-		public CustomerEnum Type { get; set; }
+        /// <summary>
+        /// Type
+        /// </summary>
+        public CustomerEnum Type { get; set; }
 
 
 
@@ -43,34 +43,6 @@ namespace  HC.AbpCore.Customers.Dtos
 		/// Tel
 		/// </summary>
 		public string Tel { get; set; }
-
-
-
-		/// <summary>
-		/// Contact
-		/// </summary>
-		public string Contact { get; set; }
-
-
-
-		/// <summary>
-		/// Position
-		/// </summary>
-		public string Position { get; set; }
-
-
-
-		/// <summary>
-		/// Phone
-		/// </summary>
-		public string Phone { get; set; }
-
-
-
-		/// <summary>
-		/// Desc
-		/// </summary>
-		public string Desc { get; set; }
 
 
 

@@ -223,7 +223,7 @@ namespace HC.AbpCore.Tasks
                 if (item.IsReady == true && item.IsPayBond == true)
                 {
                     var project = await _projectRepository.GetAsync(input.ProjectId);
-                    project.Status = isWinbid == true ? ProjectStatus.合同 : ProjectStatus.丢单;
+                    project.Status = isWinbid == true ? ProjectStatus.执行 : ProjectStatus.丢单;
                     await _projectRepository.UpdateAsync(project);
                     item.IsWinbid = isWinbid;
                 }

@@ -50,6 +50,7 @@ namespace HC.AbpCore.Customers
         /// <returns></returns>
         Task<GetCustomerForEditOutput> GetForEditAsync(NullableIdDto<int> input);
 
+
         /// <summary>
         /// 获取客户下拉列表
         /// </summary>

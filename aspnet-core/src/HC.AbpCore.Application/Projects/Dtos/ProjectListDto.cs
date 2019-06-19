@@ -41,22 +41,32 @@ namespace HC.AbpCore.Projects.Dtos
 		/// ProjectCode
 		/// </summary>
 		public string ProjectCode { get; set; }
-        
-		/// <summary>
-		/// Name
-		/// </summary>
-		public string Name { get; set; }
+
+        /// <summary>
+        /// ProjectSalesId
+        /// </summary>
+        public virtual string ProjectSalesId { get; set; }
+
+        /// <summary>
+        /// SalesAssistantId
+        /// </summary>
+        public virtual string SalesAssistantId { get; set; }
+
+        /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; set; }
         
         /// <summary>
         /// CustomerId
         /// </summary>
         public int? CustomerId { get; set; }
-        
+
         /// <summary>
-        /// EmployeeId
+        /// CustomerContact
         /// </summary>
-        public string EmployeeId { get; set; }
-        
+        public string CustomerContactId { get; set; }
+
         /// <summary>
         /// StartDate
         /// </summary>
@@ -68,29 +78,24 @@ namespace HC.AbpCore.Projects.Dtos
 		public DateTime? EndDate { get; set; }
         
 		/// <summary>
-		/// Year
-		/// </summary>
-		public int? Year { get; set; }
-        
-		/// <summary>
 		/// Budget
 		/// </summary>
 		public decimal? Budget { get; set; }
-        
-		/// <summary>
-		/// Status
-		/// </summary>
-		public ProjectStatus? Status { get; set; }
+
+        /// <summary>
+        /// ImplementMoney
+        /// </summary>
+        public virtual decimal? ImplementMoney { get; set; }
+
+        /// <summary>
+        /// Status
+        /// </summary>
+        public ProjectStatus? Status { get; set; }
         
 		/// <summary>
 		/// Desc
 		/// </summary>
 		public string Desc { get; set; }
-
-        /// <summary>
-        /// 负责人名称
-        /// </summary>
-        public string EmployeeName { get; set; }
 
         /// <summary>
         /// 客户名称
@@ -112,6 +117,12 @@ namespace HC.AbpCore.Projects.Dtos
         {
             get { return Status.ToString(); }
         }
-        
+
+        /// <summary>
+        /// 销售名称
+        /// </summary>
+        public string ProjectSalesName { get; set; }
+
+
     }
 }

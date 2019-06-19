@@ -43,11 +43,19 @@ namespace HC.AbpCore.Projects
 		/// </summary>
 		Task<ProjectListDto> GetByIdAsync(EntityDto<Guid> input);
 
+
         /// <summary>
         /// 获取项目下拉列表
         /// </summary>
         /// <returns></returns>
         Task<List<DropDownDto>> GetDropDownsAsync();
+
+
+        /// <summary>
+        /// 自动生成项目编号
+        /// </summary>
+        /// <returns></returns>
+        Task<string> GenerateProjectCodeAsync(string type);
 
 
         /// <summary>

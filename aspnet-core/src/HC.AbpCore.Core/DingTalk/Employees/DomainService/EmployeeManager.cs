@@ -58,7 +58,7 @@ namespace HC.AbpCore.DingTalk.Employees.DomainService
         public async Task EmployeeWeeklyRemind(string accessToken, DingDingAppConfig dingDingAppConfig)
         {
             var url = string.Format("https://oapi.dingtalk.com/topapi/message/corpconversation/asyncsend_v2?access_token={0}", accessToken);
-            List<string> employeeIdList = await _repository.GetAll().Select(aa => aa.Id).Distinct().AsNoTracking().ToListAsync();
+            List<string> employeeIdList = await _repository.GetAll().Where(aa=>aa.Department== "67209026").Select(aa => aa.Id).Distinct().AsNoTracking().ToListAsync();
 
             //string employeeIds = string.Join(",", employeeIdList.ToArray());
             foreach (var employeeId in employeeIdList)

@@ -22,6 +22,7 @@ using HC.AbpCore.Customers;
 using HC.AbpCore.Customers.Dtos;
 using HC.AbpCore.Customers.DomainService;
 using HC.AbpCore.Dtos;
+using Abp.Json;
 
 namespace HC.AbpCore.Customers
 {
@@ -70,8 +71,9 @@ namespace HC.AbpCore.Customers
             var count = await query.CountAsync();
 
             var entityList = await query
+               .OrderBy(input.Sorting)
                .OrderByDescending(aa => aa.CreationTime)
-               .OrderBy(input.Sorting).AsNoTracking()
+               .AsNoTracking()
                .PageBy(input)
                .ToListAsync();
             var entityListDtos = entityList.MapTo<List<CustomerListDto>>();
@@ -142,10 +144,10 @@ namespace HC.AbpCore.Customers
         protected virtual async Task<APIResultDto> CreateAsync(CustomerEditDto input)
         {
             //TODO:新增前的逻辑判断，是否允许新增
-            int customerCount = await _entityRepository.GetAll().Where(aa => aa.Name == input.Name).CountAsync();
-            if (customerCount > 0)
-                return new APIResultDto() { Code = 0, Msg = "该客户名称已存在" };
-
+            //判断客户名称是否重复
+            var count = await _entityRepository.CountAsync(aa => aa.Name == input.Name);
+            if(count>0)
+                return new APIResultDto() { Code = 0, Msg = "客户名称重复" };
 
             // var entity = ObjectMapper.Map <Customer>(input);
             var entity = input.MapTo<Customer>();
@@ -153,7 +155,7 @@ namespace HC.AbpCore.Customers
 
             entity = await _entityRepository.InsertAsync(entity);
             if (entity != null)
-                return new APIResultDto() { Code = 1, Msg = "保存成功" };
+                return new APIResultDto() { Code = 1, Msg = "保存成功",Data=entity };
             else
                 return new APIResultDto() { Code = 0, Msg = "保存失败" };
         }
@@ -166,11 +168,12 @@ namespace HC.AbpCore.Customers
             //TODO:更新前的逻辑判断，是否允许更新
 
             var entity = await _entityRepository.GetAsync(input.Id.Value);
-            if (entity.Name != input.Name)
+            //判断客户名称是否重复
+            if (input.Name != entity.Name)
             {
-                int customerCount = await _entityRepository.GetAll().Where(aa => aa.Name == input.Name).CountAsync();
-                if (customerCount > 0)
-                    return new APIResultDto() { Code = 0, Msg = "该客户名称已存在" };
+                var count = await _entityRepository.CountAsync(aa => aa.Name == input.Name);
+                if (count > 0)
+                    return new APIResultDto() { Code = 0, Msg = "客户名称重复" };
             }
 
             input.MapTo(entity);
@@ -178,7 +181,7 @@ namespace HC.AbpCore.Customers
             // ObjectMapper.Map(input, entity);
             entity = await _entityRepository.UpdateAsync(entity);
             if (entity != null)
-                return new APIResultDto() { Code = 1, Msg = "保存成功" };
+                return new APIResultDto() { Code = 1, Msg = "保存成功", Data = entity };
             else
                 return new APIResultDto() { Code = 0, Msg = "保存失败" };
         }
@@ -217,14 +220,19 @@ namespace HC.AbpCore.Customers
             return entity.MapTo<CustomerListDto>();
         }
 
+        /// <summary>
+        /// 获取客户下拉列表
+        /// </summary>
+        /// <returns></returns>
         public async Task<List<DropDownDto>> GetDropDownDtosAsync()
         {
-            var DropDownDtoList = await _entityRepository.GetAll().OrderBy(a => a.CreationTime).AsNoTracking()
+            var DropDownDtoList = await _entityRepository.GetAll()
+                .OrderByDescending(a => a.CreationTime).Distinct()
                 .Select(c => new DropDownDto()
                 {
                     Text = c.Name,
                     Value = c.Id.ToString()
-                }).ToListAsync();
+                }).AsNoTracking().ToListAsync();
             return DropDownDtoList;
         }
 

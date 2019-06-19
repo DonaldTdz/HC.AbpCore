@@ -97,15 +97,15 @@ namespace HC.AbpCore.Web.Host.Controllers
                 case "bpms_instance_change"://审批实例开始与结束，执行代码
                     #region 审批实例开始与结束，执行代码
                     string type = tb["type"].ToString();
-                    string title = tb["title"].ToString();
-                    string result = tb["result"].ToString();
-                    string processInstanceId = tb["processInstanceId"].ToString();
                     if (type == "start")//审批实例开始
                     {
-
+                        return;
                     }
                     else if (type == "finish")//审批实例结束
                     {
+                        string title = tb["title"].ToString();
+                        string result = tb["result"].ToString();
+                        string processInstanceId = tb["processInstanceId"].ToString();
                         if (title.Contains("报销"))
                         {
                             await _reimburseManager.UpdateReimburseByPIIdAsync(processInstanceId, result);
@@ -119,7 +119,7 @@ namespace HC.AbpCore.Web.Host.Controllers
                     }
                     else//审批实例终止
                     {
-
+                        return;
                     }
                     #endregion
                     break;
@@ -237,60 +237,16 @@ namespace HC.AbpCore.Web.Host.Controllers
         /// <param name="fileUrl"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<string> UploadMediaAsync(string fileUrl= @"C:\Users\Administrator\Desktop\hcpm\warn_y.png")
+        public async Task<OapiMediaUploadResponse> UploadMediaAsync()
         {
-            //OapiMediaUploadRequest
+            string path = "image/taskDefault.png";
+            DefaultDingTalkClient client = new DefaultDingTalkClient("https://oapi.dingtalk.com/media/upload");
+            OapiMediaUploadRequest request = new OapiMediaUploadRequest();
+            request.Type = "image";
+            request.Media = new FileItem(path);
             string accessToken = await _dingTalkManager.GetAccessTokenByAppAsync(DingDingAppEnum.智能办公);
-            var url = string.Format("https://oapi.dingtalk.com/media/upload?access_token={0}", accessToken);
-            //DingMediaRequest dingMediaRequest = new DingMediaRequest();
-            //dingMediaRequest.Media = new FileItem(fileUrl);
-            //dingMediaRequest.Type = "image";
-            //var jsonString = SerializerHelper.GetJsonString(dingMediaRequest, null);
-            //DingMediaResponse response = new DingMediaResponse();
-            //using (MemoryStream ms = new MemoryStream())
-            //{
-            //    var bytes = Encoding.UTF8.GetBytes(jsonString);
-            //    ms.Write(bytes, 0, bytes.Length);
-            //    ms.Seek(0, SeekOrigin.Begin);
-            //    response = Post.PostGetJson<DingMediaResponse>(url, null, ms);
-            //};
-            //return response;
-            //DefaultDingTalkClient client = new DefaultDingTalkClient("https://oapi.dingtalk.com/media/upload");
-            //OapiMediaUploadRequest request = new OapiMediaUploadRequest();
-            //request.Type="image";
-            //request.Media=new FileItem(fileUrl);
-            //OapiMediaUploadResponse response = client.Execute(request, accessToken);
-            //return response;
-            var result = string.Empty;
-            var request = (HttpWebRequest)WebRequest.Create(url);
-            var boundary = "----------" + DateTime.Now.Ticks.ToString("x");
-            request.ContentType = "multipart/form-data; boundary=" + boundary;
-            request.Method = "POST";
-            using (Stream requestStream = request.GetRequestStream())
-            {
-                byte[] boundarybytes = Encoding.UTF8.GetBytes("--" + boundary + "\r\n");
-                byte[] trailer = Encoding.UTF8.GetBytes("\r\n--" + boundary + "–-\r\n");
-                var filename = Path.GetFileName(fileUrl);
-                using (FileStream fs = new FileStream(fileUrl, FileMode.Open, FileAccess.Read))
-                {
-                    byte[] bArr = new byte[fs.Length];
-                    fs.Read(bArr, 0, bArr.Length);
-                    requestStream.Write(boundarybytes, 0, boundarybytes.Length);
-                    var header = $"Content-Disposition:form-data;name=\"media\";filename=\"{filename}\"\r\nfilelength=\"{fs.Length}\"\r\nContent-Type:application/octet-stream\r\n\r\n";
-                    byte[] postHeaderBytes = Encoding.UTF8.GetBytes(header.ToString());
-                    requestStream.Write(postHeaderBytes, 0, postHeaderBytes.Length);
-                    fs.Close();
-                    requestStream.Write(bArr, 0, bArr.Length);
-                    requestStream.Write(trailer, 0, trailer.Length);
-                }
-            }
-            var response = (HttpWebResponse)request.GetResponse();
-            var responseStream = response.GetResponseStream();
-            using (var streamReader = new StreamReader(response.GetResponseStream()))
-            {
-                result = streamReader.ReadToEnd();
-            }
-            return result;
+            OapiMediaUploadResponse response = client.Execute(request, accessToken);
+            return response;
         }
     }
 

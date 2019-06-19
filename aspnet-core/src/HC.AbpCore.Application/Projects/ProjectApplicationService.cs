@@ -28,6 +28,7 @@ using Abp.Auditing;
 using HC.AbpCore.Projects.ProjectDetails;
 using HC.AbpCore.Projects.ProjectDetails.DomainService;
 using static HC.AbpCore.Projects.ProjectBase;
+using HC.AbpCore.Customers.DomainService;
 
 namespace HC.AbpCore.Projects
 {
@@ -42,6 +43,7 @@ namespace HC.AbpCore.Projects
         private readonly IRepository<Employee, string> _employeeRepository;
         private readonly IProjectDetailManager _projectDetailManager;
         private readonly IProjectManager _entityManager;
+        private readonly ICustomerManager _customerManager;
 
         /// <summary>
         /// 构造函数 
@@ -50,10 +52,12 @@ namespace HC.AbpCore.Projects
         IRepository<Project, Guid> entityRepository,
         IRepository<Customer, int> customerRepository,
         IRepository<Employee, string> employeeRepository,
-        IProjectDetailManager projectDetailManager
+        IProjectDetailManager projectDetailManager,
+        ICustomerManager customerManager
         , IProjectManager entityManager
         )
         {
+            _customerManager = customerManager;
             _projectDetailManager = projectDetailManager;
             _entityRepository = entityRepository;
             _entityManager = entityManager;
@@ -74,8 +78,8 @@ namespace HC.AbpCore.Projects
             var query = _entityRepository.GetAll()
                 .WhereIf(!String.IsNullOrEmpty(input.Name), a => a.Name.Contains(input.Name))
                 .WhereIf(input.Status.HasValue, a => a.Status == input.Status.Value)
-                .WhereIf(input.CustomerId.HasValue,a=>a.CustomerId==input.CustomerId.Value)
-                .WhereIf(input.Id.HasValue,a=>a.Id==input.Id.Value);
+                .WhereIf(input.CustomerId.HasValue, a => a.CustomerId == input.CustomerId.Value)
+                .WhereIf(input.Id.HasValue, a => a.Id == input.Id.Value);
             // TODO:根据传入的参数添加过滤条件
 
             var customerList = await _customerRepository.GetAll().AsNoTracking().ToListAsync();
@@ -85,11 +89,11 @@ namespace HC.AbpCore.Projects
 
             var entityList = await query
                     .OrderBy(input.Sorting).AsNoTracking()
-                    .OrderByDescending(aa=>aa.CreationTime)
+                    .OrderByDescending(aa => aa.CreationTime)
                     .PageBy(input)
                     .Select(aa => new ProjectListDto()
                     {
-                        Id=aa.Id,
+                        Id = aa.Id,
                         Mode = aa.Mode,
                         ProfitRatio = aa.ProfitRatio,
                         BillCost = aa.BillCost,
@@ -98,12 +102,11 @@ namespace HC.AbpCore.Projects
                         Name = aa.Name,
                         StartDate = aa.StartDate,
                         EndDate = aa.EndDate,
-                        Year = aa.Year,
                         Budget = aa.Budget,
                         Status = aa.Status,
-                        Desc = aa.Desc,
+                        ImplementMoney = aa.ImplementMoney,
                         CustomerName = !aa.CustomerId.HasValue ? null : customerList.Where(bb => bb.Id == aa.CustomerId.Value).FirstOrDefault().Name,
-                        EmployeeName = String.IsNullOrEmpty(aa.EmployeeId) ? null : employeeList.Where(bb => bb.Id == aa.EmployeeId).FirstOrDefault().Name,
+                        ProjectSalesName = String.IsNullOrEmpty(aa.ProjectSalesId) ? null : employeeList.Where(bb => bb.Id == aa.ProjectSalesId).FirstOrDefault().Name,
                     })
                     .ToListAsync();
 
@@ -125,8 +128,8 @@ namespace HC.AbpCore.Projects
             var projectListDto = entity.MapTo<ProjectListDto>();
             if (projectListDto.CustomerId.HasValue)
                 projectListDto.CustomerName = (await _customerRepository.GetAsync(projectListDto.CustomerId.Value)).Name;
-            if (!String.IsNullOrEmpty(projectListDto.EmployeeId))
-                projectListDto.EmployeeName = (await _employeeRepository.GetAsync(projectListDto.EmployeeId)).Name;
+            if (!String.IsNullOrEmpty(projectListDto.ProjectSalesId))
+                projectListDto.ProjectSalesName = (await _employeeRepository.GetAsync(projectListDto.ProjectSalesId)).Name;
             return projectListDto;
         }
 
@@ -167,7 +170,6 @@ namespace HC.AbpCore.Projects
 
         public async Task<APIResultDto> CreateOrUpdateAsync(CreateOrUpdateProjectInput input)
         {
-
             if (input.Project.Id.HasValue)
             {
                 return await UpdateAsync(input.Project);
@@ -189,7 +191,7 @@ namespace HC.AbpCore.Projects
             var projectCount = await _entityRepository.GetAll().Where(aa => aa.ProjectCode == input.Project.ProjectCode).CountAsync();
             if (projectCount > 0)
                 return new APIResultDto() { Code = 0, Msg = "保存失败,项目编号已存在" };
-            
+
             var entity = input.Project.MapTo<Project>();
             entity = await _entityRepository.InsertAsync(entity);
 
@@ -227,7 +229,7 @@ namespace HC.AbpCore.Projects
             entity = await _entityRepository.InsertAsync(entity);
             var item = entity.MapTo<ProjectEditDto>();
             if (entity != null)
-                return new APIResultDto() { Code = 1, Msg = "保存成功",Data=item };
+                return new APIResultDto() { Code = 1, Msg = "保存成功", Data = item };
             else
                 return new APIResultDto() { Code = 0, Msg = "保存失败" };
             //return entity.MapTo<ProjectEditDto>();
@@ -252,10 +254,10 @@ namespace HC.AbpCore.Projects
             input.MapTo(entity);
 
             // ObjectMapper.Map(input, entity);
-            entity= await _entityRepository.UpdateAsync(entity);
+            entity = await _entityRepository.UpdateAsync(entity);
             var item = entity.MapTo<ProjectEditDto>();
             if (entity != null)
-                return new APIResultDto() { Code = 1, Msg = "保存成功",Data = item };
+                return new APIResultDto() { Code = 1, Msg = "保存成功", Data = item };
             else
                 return new APIResultDto() { Code = 0, Msg = "保存失败" };
         }
@@ -297,7 +299,7 @@ namespace HC.AbpCore.Projects
             var query = _entityRepository.GetAll();
             var entityList = await query
                     .OrderBy(a => a.CreationTime).AsNoTracking()
-                    .Select(c => new DropDownDto() { Text = c.Name+"("+c.ProjectCode+")", Value = c.Id.ToString() })
+                    .Select(c => new DropDownDto() { Text = c.Name + "(" + c.ProjectCode + ")", Value = c.Id.ToString() })
                     .ToListAsync();
             return entityList;
         }
@@ -314,6 +316,92 @@ namespace HC.AbpCore.Projects
             entity.Status = projectStatus;
             await _entityRepository.UpdateAsync(entity);
         }
+
+        /// <summary>
+        /// 自动生成项目编号
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public async Task<string> GenerateProjectCodeAsync(string type)
+        {
+            string projectCode = "";
+            if (!String.IsNullOrEmpty(type))
+            {
+                var project = await _entityRepository.GetAll().Where(aa => aa.Type == type).AsNoTracking().ToListAsync();
+                if (project?.Count > 0)
+                {
+                    projectCode = project.Max(aa => aa.ProjectCode);
+                }
+                switch (type)
+                {
+                    case "软件开发":
+                        if (!String.IsNullOrEmpty(projectCode))
+                        {
+                            var arr = projectCode.Split("-");
+                            projectCode = arr[0].ToString() + "-" + arr[1].ToString() + "-" + (long.Parse(arr[2]) + 1).ToString();
+                        }
+                        else
+                        {
+                            projectCode = "HC-R-" + DateTime.Now.ToString("yyMM") + "001";
+                        }
+                        break;
+                    case "系统集成":
+                        if (!String.IsNullOrEmpty(projectCode))
+                        {
+                            var arr = projectCode.Split("-");
+                            projectCode = arr[0].ToString() + "-" + arr[1].ToString() + "-" + (long.Parse(arr[2]) + 1).ToString();
+                        }
+                        else
+                        {
+                            projectCode = "HC-X-" + DateTime.Now.ToString("yyMM") + "001";
+                        }
+                        break;
+                    case "维保服务":
+                        if (!String.IsNullOrEmpty(projectCode))
+                        {
+                            var arr = projectCode.Split("-");
+                            projectCode = arr[0].ToString() + "-" + arr[1].ToString() + "-" + (long.Parse(arr[2]) + 1).ToString();
+                        }
+                        else
+                        {
+                            projectCode = "HC-W-" + DateTime.Now.ToString("yyMM") + "001";
+                        }
+                        break;
+                    case "内部需求":
+                        if (!String.IsNullOrEmpty(projectCode))
+                        {
+                            var arr = projectCode.Split("-");
+                            projectCode = arr[0].ToString() + "-" + arr[1].ToString() + "-" + (long.Parse(arr[2]) + 1).ToString();
+                        }
+                        else
+                        {
+                            projectCode = "HC-N-" + DateTime.Now.ToString("yyMM") + "001";
+                        }
+                        break;
+                    default:
+                        if (!String.IsNullOrEmpty(projectCode))
+                        {
+                            var arr = projectCode.Split("-");
+                            projectCode = arr[0].ToString() + "-" + arr[1].ToString() + "-" + (long.Parse(arr[2]) + 1).ToString();
+                        }
+                        else
+                        {
+                            projectCode = "HC-Y-" + DateTime.Now.ToString("yyMM") + "001";
+                        }
+                        break;
+                }
+
+            }
+            else
+            {
+                projectCode = "HC-R-" + DateTime.Now.ToString("yyMM") + "001";
+            }
+            return projectCode;
+
+        }
+
+
+
 
         /// <summary>
         /// 导出Project为excel表,等待开发。

@@ -67,13 +67,13 @@ namespace HC.AbpCore
 
             AsyncHelper.RunSync(() => jobManager.ScheduleAsync<MonSendWorkReminderMsgJob>(job =>
             {
-                job.WithIdentity("MondaySendWorkReminderMsgJob", "WorkGroup").WithDescription("A job to send msg.");
+                job.WithIdentity("MonSendWorkReminderMsgJob", "WorkGroup").WithDescription("A job to send msg.");
             },
            trigger =>
            {
                trigger//.StartAt(new DateTimeOffset(startTime))
                 .StartNow()//一旦加入scheduler，立即生效
-                           .WithCronSchedule("0 0 9 ? * MON")//每周一上午9点? * MON
+                           .WithCronSchedule("0 0 9 ? * MON")//每周一上午9点? * MON(周1)   WED(周3)
                            .Build();
            }));
         }

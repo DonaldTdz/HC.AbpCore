@@ -41,7 +41,7 @@ namespace HC.AbpCore.TimeSheets
         private readonly IRepository<Employee, string> _employeeRepository;
         private readonly IMessageManager _messageManager;
         private readonly ITimeSheetManager _entityManager;
-   
+
 
         /// <summary>
         /// 构造函数 
@@ -55,8 +55,8 @@ namespace HC.AbpCore.TimeSheets
         )
         {
             _messageManager = messageManager;
-            _entityRepository = entityRepository; 
-            _entityManager=entityManager;
+            _entityRepository = entityRepository;
+            _entityManager = entityManager;
             _projectRepository = projectRepository;
             _employeeRepository = employeeRepository;
         }
@@ -70,11 +70,11 @@ namespace HC.AbpCore.TimeSheets
         [AbpAllowAnonymous]
         [Audited]
         public async Task<PagedResultDto<TimeSheetListDto>> GetPagedAsync(GetTimeSheetsInput input)
-		{
+        {
 
-		    var query = _entityRepository.GetAll().WhereIf(input.ProjectId.HasValue,aa=>aa.ProjectId==input.ProjectId.Value)
+            var query = _entityRepository.GetAll().WhereIf(input.ProjectId.HasValue, aa => aa.ProjectId == input.ProjectId.Value)
                .WhereIf(input.Status.HasValue, aa => aa.Status == input.Status.Value)
-               .WhereIf(!String.IsNullOrEmpty(input.EmployeeId),aa=>aa.EmployeeId==input.EmployeeId);
+               .WhereIf(!String.IsNullOrEmpty(input.EmployeeId), aa => aa.EmployeeId == input.EmployeeId);
             // TODO:根据传入的参数添加过滤条件
 
             //var counts = await query.CountAsync();
@@ -112,7 +112,7 @@ namespace HC.AbpCore.TimeSheets
                 .ToListAsync();
 
             return new PagedResultDto<TimeSheetListDto>(count, items);
-		}
+        }
 
 
         /// <summary>
@@ -121,45 +121,45 @@ namespace HC.AbpCore.TimeSheets
         [AbpAllowAnonymous]
         [Audited]
         public async Task<TimeSheetListDto> GetByIdAsync(EntityDto<Guid> input)
-		{
-			var entity = await _entityRepository.GetAsync(input.Id);
+        {
+            var entity = await _entityRepository.GetAsync(input.Id);
 
-		    var item= entity.MapTo<TimeSheetListDto>();
+            var item = entity.MapTo<TimeSheetListDto>();
 
             var project = await _projectRepository.GetAsync(item.ProjectId);
             item.ProjectName = project.Name + "(" + project.ProjectCode + ")";
-            if(!String.IsNullOrEmpty(item.ApproverId))
+            if (!String.IsNullOrEmpty(item.ApproverId))
                 item.ApproverName = (await _employeeRepository.GetAsync(item.ApproverId)).Name;
             return item;
-		}
+        }
 
-		/// <summary>
-		/// 获取编辑 TimeSheet
-		/// </summary>
-		/// <param name="input"></param>
-		/// <returns></returns>
-		
-		public async Task<GetTimeSheetForEditOutput> GetForEditAsync(NullableIdDto<Guid> input)
-		{
-			var output = new GetTimeSheetForEditOutput();
-TimeSheetEditDto editDto;
+        /// <summary>
+        /// 获取编辑 TimeSheet
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
 
-			if (input.Id.HasValue)
-			{
-				var entity = await _entityRepository.GetAsync(input.Id.Value);
+        public async Task<GetTimeSheetForEditOutput> GetForEditAsync(NullableIdDto<Guid> input)
+        {
+            var output = new GetTimeSheetForEditOutput();
+            TimeSheetEditDto editDto;
 
-				editDto = entity.MapTo<TimeSheetEditDto>();
+            if (input.Id.HasValue)
+            {
+                var entity = await _entityRepository.GetAsync(input.Id.Value);
 
-				//timeSheetEditDto = ObjectMapper.Map<List<timeSheetEditDto>>(entity);
-			}
-			else
-			{
-				editDto = new TimeSheetEditDto();
-			}
+                editDto = entity.MapTo<TimeSheetEditDto>();
 
-			output.TimeSheet = editDto;
-			return output;
-		}
+                //timeSheetEditDto = ObjectMapper.Map<List<timeSheetEditDto>>(entity);
+            }
+            else
+            {
+                editDto = new TimeSheetEditDto();
+            }
+
+            output.TimeSheet = editDto;
+            return output;
+        }
 
 
         /// <summary>
@@ -167,77 +167,78 @@ TimeSheetEditDto editDto;
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
+        
         [AbpAllowAnonymous]
         [Audited]
         public async Task CreateOrUpdateAsync(CreateOrUpdateTimeSheetInput input)
-		{
+        {
 
-			if (input.TimeSheet.Id.HasValue)
-			{
-				await UpdateAsync(input.TimeSheet);
-			}
-			else
-			{
-				await CreateAsync(input.TimeSheet);
-			}
-		}
+            if (input.TimeSheet.Id.HasValue)
+            {
+                await UpdateAsync(input.TimeSheet);
+            }
+            else
+            {
+                await CreateAsync(input.TimeSheet);
+            }
+        }
 
 
-		/// <summary>
-		/// 新增TimeSheet
-		/// </summary>
-		
-		protected virtual async Task<TimeSheetEditDto> CreateAsync(TimeSheetEditDto input)
-		{
+        /// <summary>
+        /// 新增TimeSheet
+        /// </summary>
+
+        protected virtual async Task<TimeSheetEditDto> CreateAsync(TimeSheetEditDto input)
+        {
             //TODO:新增前的逻辑判断，是否允许新增
             // var entity = ObjectMapper.Map <TimeSheet>(input);
-            var entity=input.MapTo<TimeSheet>();
-			
-
-			entity = await _entityRepository.InsertAsync(entity);
-			return entity.MapTo<TimeSheetEditDto>();
-		}
-
-		/// <summary>
-		/// 编辑TimeSheet
-		/// </summary>
-		
-		protected virtual async Task UpdateAsync(TimeSheetEditDto input)
-		{
-			//TODO:更新前的逻辑判断，是否允许更新
-
-			var entity = await _entityRepository.GetAsync(input.Id.Value);
-			input.MapTo(entity);
-
-			// ObjectMapper.Map(input, entity);
-		    await _entityRepository.UpdateAsync(entity);
-		}
+            var entity = input.MapTo<TimeSheet>();
 
 
+            entity = await _entityRepository.InsertAsync(entity);
+            return entity.MapTo<TimeSheetEditDto>();
+        }
 
-		/// <summary>
-		/// 删除TimeSheet信息的方法
-		/// </summary>
-		/// <param name="input"></param>
-		/// <returns></returns>
-		
-		public async Task DeleteAsync(EntityDto<Guid> input)
-		{
-			//TODO:删除前的逻辑判断，是否允许删除
-			await _entityRepository.DeleteAsync(input.Id);
-		}
+        /// <summary>
+        /// 编辑TimeSheet
+        /// </summary>
+
+        protected virtual async Task UpdateAsync(TimeSheetEditDto input)
+        {
+            //TODO:更新前的逻辑判断，是否允许更新
+
+            var entity = await _entityRepository.GetAsync(input.Id.Value);
+            input.MapTo(entity);
+
+            // ObjectMapper.Map(input, entity);
+            await _entityRepository.UpdateAsync(entity);
+        }
 
 
 
-		/// <summary>
-		/// 批量删除TimeSheet的方法
-		/// </summary>
-		
-		public async Task BatchDeleteAsync(List<Guid> input)
-		{
-			// TODO:批量删除前的逻辑判断，是否允许删除
-			await _entityRepository.DeleteAsync(s => input.Contains(s.Id));
-		}
+        /// <summary>
+        /// 删除TimeSheet信息的方法
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+
+        public async Task DeleteAsync(EntityDto<Guid> input)
+        {
+            //TODO:删除前的逻辑判断，是否允许删除
+            await _entityRepository.DeleteAsync(input.Id);
+        }
+
+
+
+        /// <summary>
+        /// 批量删除TimeSheet的方法
+        /// </summary>
+
+        public async Task BatchDeleteAsync(List<Guid> input)
+        {
+            // TODO:批量删除前的逻辑判断，是否允许删除
+            await _entityRepository.DeleteAsync(s => input.Contains(s.Id));
+        }
 
 
 

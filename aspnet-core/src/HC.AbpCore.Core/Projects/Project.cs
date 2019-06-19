@@ -35,6 +35,16 @@ namespace HC.AbpCore.Projects
         [StringLength(50)]
         public virtual string ProjectCode { get; set; }
         /// <summary>
+        /// 项目销售
+        /// </summary>
+        [StringLength(50)]
+        public virtual string ProjectSalesId { get; set; }
+        /// <summary>
+        /// 销售助理
+        /// </summary>
+        [StringLength(50)]
+        public virtual string SalesAssistantId { get; set; }
+        /// <summary>
         /// 项目名称
         /// </summary>
         [StringLength(200)]
@@ -44,10 +54,9 @@ namespace HC.AbpCore.Projects
         /// </summary>
         public virtual int? CustomerId { get; set; }
         /// <summary>
-        /// 负责人（外键）
+        /// 所属客户联系人（外键）
         /// </summary>
-        [StringLength(50)]
-        public virtual string EmployeeId { get; set; }
+        public virtual int? CustomerContactId { get; set; }
         /// <summary>
         /// 开始日期
         /// </summary>
@@ -57,13 +66,13 @@ namespace HC.AbpCore.Projects
         /// </summary>
         public virtual DateTime? EndDate { get; set; }
         /// <summary>
-        /// 所属年
-        /// </summary>
-        public virtual int? Year { get; set; }
-        /// <summary>
         /// 预算金额
         /// </summary>
         public virtual decimal? Budget { get; set; }
+        /// <summary>
+        /// 执行金额
+        /// </summary>
+        public virtual decimal? ImplementMoney { get; set; }
         /// <summary>
         /// 项目状态 枚举（1 线索、2 立项、3、进行中、4、已完成、5 已回款、0 取消）
         /// </summary>

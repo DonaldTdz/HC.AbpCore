@@ -18,7 +18,7 @@ using Abp.Domain.Services;
 
 using HC.AbpCore;
 using HC.AbpCore.Customers;
-
+using HC.AbpCore.Common;
 
 namespace HC.AbpCore.Customers.DomainService
 {
@@ -48,8 +48,22 @@ namespace HC.AbpCore.Customers.DomainService
 		{
 			throw new NotImplementedException();
 		}
-        
+
         // TODO:编写领域业务代码
-        
+        //public async Task<ResultCode> UpdateContactById(int id, string Contact)
+        //{
+        //    var customer = await _repository.GetAsync(id);
+        //    if (customer != null && customer.Contact != Contact)
+        //    {
+        //        customer.Contact = Contact;
+        //        await _repository.UpdateAsync(customer);
+        //        return new ResultCode() { Code = 1, Msg = "成功" };
+        //    }
+        //    else
+        //    {
+        //        return new ResultCode() { Code = 0, Msg = "当前客户不存在" };
+        //    }
+        //}
+
     }
 }

@@ -73,7 +73,6 @@ namespace HC.AbpCore.Reimburses
         [Audited]
         public async Task<PagedResultDto<ReimburseListDto>> GetPagedAsync(GetReimbursesInput input)
         {
-
             var query = _entityRepository.GetAll().WhereIf(input.ProjectId.HasValue, aa => aa.ProjectId == input.ProjectId.Value)
                 .WhereIf(input.Status.HasValue, aa => aa.Status == input.Status.Value)
                 .WhereIf(!String.IsNullOrEmpty(input.EmployeeId), aa => aa.EmployeeId == input.EmployeeId);
@@ -113,17 +112,6 @@ namespace HC.AbpCore.Reimburses
                 .PageBy(input)
                 .AsNoTracking()
                 .ToListAsync();
-            //List<ReimburseListDto> reimburseListDto = new List<ReimburseListDto>();
-            //foreach (var item in items)
-            //{
-            //    if (!String.IsNullOrEmpty(item.ApproverId))
-            //    {
-            //        var approverIds = item.ApproverId.Split(",");
-            //        var employeesList = await employees.Where(aa => approverIds.Contains(aa.Id)).Select(aa => new { aa.Name }).AsNoTracking().ToListAsync();
-            //        item.ApproverName = String.Join(",", employeesList);
-            //    }
-            //    reimburseListDto.Add(item);
-            //}
             return new PagedResultDto<ReimburseListDto>(count, items);
         }
 

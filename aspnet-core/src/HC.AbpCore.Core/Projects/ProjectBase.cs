@@ -21,12 +21,12 @@ namespace HC.AbpCore.Projects
         /// </summary>
         public enum ProjectStatus
         {
-            立项 = 1,
-            招标 = 2,
-            合同 = 3,
-            收款 = 4,
+            线索 = 1,
+            立项 = 2,
+            招标 = 3,
+            执行 = 4,
             已完成 = 5,
-            丢单 = 6
+            丢单=6
         }
     }
 }

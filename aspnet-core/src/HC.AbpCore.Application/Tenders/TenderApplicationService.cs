@@ -253,7 +253,7 @@ namespace HC.AbpCore.Tenders
             if (input.IsWinbid.HasValue)
             {
                 var project = await _projectRepository.GetAsync(input.ProjectId);
-                project.Status = input.IsWinbid.Value == true ? ProjectStatus.合同 : ProjectStatus.丢单;
+                project.Status = input.IsWinbid.Value == true ? ProjectStatus.执行 : ProjectStatus.丢单;
                 await _projectRepository.UpdateAsync(project);
             }
 

@@ -2,12 +2,14 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using Abp.Application.Services.Dto;
+using Abp.AutoMapper;
 using Abp.Domain.Entities.Auditing;
 using HC.AbpCore.Projects;
 using static HC.AbpCore.Projects.ProjectBase;
 
 namespace  HC.AbpCore.Projects.Dtos
 {
+    [AutoMapFrom(typeof(Project))]
     public class ProjectEditDto: FullAuditedEntityDto<Guid?>
     {      
         
@@ -47,10 +49,24 @@ namespace  HC.AbpCore.Projects.Dtos
 
 
 
-		/// <summary>
-		/// Name
-		/// </summary>
-		public string Name { get; set; }
+        /// <summary>
+        /// ProjectSalesId
+        /// </summary>
+        public virtual string ProjectSalesId { get; set; }
+
+
+
+        /// <summary>
+        /// SalesAssistantId
+        /// </summary>
+        public virtual string SalesAssistantId { get; set; }
+
+
+
+        /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; set; }
 
 
 
@@ -61,17 +77,17 @@ namespace  HC.AbpCore.Projects.Dtos
 
 
 
-		/// <summary>
-		/// EmployeeId
-		/// </summary>
-		public string EmployeeId { get; set; }
+        /// <summary>
+        /// CustomerContact
+        /// </summary>
+        public string CustomerContactId { get; set; }
 
 
 
-		/// <summary>
-		/// StartDate
-		/// </summary>
-		public DateTime? StartDate { get; set; }
+        /// <summary>
+        /// StartDate
+        /// </summary>
+        public DateTime? StartDate { get; set; }
 
 
 
@@ -83,23 +99,23 @@ namespace  HC.AbpCore.Projects.Dtos
 
 
 		/// <summary>
-		/// Year
-		/// </summary>
-		public int? Year { get; set; }
-
-
-
-		/// <summary>
 		/// Budget
 		/// </summary>
 		public decimal? Budget { get; set; }
 
 
 
-		/// <summary>
-		/// Status
-		/// </summary>
-		public ProjectStatus? Status { get; set; }
+        /// <summary>
+        /// ImplementMoney
+        /// </summary>
+        public virtual decimal? ImplementMoney { get; set; }
+
+
+
+        /// <summary>
+        /// Status
+        /// </summary>
+        public ProjectStatus? Status { get; set; }
 
 
 
@@ -107,9 +123,5 @@ namespace  HC.AbpCore.Projects.Dtos
 		/// Desc
 		/// </summary>
 		public string Desc { get; set; }
-
-
-
-
     }
 }

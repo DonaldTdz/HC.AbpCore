@@ -76,7 +76,7 @@ namespace HC.AbpCore.PaymentPlans.DomainService
                                select new
                                {
                                    ProjectName = project.Name + "(" + project.ProjectCode + ")",
-                                   project.EmployeeId,
+                                   project.ProjectSalesId,
                                    paymentPlan.PlanTime
                                };
             var items = await paymentPlans.AsNoTracking().ToListAsync();
@@ -86,7 +86,7 @@ namespace HC.AbpCore.PaymentPlans.DomainService
             var url = string.Format("https://oapi.dingtalk.com/topapi/message/corpconversation/asyncsend_v2?access_token={0}", accessToken);
             foreach (var item in items)
             {
-                employeeIdList.Add(item.EmployeeId);
+                employeeIdList.Add(item.ProjectSalesId);
                 foreach (var employeeId in employeeIdList)
                 {
                     Message message = new Message();

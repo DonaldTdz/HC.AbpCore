@@ -38,26 +38,6 @@ namespace HC.AbpCore.Customers
         [StringLength(20)]
         public virtual string Tel { get; set; }
         /// <summary>
-        /// 联系人
-        /// </summary>
-        [StringLength(50)]
-        public virtual string Contact { get; set; }
-        /// <summary>
-        /// 联系人职位
-        /// </summary>
-        [StringLength(50)]
-        public virtual string Position { get; set; }
-        /// <summary>
-        /// 联系人电话
-        /// </summary>
-        [StringLength(20)]
-        public virtual string Phone { get; set; }
-        /// <summary>
-        /// 描述
-        /// </summary>
-        [StringLength(500)]
-        public virtual string Desc { get; set; }
-        /// <summary>
         /// 备注
         /// </summary>
         [StringLength(500)]

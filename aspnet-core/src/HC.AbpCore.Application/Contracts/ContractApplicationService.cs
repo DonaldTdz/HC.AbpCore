@@ -202,7 +202,7 @@ namespace HC.AbpCore.Contracts
             if (input.Type == ContractTypeEnum.销项)
             {
                 var project = await _projectRepository.GetAsync(input.RefId.Value);
-                project.Status = ProjectStatus.收款;
+                project.Status = ProjectStatus.执行;
                 await _projectRepository.UpdateAsync(project);
             }
             //判断合同编号是否重复
@@ -319,7 +319,7 @@ namespace HC.AbpCore.Contracts
             if (input.Contract.Type == ContractTypeEnum.销项)
             {
                 var project = await _projectRepository.GetAsync(input.Contract.RefId.Value);
-                project.Status = ProjectStatus.收款;
+                project.Status = ProjectStatus.执行;
                 await _projectRepository.UpdateAsync(project);
             }
             var item = entity.MapTo<ContractEditDto>();

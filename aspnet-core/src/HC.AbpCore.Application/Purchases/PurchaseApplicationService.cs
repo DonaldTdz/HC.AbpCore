@@ -303,7 +303,9 @@ namespace HC.AbpCore.Purchases
         /// <returns></returns>
         public async Task<string> GetPurchaseCodeAsync(PurchaseTypeEnum type)
         {
-            var purchases = await _entityRepository.GetAll().Where(aa => aa.Type == type && aa.CreationTime >= DateTime.Now.Date && aa.CreationTime <= DateTime.Now.Date.AddDays(1)).AsNoTracking().ToListAsync();
+            var purchases = await _entityRepository.GetAll()
+                .Where(aa => aa.Type == type && aa.CreationTime >= DateTime.Now.Date && aa.CreationTime <= DateTime.Now.Date.AddDays(1))
+                .AsNoTracking().ToListAsync();
             var code = purchases.Max(aa => aa.Code);
             if (!String.IsNullOrEmpty(code))
             {
