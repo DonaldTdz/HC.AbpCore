@@ -22,30 +22,9 @@ namespace HC.AbpCore.Projects.ProjectDetails.Dtos
 
 
 		/// <summary>
-		/// Type
-		/// </summary>
-		public string Type { get; set; }
-
-
-
-		/// <summary>
 		/// Name
 		/// </summary>
 		public string Name { get; set; }
-
-
-
-		/// <summary>
-		/// Specification
-		/// </summary>
-		public string Specification { get; set; }
-
-
-
-		/// <summary>
-		/// Unit
-		/// </summary>
-		public string Unit { get; set; }
 
 
 
@@ -60,13 +39,6 @@ namespace HC.AbpCore.Projects.ProjectDetails.Dtos
 		/// Price
 		/// </summary>
 		public decimal? Price { get; set; }
-
-
-
-		/// <summary>
-		/// ProductId
-		/// </summary>
-		public int? ProductId { get; set; }
 
 
 

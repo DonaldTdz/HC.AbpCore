@@ -13,6 +13,7 @@ namespace HC.AbpCore.DataDictionarys
             报销分类 = 3,
             公共配置=4,
             税率=5,
+            招标=6,
         }
     }
 }

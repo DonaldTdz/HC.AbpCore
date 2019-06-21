@@ -102,7 +102,7 @@ namespace HC.AbpCore.Projects
         /// <param name="input"></param>
         /// <param name="projectStatus"></param>
         /// <returns></returns>
-        Task ModifyProjectStatusAsync(EntityDto<Guid> input, ProjectStatus projectStatus);
+        Task ModifyProjectStatusAsync(Guid id, int projectStatus);
 
         /// <summary>
         /// 导出Project为excel表

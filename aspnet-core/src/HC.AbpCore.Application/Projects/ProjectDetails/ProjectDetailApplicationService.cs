@@ -41,7 +41,7 @@ namespace HC.AbpCore.Projects.ProjectDetails
         ///</summary>
         public ProjectDetailAppService(
         IRepository<ProjectDetail, Guid> entityRepository
-          //IRepository<Product, int> productRepository
+        //IRepository<Product, int> productRepository
         , IProjectDetailManager entityManager
         )
         {
@@ -60,9 +60,8 @@ namespace HC.AbpCore.Projects.ProjectDetails
         public async Task<PagedResultDto<ProjectDetailListDto>> GetPagedAsync(GetProjectDetailsInput input)
         {
 
-            var query = _entityRepository.GetAll().WhereIf(input.ProjectId.HasValue,aa=>aa.ProjectId==input.ProjectId.Value)
-                .WhereIf(!String.IsNullOrEmpty(input.Name),aa=>aa.Name.Contains(input.Name))
-                .WhereIf(!String.IsNullOrEmpty(input.Type),aa=>aa.Type==input.Type);
+            var query = _entityRepository.GetAll().WhereIf(input.ProjectId.HasValue, aa => aa.ProjectId == input.ProjectId.Value)
+                .WhereIf(!String.IsNullOrEmpty(input.Name), aa => aa.Name.Contains(input.Name));
             // TODO:根据传入的参数添加过滤条件
 
             var count = await query.CountAsync();
@@ -73,25 +72,22 @@ namespace HC.AbpCore.Projects.ProjectDetails
                     //.PageBy(input)
                     .ToListAsync();
 
-            List<ProjectDetailListDto> projectDetailListDtos = new List<ProjectDetailListDto>();
-            decimal? totalSum=0;
-            decimal? totalQuantity = 0;
-            if (count > 0)
-            {
-                foreach (var item in entityList)
-                {
-                    ProjectDetailListDto projectDetailListDto = item.MapTo<ProjectDetailListDto>();
-                    projectDetailListDto.TotalSum = projectDetailListDto.Num * projectDetailListDto.Price;
-                    totalSum += projectDetailListDto.TotalSum;
-                    totalQuantity += projectDetailListDto.Num;
-                    projectDetailListDtos.Add(projectDetailListDto);
-                }
-                ProjectDetailListDto entity = new ProjectDetailListDto();
-                entity.Name = "合计";
-                entity.Num = totalQuantity;
-                entity.TotalSum = totalSum;
-                projectDetailListDtos.Add(entity);
-            }
+            List<ProjectDetailListDto> projectDetailListDtos = entityList.MapTo<List<ProjectDetailListDto>>();
+            //decimal? totalSum = 0;
+            //if (count > 0)
+            //{
+            //    foreach (var item in entityList)
+            //    {
+            //        ProjectDetailListDto projectDetailListDto = item.MapTo<ProjectDetailListDto>();
+            //        projectDetailListDto.TotalSum = projectDetailListDto.Num * projectDetailListDto.Price;
+            //        totalSum += projectDetailListDto.TotalSum;
+            //        projectDetailListDtos.Add(projectDetailListDto);
+            //    }
+            //    ProjectDetailListDto entity = new ProjectDetailListDto();
+            //    entity.Name = "合计";
+            //    entity.TotalSum = totalSum;
+            //    projectDetailListDtos.Add(entity);
+            //}
 
             // var entityListDtos = ObjectMapper.Map<List<ProjectDetailListDto>>(entityList);
             //var entityListDtos = entityList.MapTo<List<ProjectDetailListDto>>();
@@ -146,16 +142,15 @@ namespace HC.AbpCore.Projects.ProjectDetails
         /// <param name="input"></param>
         /// <returns></returns>
 
-        public async Task CreateOrUpdateAsync(CreateOrUpdateProjectDetailInput input)
+        public async Task<ProjectDetailEditDto> CreateOrUpdateAsync(CreateOrUpdateProjectDetailInput input)
         {
-
             if (input.ProjectDetail.Id.HasValue)
             {
-                await UpdateAsync(input.ProjectDetail);
+                return await UpdateAsync(input.ProjectDetail);
             }
             else
             {
-                await CreateAsync(input.ProjectDetail);
+                return await CreateAsync(input.ProjectDetail);
             }
         }
 
@@ -167,60 +162,20 @@ namespace HC.AbpCore.Projects.ProjectDetails
         protected virtual async Task<ProjectDetailEditDto> CreateAsync(ProjectDetailEditDto input)
         {
             //TODO:新增前的逻辑判断，是否允许新增
-
-            // var entity = ObjectMapper.Map <ProjectDetail>(input);
             var entity = input.MapTo<ProjectDetail>();
-            var ProjectDetail = await _entityManager.CreateAsync(entity);
-            return ProjectDetail.MapTo<ProjectDetailEditDto>();
-            //更新产品表
-            //if(input.Type=="商品采购")
-            //{
-            //    if (input.ProductId.HasValue)
-            //    {
-            //        var product = await _productRepository.GetAsync(input.ProductId.Value);
-            //        if (product.Unit != input.Unit)
-            //        {
-            //            product.Unit = input.Unit;
-            //            await _productRepository.UpdateAsync(product);
-            //        }
-            //    }
-            //    else
-            //    {
-            //        input.ProductId = await _productRepository.InsertAndGetIdAsync(new Product() { Name = input.Name.Trim(), Specification = input.Specification.Trim(),Unit=input.Unit, Type = 0, IsEnabled = true, CreationTime = DateTime.Now });
-            //    }
-            //}
-
-            //var entity = input.MapTo<ProjectDetail>();
-
-
-            //entity = await _entityRepository.InsertAsync(entity);
-            //return entity.MapTo<ProjectDetailEditDto>();
+            entity = await _entityRepository.InsertAsync(entity);
+            return entity.MapTo<ProjectDetailEditDto>();
         }
 
         /// <summary>
         /// 编辑ProjectDetail
         /// </summary>
 
-        protected virtual async Task UpdateAsync(ProjectDetailEditDto input)
+        protected virtual async Task<ProjectDetailEditDto> UpdateAsync(ProjectDetailEditDto input)
         {
             var entity = input.MapTo<ProjectDetail>();
-            await _entityManager.UpdateAsync(entity);
-            //TODO:更新前的逻辑判断，是否允许更新
-            //if (input.ProductId.HasValue)
-            //{
-            //    var product = await _productRepository.GetAsync(input.ProductId.Value);
-            //    if (product.Unit != input.Unit)
-            //    {
-            //        product.Unit = input.Unit;
-            //        await _productRepository.UpdateAsync(product);
-            //    }
-            //}
-
-            //var entity = await _entityRepository.GetAsync(input.Id.Value);
-            //input.MapTo(entity);
-
-            //// ObjectMapper.Map(input, entity);
-            //await _entityRepository.UpdateAsync(entity);
+            entity = await _entityRepository.UpdateAsync(entity);
+            return entity.MapTo<ProjectDetailEditDto>();
         }
 
 
@@ -259,10 +214,24 @@ namespace HC.AbpCore.Projects.ProjectDetails
             var query = _entityRepository.GetAll();
             var entityList = await query
                     .OrderBy(a => a.CreationTime).AsNoTracking()
-                    .Where(aa=>aa.ProjectId==projectId)
+                    .Where(aa => aa.ProjectId == projectId)
                     .Select(c => new DropDownDto() { Text = c.Name, Value = c.Id.ToString() })
                     .ToListAsync();
             return entityList;
+        }
+
+        /// <summary>
+        /// 批量新增
+        /// </summary>
+        /// <param name="inputs"></param>
+        /// <returns></returns>
+        public async Task BatchCreateAsync(BatchCreateProjectDetailInput inputs)
+        {
+            foreach (var item in inputs.ProjectDetails)
+            {
+                var entity = item.MapTo<ProjectDetail>();
+                await _entityRepository.InsertAsync(entity);
+            }
         }
 
         /// <summary>

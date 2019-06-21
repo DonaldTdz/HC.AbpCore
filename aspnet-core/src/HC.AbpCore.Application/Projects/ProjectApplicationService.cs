@@ -199,7 +199,7 @@ namespace HC.AbpCore.Projects
             {
                 projectDetail.ProjectId = entity.Id;
                 var detail = projectDetail.MapTo<ProjectDetail>();
-                await _projectDetailManager.CreateAsync(detail);
+                //await _projectDetailManager.CreateAsync(detail);
             }
             var item = entity.MapTo<ProjectEditDto>();
             if (entity != null)
@@ -310,10 +310,10 @@ namespace HC.AbpCore.Projects
         /// <param name="input"></param>
         /// <param name="projectStatus"></param>
         /// <returns></returns>
-        public async Task ModifyProjectStatusAsync(EntityDto<Guid> input, ProjectStatus projectStatus)
+        public async Task ModifyProjectStatusAsync(Guid id,int projectStatus)
         {
-            var entity = await _entityRepository.GetAsync(input.Id);
-            entity.Status = projectStatus;
+            var entity = await _entityRepository.GetAsync(id);
+            entity.Status = (ProjectStatus)Enum.ToObject(typeof(ProjectStatus), projectStatus);
             await _entityRepository.UpdateAsync(entity);
         }
 

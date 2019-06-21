@@ -107,7 +107,7 @@ namespace HC.AbpCore.Suppliers
                             PurchaseCode = purchase.Code,
                             PurchaseDate = purchase.PurchaseDate,
                             PurchaseName = tem.Name,
-                            Specification = tem.Specification
+                            //Specification = tem.Specification
                         };
             var count = await items.CountAsync();
             var entity =await items.OrderByDescending(aa => aa.PurchaseDate)

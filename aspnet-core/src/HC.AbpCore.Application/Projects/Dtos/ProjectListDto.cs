@@ -45,12 +45,12 @@ namespace HC.AbpCore.Projects.Dtos
         /// <summary>
         /// ProjectSalesId
         /// </summary>
-        public virtual string ProjectSalesId { get; set; }
+        public string ProjectSalesId { get; set; }
 
         /// <summary>
         /// SalesAssistantId
         /// </summary>
-        public virtual string SalesAssistantId { get; set; }
+        public string SalesAssistantId { get; set; }
 
         /// <summary>
         /// Name
@@ -65,7 +65,7 @@ namespace HC.AbpCore.Projects.Dtos
         /// <summary>
         /// CustomerContact
         /// </summary>
-        public string CustomerContactId { get; set; }
+        public int? CustomerContactId { get; set; }
 
         /// <summary>
         /// StartDate

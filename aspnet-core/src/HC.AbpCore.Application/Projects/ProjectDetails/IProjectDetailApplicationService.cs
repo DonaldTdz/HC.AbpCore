@@ -56,7 +56,15 @@ namespace HC.AbpCore.Projects.ProjectDetails
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task CreateOrUpdateAsync(CreateOrUpdateProjectDetailInput input);
+        Task<ProjectDetailEditDto> CreateOrUpdateAsync(CreateOrUpdateProjectDetailInput input);
+
+
+        /// <summary>
+        /// 批量新增
+        /// </summary>
+        /// <param name="inputs"></param>
+        /// <returns></returns>
+        Task BatchCreateAsync(BatchCreateProjectDetailInput inputs);
 
 
         /// <summary>

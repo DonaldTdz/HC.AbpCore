@@ -1,6 +1,7 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Abp;
 using Abp.Domain.Services;
@@ -22,14 +23,14 @@ namespace HC.AbpCore.Projects.ProjectDetails.DomainService
         /// </summary>
         /// <param name="projectDetail"></param>
         /// <returns></returns>
-        Task<ProjectDetail> CreateAsync(ProjectDetail projectDetail);
+        //Task<ProjectDetail> CreateAsync(List<ProjectDetail> projectDetails);
 
         /// <summary>
         /// 编辑
         /// </summary>
         /// <param name="projectDetail"></param>
         /// <returns></returns>
-        Task<ProjectDetail> UpdateAsync(ProjectDetail projectDetail);
+        //Task<ProjectDetail> UpdateAsync(ProjectDetail projectDetail);
 
 
 
