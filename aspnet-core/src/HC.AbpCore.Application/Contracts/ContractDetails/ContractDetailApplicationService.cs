@@ -38,7 +38,6 @@ namespace HC.AbpCore.Contracts.ContractDetails
         private readonly IRepository<Contract, Guid> _contractRepository;
         private readonly IRepository<ProjectDetail, Guid> _projectDetailRepository;
         private readonly IRepository<PurchaseDetail, Guid> _purchaseDetailRepository;
-
         private readonly IContractDetailManager _entityManager;
 
         /// <summary>
@@ -71,8 +70,6 @@ namespace HC.AbpCore.Contracts.ContractDetails
 
             var query = _entityRepository.GetAll().WhereIf(input.ContractId.HasValue,aa=>aa.ContractId==input.ContractId.Value);
             // TODO:根据传入的参数添加过滤条件
-            var projectDetails = await _projectDetailRepository.GetAll().AsNoTracking().ToListAsync();
-            var purchaseDetails = await _purchaseDetailRepository.GetAll().AsNoTracking().ToListAsync();
 
             var count = await query.CountAsync();
 
@@ -83,31 +80,8 @@ namespace HC.AbpCore.Contracts.ContractDetails
                     .ToListAsync();
 
             // var entityListDtos = ObjectMapper.Map<List<ContractDetailListDto>>(entityList);
-            List<ContractDetailListDto> contractDetailListDtos = new List<ContractDetailListDto>();
-            foreach (var item in entityList)
-            {
-                var contractDetailListDto = item.MapTo<ContractDetailListDto>();
-                if (contractDetailListDto.RefDetailId.HasValue)
-                {
-                    if (input.Type == ContractTypeEnum.销项)
-                    {
-                        contractDetailListDto.RefDetailName = projectDetails.Where(aa => aa.Id == contractDetailListDto.RefDetailId.Value).FirstOrDefault()!=null? projectDetails.Where(aa => aa.Id == contractDetailListDto.RefDetailId.Value).FirstOrDefault().Name:null;
-                    }
-                    else
-                    {
-                        var projectDetailId = purchaseDetails.Where(aa => aa.Id == contractDetailListDto.RefDetailId.Value).FirstOrDefault()!=null? purchaseDetails.Where(aa => aa.Id == contractDetailListDto.RefDetailId.Value).FirstOrDefault().ProjectDetailId:null;
-                        if (projectDetailId.HasValue)
-                            contractDetailListDto.RefDetailName = projectDetails.Where(aa => aa.Id == projectDetailId.Value).FirstOrDefault()!=null? projectDetails.Where(aa => aa.Id == projectDetailId.Value).FirstOrDefault().Name:null;
-                        else
-                            contractDetailListDto.RefDetailName = null;
-                    }
-                }
-                else
-                {
-                    contractDetailListDto.RefDetailName = null;
-                }
-                contractDetailListDtos.Add(contractDetailListDto);
-            }
+            //List<ContractDetailListDto> contractDetailListDtos = new List<ContractDetailListDto>();
+            var contractDetailListDtos = entityList.MapTo<List<ContractDetailListDto>>();
 
             return new PagedResultDto<ContractDetailListDto>(count,contractDetailListDtos);
         }
@@ -159,16 +133,16 @@ namespace HC.AbpCore.Contracts.ContractDetails
         /// <param name="input"></param>
         /// <returns></returns>
 
-        public async Task CreateOrUpdateAsync(CreateOrUpdateContractDetailInput input)
+        public async Task<ContractDetail> CreateOrUpdateAsync(CreateOrUpdateContractDetailInput input)
         {
 
             if (input.ContractDetail.Id.HasValue)
             {
-                await UpdateAsync(input.ContractDetail);
+                return await UpdateAsync(input.ContractDetail);
             }
             else
             {
-                await CreateAsync(input.ContractDetail);
+                return await CreateAsync(input.ContractDetail);
             }
         }
 
@@ -193,7 +167,7 @@ namespace HC.AbpCore.Contracts.ContractDetails
         /// 编辑ContractDetail
         /// </summary>
 
-        protected virtual async Task UpdateAsync(ContractDetailEditDto input)
+        protected virtual async Task<ContractDetail> UpdateAsync(ContractDetailEditDto input)
         {
             //TODO:更新前的逻辑判断，是否允许更新
 
@@ -201,7 +175,8 @@ namespace HC.AbpCore.Contracts.ContractDetails
             var entity = input.MapTo<ContractDetail>();
 
             // ObjectMapper.Map(input, entity);
-            await _entityManager.UpdateAsync(entity);
+            entity = await _entityManager.UpdateAsync(entity);
+            return entity;
         }
 
 
@@ -230,6 +205,15 @@ namespace HC.AbpCore.Contracts.ContractDetails
             await _entityRepository.DeleteAsync(s => input.Contains(s.Id));
         }
 
+        public async Task BatchCreateAsync(BatchCreateContractDetail input)
+        {
+            foreach (var contractDetail in input.ContractDetails)
+            {
+                contractDetail.ContractId = input.ContractId;
+                var detail = contractDetail.MapTo<ContractDetail>();
+                await _entityManager.CreateAsync(detail);
+            }
+        }
 
         /// <summary>
         /// 导出ContractDetail为excel表,等待开发。

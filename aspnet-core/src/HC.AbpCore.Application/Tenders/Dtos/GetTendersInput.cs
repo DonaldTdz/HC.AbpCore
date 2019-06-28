@@ -25,10 +25,5 @@ namespace HC.AbpCore.Tenders.Dtos
         /// </summary>
         public Guid? ProjectId { get; set; }
 
-        /// <summary>
-        /// 查询条件-负责人
-        /// </summary>
-        public string EmployeeId { get; set; }
-
     }
 }

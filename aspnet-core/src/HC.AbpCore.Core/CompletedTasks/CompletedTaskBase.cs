@@ -11,6 +11,6 @@ namespace HC.AbpCore.CompletedTasks
 
     public enum TaskStatusEnum
     {
-        招标保证金缴纳=1,招标准备=2,招标=3,
+        购买标书=1,招标准备=2
     }
 }

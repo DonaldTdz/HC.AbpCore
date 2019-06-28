@@ -80,25 +80,25 @@ namespace HC.AbpCore.Invoices.InvoiceDetails
             foreach (var item in entityList)
             {
                 var InvoiceDetailListDto = item.MapTo<InvoiceDetailListDto>();
-                if (InvoiceDetailListDto.RefId.HasValue)
-                {
-                    if (input.Type == InvoiceTypeEnum.销项)
-                    {
-                        InvoiceDetailListDto.RefName = projectDetails.Where(aa => aa.Id == InvoiceDetailListDto.RefId.Value).FirstOrDefault() != null ? projectDetails.Where(aa => aa.Id == InvoiceDetailListDto.RefId.Value).FirstOrDefault().Name : null;
-                    }
-                    else
-                    {
-                        var projectDetailId = purchaseDetails.Where(aa => aa.Id == InvoiceDetailListDto.RefId.Value).FirstOrDefault() != null ? purchaseDetails.Where(aa => aa.Id == InvoiceDetailListDto.RefId.Value).FirstOrDefault().ProjectDetailId : null;
-                        if (projectDetailId.HasValue)
-                            InvoiceDetailListDto.RefName = projectDetails.Where(aa => aa.Id == projectDetailId.Value).FirstOrDefault() != null ? projectDetails.Where(aa => aa.Id == projectDetailId.Value).FirstOrDefault().Name : null;
-                        else
-                            InvoiceDetailListDto.RefName = null;
-                    }
-                }
-                else
-                {
-                    InvoiceDetailListDto.RefName = null;
-                }
+                //if (InvoiceDetailListDto.RefId.HasValue)
+                //{
+                //    if (input.Type == InvoiceTypeEnum.销项)
+                //    {
+                //        InvoiceDetailListDto.RefName = projectDetails.Where(aa => aa.Id == InvoiceDetailListDto.RefId.Value).FirstOrDefault() != null ? projectDetails.Where(aa => aa.Id == InvoiceDetailListDto.RefId.Value).FirstOrDefault().Name : null;
+                //    }
+                //    else
+                //    {
+                //        var projectDetailId = purchaseDetails.Where(aa => aa.Id == InvoiceDetailListDto.RefId.Value).FirstOrDefault() != null ? purchaseDetails.Where(aa => aa.Id == InvoiceDetailListDto.RefId.Value).FirstOrDefault().ProjectDetailId : null;
+                //        if (projectDetailId.HasValue)
+                //            InvoiceDetailListDto.RefName = projectDetails.Where(aa => aa.Id == projectDetailId.Value).FirstOrDefault() != null ? projectDetails.Where(aa => aa.Id == projectDetailId.Value).FirstOrDefault().Name : null;
+                //        else
+                //            InvoiceDetailListDto.RefName = null;
+                //    }
+                //}
+                //else
+                //{
+                //    InvoiceDetailListDto.RefName = null;
+                //}
                 InvoiceDetailListDtos.Add(InvoiceDetailListDto);
             }
 

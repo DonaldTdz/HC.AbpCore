@@ -15,25 +15,14 @@ namespace HC.AbpCore.Invoices.InvoiceDetails
         /// </summary>
         public virtual Guid? InvoiceId { get; set; }
         /// <summary>
-        /// 项目明细或采购明细Id
+        /// 名称
         /// </summary>
-        public virtual Guid? RefId { get; set; }
-        /// <summary>
-        /// 劳务或服务名称
-        /// </summary>
-        [StringLength(50)]
-        [Required]
         public virtual string Name { get; set; }
         /// <summary>
         /// 规格型号
         /// </summary>
         [StringLength(200)]
         public virtual string Specification { get; set; }
-        /// <summary>
-        /// 单位
-        /// </summary>
-        [StringLength(50)]
-        public virtual string Unit { get; set; }
         /// <summary>
         /// 数量
         /// </summary>
@@ -43,10 +32,22 @@ namespace HC.AbpCore.Invoices.InvoiceDetails
         /// </summary>
         public virtual decimal? Price { get; set; }
         /// <summary>
+        /// 金额
+        /// </summary>
+        public virtual decimal? Amount { get; set; }
+        /// <summary>
         /// 税率 数据字典配置，如：16%
         /// </summary>
         [StringLength(50)]
         public virtual string TaxRate { get; set; }
+        /// <summary>
+        /// 税额
+        /// </summary>
+        public virtual decimal? TaxAmount { get; set; }
+        /// <summary>
+        /// 合计
+        /// </summary>
+        public virtual decimal? TotalAmount { get; set; }
     }
 
 }

@@ -18,17 +18,33 @@ namespace  HC.AbpCore.Contracts.ContractDetails.Dtos
 
 
 
-		/// <summary>
-		/// RefDetailId
-		/// </summary>
-		public Guid? RefDetailId { get; set; }
+        /// <summary>
+        /// Name
+        /// </summary>
+        [StringLength(100)]
+        public string Name { get; set; }
 
 
 
-		/// <summary>
-		/// DeliveryDate
-		/// </summary>
-		public DateTime? DeliveryDate { get; set; }
+        /// <summary>
+        /// Model
+        /// </summary>
+        [StringLength(100)]
+        public string Model { get; set; }
+
+
+
+        /// <summary>
+        /// Num
+        /// </summary>
+        public int? Num { get; set; }
+
+
+
+        /// <summary>
+        /// Price
+        /// </summary>
+        public decimal? Price { get; set; }
 
 
 

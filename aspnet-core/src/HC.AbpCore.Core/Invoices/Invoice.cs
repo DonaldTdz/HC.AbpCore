@@ -11,12 +11,6 @@ namespace HC.AbpCore.Invoices
     public class Invoice : FullAuditedEntity<Guid> //注意修改主键Id数据类型
     {
         /// <summary>
-        /// 发票抬头（根据客户名称带过来 可修改）
-        /// </summary>
-        [StringLength(200)]
-        [Required]
-        public virtual string Title { get; set; }
-        /// <summary>
         /// 发票分类 枚举（1 销项、2 进项）销项标书销售合同发票， 进项表示采购发票
         /// </summary>
         [Required]
@@ -35,11 +29,6 @@ namespace HC.AbpCore.Invoices
         /// 开票日期
         /// </summary>
         public virtual DateTime? SubmitDate { get; set; }
-        /// <summary>
-        /// 发票附件 多个 逗号分开
-        /// </summary>
-        [StringLength(500)]
-        public virtual string Attachments { get; set; }
         /// <summary>
         /// 引用Id （项目Id，采购Id）
         /// </summary>

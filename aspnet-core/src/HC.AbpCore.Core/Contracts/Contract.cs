@@ -24,12 +24,6 @@ namespace HC.AbpCore.Contracts
         public virtual string ContractCode { get; set; }
 
         /// <summary>
-        /// 编号分类   主要用来生成编号
-        /// </summary>
-        [Required]
-        public virtual CodeTypeEnum CodeType { get; set; }
-
-        /// <summary>
         /// 项目合同 为 项目Id  采购合同为采购单Id
         /// </summary>
         public virtual Guid? RefId { get; set; }
@@ -42,10 +36,18 @@ namespace HC.AbpCore.Contracts
         /// </summary>
         public virtual decimal? Amount { get; set; }
         /// <summary>
-        /// 合同描述
+        /// 合同拟写
+        /// </summary>
+        public virtual int ContractDrafting { get; set; }
+        /// <summary>
+        /// 原件回收情况
+        /// </summary>
+        public virtual int OriginalRecycling { get; set; }
+        /// <summary>
+        /// 原件附件 多个 逗号分隔
         /// </summary>
         [StringLength(500)]
-        public virtual string Desc { get; set; }
+        public virtual string OriginalAnnex { get; set; }
         /// <summary>
         /// 合同附件 多个 逗号分隔
         /// </summary>

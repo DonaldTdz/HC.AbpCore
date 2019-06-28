@@ -32,6 +32,7 @@ using HC.AbpCore.Messages;
 using System.Threading.Tasks;
 using HC.AbpCore.Tasks;
 using HC.AbpCore.Customers.CustomerContacts;
+using HC.AbpCore.Implements;
 
 namespace HC.AbpCore.EntityFrameworkCore
 {
@@ -99,5 +100,7 @@ namespace HC.AbpCore.EntityFrameworkCore
         public virtual DbSet<CompletedTask> CompletedTasks { get; set; }
 
         public virtual DbSet<CustomerContact> CustomerContacts { get; set; }
+
+        public virtual DbSet<Implement> Implements { get; set; }
     }
 }

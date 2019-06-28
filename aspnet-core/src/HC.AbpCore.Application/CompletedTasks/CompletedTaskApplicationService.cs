@@ -202,7 +202,7 @@ namespace HC.AbpCore.Tasks
             //TODO:更新前的逻辑判断，是否允许更新
             var item = await _tenderRepository.GetAsync(input.RefId.Value);
 
-            if (input.Status == TaskStatusEnum.招标保证金缴纳)
+            if (input.Status == TaskStatusEnum.招标准备)
             {
                 item.IsPayBond = input.IsCompleted;
                 if (!string.IsNullOrEmpty(bond))
@@ -218,14 +218,14 @@ namespace HC.AbpCore.Tasks
                     item.IsReady = input.IsCompleted;
                 }
             }
-            else if (input.Status == TaskStatusEnum.招标)
+            else if (input.Status == TaskStatusEnum.购买标书)
             {
                 if (item.IsReady == true && item.IsPayBond == true)
                 {
                     var project = await _projectRepository.GetAsync(input.ProjectId);
                     project.Status = isWinbid == true ? ProjectStatus.执行 : ProjectStatus.丢单;
                     await _projectRepository.UpdateAsync(project);
-                    item.IsWinbid = isWinbid;
+                    //item.IsWinbid = isWinbid;
                 }
                 else
                 {

@@ -164,6 +164,8 @@ namespace HC.AbpCore.PaymentPlans
             //TODO:新增前的逻辑判断，是否允许新增
 
             // var entity = ObjectMapper.Map <PaymentPlan>(input);
+            if (input.Status == PaymentPlanStatusEnum.已回款)
+                input.PaymentTime = DateTime.Now;
             var entity = input.MapTo<PaymentPlan>();
             entity = await _entityRepository.InsertAsync(entity);
             //TODO:新增后关联操作
@@ -178,7 +180,7 @@ namespace HC.AbpCore.PaymentPlans
                     Initial = company.Balance,
                     Amount = input.Amount,
                     Ending = company.Balance + input.Amount,
-                    Desc = input.Desc,
+                    //Desc = input.Desc,
                     RefId = entity.Id.ToString(),
                     CreationTime = DateTime.Now
                 };
@@ -206,16 +208,17 @@ namespace HC.AbpCore.PaymentPlans
             Account account = new Account();
             if (input.Status == PaymentPlanStatusEnum.已回款)
             {
+                input.PaymentTime = DateTime.Now;
                 Company company = await _companyRepository.GetAll().FirstOrDefaultAsync();
-                account = await _accountRepository.GetAll().FirstOrDefaultAsync(aa => aa.RefId == input.Id.Value.ToString());
-                if (account != null)
+                var item = await _accountRepository.GetAll().FirstOrDefaultAsync(aa => aa.RefId == input.Id.Value.ToString());
+                if (item != null)
                 {
                     //account.Initial = company.Balance;
-                    account.Amount = input.Amount;
-                    account.Ending = account.Initial + input.Amount;
-                    account.Desc = input.Desc;
+                    item.Amount = input.Amount;
+                    item.Ending = item.Initial + input.Amount;
+                    //account.Desc = input.Desc;
                     //更新账户流水
-                    await _accountRepository.UpdateAsync(account);
+                    await _accountRepository.UpdateAsync(item);
                     //input.Amount -= entity.Amount;
                 }
                 else
@@ -227,7 +230,7 @@ namespace HC.AbpCore.PaymentPlans
                     if (input.Amount.HasValue)
                         account.Amount = input.Amount.Value;
                     account.Ending = company.Balance + input.Amount;
-                    account.Desc = input.Desc;
+                    //account.Desc = input.Desc;
                     account.RefId = input.Id.Value.ToString();
                     account.CreationTime = DateTime.Now;
                     //添加账户流水

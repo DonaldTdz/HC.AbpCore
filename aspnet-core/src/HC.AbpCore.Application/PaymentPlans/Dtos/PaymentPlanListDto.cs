@@ -28,10 +28,18 @@ namespace HC.AbpCore.PaymentPlans.Dtos
 
 
 
-		/// <summary>
-		/// Desc
+        /// <summary>
+		/// Ratio
 		/// </summary>
-		public string Desc { get; set; }
+		[Required(ErrorMessage = "回款比率不能为空")]
+        public int Ratio { get; set; }
+
+
+
+        /// <summary>
+        /// PaymentCondition
+        /// </summary>
+        public string PaymentCondition { get; set; }
 
 
 

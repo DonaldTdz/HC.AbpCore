@@ -41,7 +41,7 @@ namespace HC.AbpCore.Contracts
 		/// <summary>
 		/// 通过指定id获取ContractListDto信息
 		/// </summary>
-		Task<ContractListDto> GetByIdAsync(EntityDto<Guid> input);
+		Task<ContractListDto> GetByIdAsync(Guid? id, Guid? projectId);
 
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace HC.AbpCore.Contracts
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<APIResultDto> CreateContractAndDetailAsync(CreateContractAndDetailInput input);
+        //Task<APIResultDto> CreateContractAndDetailAsync(CreateContractAndDetailInput input);
 
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace HC.AbpCore.Contracts
         /// </summary>
         /// <param name="CodeType"></param>
         /// <returns></returns>
-        Task<string> GetContractCodeAsync(CodeTypeEnum CodeType);
+        Task<string> GetContractCodeAsync(ContractTypeEnum type);
 
         /// <summary>
         /// 导出Contract为excel表

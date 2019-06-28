@@ -67,7 +67,7 @@ namespace HC.AbpCore.Invoices
         public async Task<PagedResultDto<InvoiceListDto>> GetPagedAsync(GetInvoicesInput input)
         {
 
-            var query = _entityRepository.GetAll().WhereIf(!String.IsNullOrEmpty(input.Title), aa => aa.Title.Contains(input.Title))
+            var query = _entityRepository.GetAll()
                 .WhereIf(!String.IsNullOrEmpty(input.Code), aa => aa.Code.Contains(input.Code))
                 .WhereIf(input.Type.HasValue, aa => aa.Type == input.Type)
                 .WhereIf(input.RefId.HasValue, aa => aa.RefId == input.RefId.Value);

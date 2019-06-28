@@ -74,26 +74,7 @@ namespace HC.AbpCore.Contracts.ContractDetails.DomainService
             if (input.ContractId.HasValue)
             {
                 var contract = await _contractRepository.GetAsync(input.ContractId.Value);
-                decimal detailAmount = 0;
-                ProjectDetail projectDetail = new ProjectDetail();
-                if (input.RefDetailId.HasValue)
-                {
-                    if (contract.Type == ContractTypeEnum.销项)
-                    {
-                        projectDetail = await _projectDetailRepository.GetAsync(input.RefDetailId.Value);
-                        if (projectDetail.Num.HasValue && projectDetail.Price.HasValue)
-                            detailAmount = projectDetail.Num.Value * projectDetail.Price.Value;
-                    }
-                    else
-                    {
-                        var purchaseDetail = await _purchaseDetailRepository.GetAsync(input.RefDetailId.Value);
-                        if (purchaseDetail.ProjectDetailId.HasValue)
-                            projectDetail = await _projectDetailRepository.GetAsync(purchaseDetail.ProjectDetailId.Value);
-                        if (projectDetail.Num.HasValue && purchaseDetail.Price.HasValue)
-                            detailAmount = projectDetail.Num.Value * purchaseDetail.Price.Value;
-                    }
-                }
-                contract.Amount += detailAmount;
+                contract.Amount += input.Num * input.Price;
                 await _contractRepository.UpdateAsync(contract);
             }
 
@@ -108,41 +89,21 @@ namespace HC.AbpCore.Contracts.ContractDetails.DomainService
         /// 编辑ContractDetail
         /// </summary>
 
-        public async Task UpdateAsync(ContractDetail input)
+        public async Task<ContractDetail> UpdateAsync(ContractDetail input)
         {
             //TODO:更新前的逻辑判断，是否允许更新
 
-            //var entity = await _repository.GetAsync(input.Id);
+            var entity = await _repository.GetAsync(input.Id);
             //修改合同金额
             if (input.ContractId.HasValue)
             {
                 var contract = await _contractRepository.GetAsync(input.ContractId.Value);
-                decimal detailAmount = 0;
-                ProjectDetail projectDetail = new ProjectDetail();
-                if (input.RefDetailId.HasValue)
-                {
-                    if (contract.Type == ContractTypeEnum.销项)
-                    {
-                        projectDetail = await _projectDetailRepository.GetAsync(input.RefDetailId.Value);
-                        if (projectDetail.Num.HasValue && projectDetail.Price.HasValue)
-                            detailAmount = projectDetail.Num.Value * projectDetail.Price.Value;
-                    }
-                    else
-                    {
-                        var purchaseDetail = await _purchaseDetailRepository.GetAsync(input.RefDetailId.Value);
-                        if (purchaseDetail.ProjectDetailId.HasValue)
-                            projectDetail = await _projectDetailRepository.GetAsync(purchaseDetail.ProjectDetailId.Value);
-                        if (projectDetail.Num.HasValue && purchaseDetail.Price.HasValue)
-                            detailAmount = projectDetail.Num.Value * purchaseDetail.Price.Value;
-                    }
-                }
-                contract.Amount += detailAmount;
+                contract.Amount = contract.Amount + input.Num * input.Price - entity.Num * entity.Price;
                 await _contractRepository.UpdateAsync(contract);
             }
-            
-
-            // ObjectMapper.Map(input, entity);
-            await _repository.UpdateAsync(input);
+            ObjectMapper.Map(input, entity);
+            entity= await _repository.UpdateAsync(input);
+            return entity;
         }
 
         /// <summary>
@@ -156,26 +117,7 @@ namespace HC.AbpCore.Contracts.ContractDetails.DomainService
             if (entity.ContractId.HasValue)
             {
                 var contract = await _contractRepository.GetAsync(entity.ContractId.Value);
-                decimal detailAmount = 0;
-                ProjectDetail projectDetail = new ProjectDetail();
-                if (entity.RefDetailId.HasValue)
-                {
-                    if (contract.Type == ContractTypeEnum.销项)
-                    {
-                        projectDetail = await _projectDetailRepository.GetAsync(entity.RefDetailId.Value);
-                        if (projectDetail.Num.HasValue && projectDetail.Price.HasValue)
-                            detailAmount = projectDetail.Num.Value * projectDetail.Price.Value;
-                    }
-                    else
-                    {
-                        var purchaseDetail = await _purchaseDetailRepository.GetAsync(entity.RefDetailId.Value);
-                        if (purchaseDetail.ProjectDetailId.HasValue)
-                            projectDetail = await _projectDetailRepository.GetAsync(purchaseDetail.ProjectDetailId.Value);
-                        if (projectDetail.Num.HasValue && purchaseDetail.Price.HasValue)
-                            detailAmount = projectDetail.Num.Value * purchaseDetail.Price.Value;
-                    }
-                }
-                contract.Amount -= detailAmount;
+                contract.Amount -= entity.Num * entity.Price;
                 await _contractRepository.UpdateAsync(contract);
             }
             await _repository.DeleteAsync(Id);

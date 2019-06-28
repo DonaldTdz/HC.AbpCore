@@ -18,13 +18,6 @@ namespace  HC.AbpCore.Invoices.InvoiceDetails.Dtos
 
 
 		/// <summary>
-		/// RefId
-		/// </summary>
-		public Guid? RefId { get; set; }
-
-
-
-		/// <summary>
 		/// Name
 		/// </summary>
 		[Required(ErrorMessage="Name不能为空")]
@@ -36,13 +29,6 @@ namespace  HC.AbpCore.Invoices.InvoiceDetails.Dtos
 		/// Specification
 		/// </summary>
 		public string Specification { get; set; }
-
-
-
-		/// <summary>
-		/// Unit
-		/// </summary>
-		public string Unit { get; set; }
 
 
 
@@ -60,10 +46,31 @@ namespace  HC.AbpCore.Invoices.InvoiceDetails.Dtos
 
 
 
-		/// <summary>
-		/// TaxRate
-		/// </summary>
-		public string TaxRate { get; set; }
+        /// <summary>
+        /// Amount
+        /// </summary>
+        public decimal? Amount { get; set; }
+
+
+
+        /// <summary>
+        /// TaxRate
+        /// </summary>
+        public string TaxRate { get; set; }
+
+
+
+        /// <summary>
+        /// TaxAmount
+        /// </summary>
+        public decimal? TaxAmount { get; set; }
+
+
+
+        /// <summary>
+        /// TotalAmount
+        /// </summary>
+        public decimal? TotalAmount { get; set; }
 
 
 

@@ -22,10 +22,15 @@ namespace HC.AbpCore.PaymentPlans
         [Required]
         public virtual DateTime PlanTime { get; set; }
         /// <summary>
-        /// 回款描述
+        /// 回款比率  5
+        /// </summary>
+        [Required]
+        public virtual int Ratio { get; set; }
+        /// <summary>
+        /// 回款条件
         /// </summary>
         [StringLength(500)]
-        public virtual string Desc { get; set; }
+        public virtual string PaymentCondition { get; set; }
         /// <summary>
         /// 回款金额
         /// </summary>

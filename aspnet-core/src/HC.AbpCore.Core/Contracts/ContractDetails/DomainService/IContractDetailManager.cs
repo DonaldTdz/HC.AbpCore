@@ -32,7 +32,7 @@ namespace HC.AbpCore.Contracts.ContractDetails.DomainService
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task UpdateAsync(ContractDetail input);
+        Task<ContractDetail> UpdateAsync(ContractDetail input);
 
         /// <summary>
         /// 删除

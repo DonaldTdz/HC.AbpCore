@@ -13,19 +13,21 @@ namespace HC.AbpCore.Tenders.Dtos
     public class TenderListDto : FullAuditedEntityDto<Guid> 
     {
 
-        
-		/// <summary>
-		/// ProjectId
-		/// </summary>
-		[Required(ErrorMessage="ProjectId不能为空")]
-		public Guid ProjectId { get; set; }
+
+
+        /// <summary>
+        /// ProjectId
+        /// </summary>
+        [Required(ErrorMessage = "ProjectId不能为空")]
+        public Guid ProjectId { get; set; }
 
 
 
-		/// <summary>
-		/// TenderTime
-		/// </summary>
-		public DateTime? TenderTime { get; set; }
+        /// <summary>
+        /// TenderTime
+        /// </summary>
+        public DateTime? TenderTime { get; set; }
+
 
 
         /// <summary>
@@ -50,13 +52,6 @@ namespace HC.AbpCore.Tenders.Dtos
 
 
         /// <summary>
-        /// ReadyTime
-        /// </summary>
-        public DateTime? ReadyTime { get; set; }
-
-
-
-        /// <summary>
         /// IsReady
         /// </summary>
         public bool? IsReady { get; set; }
@@ -64,48 +59,99 @@ namespace HC.AbpCore.Tenders.Dtos
 
 
         /// <summary>
-        /// EmployeeId
+        /// PurchaseStartDate
         /// </summary>
-        public string EmployeeId { get; set; }
+        public DateTime? PurchaseStartDate { get; set; }
 
 
 
-		/// <summary>
-		/// ReadyEmployeeIds
-		/// </summary>
-		public string ReadyEmployeeIds { get; set; }
+        /// <summary>
+        /// ReadyEmployeeIds
+        /// </summary>
+        public DateTime? PurchaseEndDate { get; set; }
 
 
 
-		/// <summary>
-		/// IsWinbid
-		/// </summary>
-		public bool? IsWinbid { get; set; }
+        /// <summary>
+        /// BidPurchaser
+        /// </summary>
+        public string BidPurchaser { get; set; }
 
 
 
-		/// <summary>
-		/// Attachments
-		/// </summary>
-		public string Attachments { get; set; }
+        /// <summary>
+        /// PurchaseInformation
+        /// </summary>
+        public string PurchaseInformation { get; set; }
+
+
+
+        /// <summary>
+        /// BuyBidingPerson
+        /// </summary>
+        public string BuyBidingPerson { get; set; }
+
+
+
+        /// <summary>
+        /// PreparationPerson
+        /// </summary>
+        public string PreparationPerson { get; set; }
+
+
+
+        /// <summary>
+        /// Qualification
+        /// </summary>
+        public string Qualification { get; set; }
+
+
+
+        /// <summary>
+        /// Organizer
+        /// </summary>
+        public string Organizer { get; set; }
+
+
+
+        /// <summary>
+        /// Inspector
+        /// </summary>
+        public string Inspector { get; set; }
+
+
+
+        /// <summary>
+        /// Qualification
+        /// </summary>
+        public string Binder { get; set; }
+
+
+
+        /// <summary>
+        /// IsWinbid
+        /// </summary>
+        public bool? IsWinbid { get; set; }
+
+
+
+        /// <summary>
+        /// Attachments
+        /// </summary>
+        public string Attachments { get; set; }
+
+
+
+        /// <summary>
+        /// Voucher
+        /// </summary>
+        public string Voucher { get; set; }
+
+
 
         /// <summary>
         /// 项目名称
         /// </summary>
         public string ProjectName { get; set; }
-
-        /// <summary>
-        /// 负责人名称
-        /// </summary>
-        public string EmployeeName { get; set; }
-
-        /// <summary>
-        /// 标书准备人名称
-        /// </summary>
-        public string ReadyEmployeeNames { get; set; }
-
-
-
-
     }
 }

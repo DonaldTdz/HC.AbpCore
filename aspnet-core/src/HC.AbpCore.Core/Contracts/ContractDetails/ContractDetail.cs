@@ -1,6 +1,7 @@
 ﻿using Abp.Domain.Entities.Auditing;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
@@ -14,13 +15,23 @@ namespace HC.AbpCore.Contracts.ContractDetails
         /// </summary>
         public virtual Guid? ContractId { get; set; }
         /// <summary>
-        /// 项目明细或采购明细Id
+        /// 设备名称
         /// </summary>
-        public virtual Guid? RefDetailId { get; set; }
+        [StringLength(100)]
+        public virtual string Name { get; set; }
         /// <summary>
-        /// 交货日期
+        /// 型号
         /// </summary>
-        public virtual DateTime? DeliveryDate { get; set; }
+        [StringLength(100)]
+        public virtual string Model { get; set; }
+        /// <summary>
+        /// 数量
+        /// </summary>
+        public virtual int? Num { get; set; }
+        /// <summary>
+        /// 单价
+        /// </summary>
+        public virtual decimal? Price { get; set; }
     }
 
 }

@@ -30,12 +30,6 @@ namespace HC.AbpCore.Contracts.Dtos
 		public string ContractCode { get; set; }
 
         /// <summary>
-		/// CodeType
-		/// </summary>
-		[Required(ErrorMessage = "CodeType不能为空")]
-        public CodeTypeEnum CodeType { get; set; }
-
-        /// <summary>
         /// RefId
         /// </summary>
         public Guid? RefId { get; set; }
@@ -56,17 +50,31 @@ namespace HC.AbpCore.Contracts.Dtos
 
 
 
-		/// <summary>
-		/// Desc
-		/// </summary>
-		public string Desc { get; set; }
+        /// <summary>
+        /// 合同拟写
+        /// </summary>
+        public int ContractDrafting { get; set; }
 
 
 
-		/// <summary>
-		/// Attachments
-		/// </summary>
-		public string Attachments { get; set; }
+        /// <summary>
+        /// 原件回收情况
+        /// </summary>
+        public int OriginalRecycling { get; set; }
+
+
+
+        /// <summary>
+        /// 原件附件 多个 逗号分隔
+        /// </summary>
+        public string OriginalAnnex { get; set; }
+
+
+
+        /// <summary>
+        /// Attachments
+        /// </summary>
+        public string Attachments { get; set; }
 
 
 

@@ -56,7 +56,7 @@ namespace HC.AbpCore.Contracts.ContractDetails
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task CreateOrUpdateAsync(CreateOrUpdateContractDetailInput input);
+        Task<ContractDetail> CreateOrUpdateAsync(CreateOrUpdateContractDetailInput input);
 
 
         /// <summary>
@@ -73,11 +73,17 @@ namespace HC.AbpCore.Contracts.ContractDetails
         Task BatchDeleteAsync(List<Guid> input);
 
 
-		/// <summary>
+        /// <summary>
+        /// 批量新增ContractDetail
+        /// </summary>
+        Task BatchCreateAsync(BatchCreateContractDetail input);
+
+
+        /// <summary>
         /// 导出ContractDetail为excel表
         /// </summary>
         /// <returns></returns>
-		//Task<FileDto> GetToExcel();
+        //Task<FileDto> GetToExcel();
 
     }
 }

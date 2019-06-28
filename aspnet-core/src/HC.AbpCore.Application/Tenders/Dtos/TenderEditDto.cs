@@ -49,13 +49,6 @@ namespace HC.AbpCore.Tenders.Dtos
 
 
         /// <summary>
-        /// ReadyTime
-        /// </summary>
-        public DateTime? ReadyTime { get; set; }
-
-
-
-        /// <summary>
         /// IsReady
         /// </summary>
         public bool? IsReady { get; set; }
@@ -63,16 +56,72 @@ namespace HC.AbpCore.Tenders.Dtos
 
 
         /// <summary>
-        /// EmployeeId
+        /// PurchaseStartDate
         /// </summary>
-        public string EmployeeId { get; set; }
+        public DateTime? PurchaseStartDate { get; set; }
 
 
 
         /// <summary>
         /// ReadyEmployeeIds
         /// </summary>
-        public string ReadyEmployeeIds { get; set; }
+        public DateTime? PurchaseEndDate { get; set; }
+
+
+
+        /// <summary>
+        /// BidPurchaser
+        /// </summary>
+        public string BidPurchaser { get; set; }
+
+
+
+        /// <summary>
+        /// PurchaseInformation
+        /// </summary>
+        public string PurchaseInformation { get; set; }
+
+
+
+        /// <summary>
+        /// BuyBidingPerson
+        /// </summary>
+        public string BuyBidingPerson { get; set; }
+
+
+
+        /// <summary>
+        /// PreparationPerson
+        /// </summary>
+        public string PreparationPerson { get; set; }
+
+
+
+        /// <summary>
+        /// Qualification
+        /// </summary>
+        public string Qualification { get; set; }
+
+
+
+        /// <summary>
+        /// Organizer
+        /// </summary>
+        public string Organizer { get; set; }
+
+
+
+        /// <summary>
+        /// Inspector
+        /// </summary>
+        public string Inspector { get; set; }
+
+
+
+        /// <summary>
+        /// Qualification
+        /// </summary>
+        public string Binder { get; set; }
 
 
 
@@ -87,6 +136,13 @@ namespace HC.AbpCore.Tenders.Dtos
         /// Attachments
         /// </summary>
         public string Attachments { get; set; }
+
+
+
+        /// <summary>
+        /// Voucher
+        /// </summary>
+        public string Voucher { get; set; }
 
 
 

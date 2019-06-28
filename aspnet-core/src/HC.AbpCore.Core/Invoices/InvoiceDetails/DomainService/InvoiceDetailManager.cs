@@ -108,10 +108,10 @@ namespace HC.AbpCore.Invoices.InvoiceDetails.DomainService
             entity.Price = input.Price;
             entity.Num = input.Num;
             entity.Name = input.Name;
-            entity.RefId = input.RefId;
+            //entity.RefId = input.RefId;
             entity.Specification = input.Specification;
             entity.TaxRate = input.TaxRate;
-            entity.Unit = input.Unit;
+            //entity.Unit = input.Unit;
             //ObjectMapper.Map(input, entity);
             await _repository.UpdateAsync(entity);
         }

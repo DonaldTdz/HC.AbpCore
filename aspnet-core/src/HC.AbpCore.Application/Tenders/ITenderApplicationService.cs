@@ -55,7 +55,7 @@ namespace HC.AbpCore.Tenders
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task CreateOrUpdateAsync(CreateOrUpdateTenderInput input);
+        Task<TenderEditDto> CreateOrUpdateAsync(CreateOrUpdateTenderInput input);
 
 
         /// <summary>

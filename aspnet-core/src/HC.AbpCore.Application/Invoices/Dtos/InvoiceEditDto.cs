@@ -8,12 +8,6 @@ namespace  HC.AbpCore.Invoices.Dtos
 {
     public class InvoiceEditDto: FullAuditedEntity<Guid?>
     {   
-        
-		/// <summary>
-		/// Title
-		/// </summary>
-		[Required(ErrorMessage="Title不能为空")]
-		public string Title { get; set; }
 
 
 
@@ -44,13 +38,6 @@ namespace  HC.AbpCore.Invoices.Dtos
 		/// SubmitDate
 		/// </summary>
 		public DateTime? SubmitDate { get; set; }
-
-
-
-		/// <summary>
-		/// Attachments
-		/// </summary>
-		public string Attachments { get; set; }
 
 
 

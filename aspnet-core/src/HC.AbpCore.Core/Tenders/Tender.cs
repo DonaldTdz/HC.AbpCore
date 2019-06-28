@@ -32,32 +32,71 @@ namespace HC.AbpCore.Tenders
         /// </summary>
         public virtual bool? IsPayBond { get; set; }
         /// <summary>
-        /// 准备完成时间 （完成时间提醒 比如提前4提醒）页面标注
-        /// </summary>
-        public virtual DateTime? ReadyTime { get; set; }
-        /// <summary>
         /// 是否完成准备
         /// </summary>
         public virtual bool? IsReady { get; set; }
         /// <summary>
-        /// 招标负责人，准备完成时间提醒
+        /// 购买标书开始日期
         /// </summary>
-        [StringLength(500)]
-        public virtual string EmployeeId { get; set; }
+        public virtual DateTime? PurchaseStartDate { get; set; }
         /// <summary>
-        /// 标书准备人 多个
+        /// 购买标书结束日期
+        /// </summary>
+        public virtual DateTime? PurchaseEndDate { get; set; }
+        /// <summary>
+        /// 标书购买人
+        /// </summary>
+        [StringLength(50)]
+        public virtual string BidPurchaser { get; set; }
+        /// <summary>
+        /// 购买资料 多个 逗号分隔
         /// </summary>
         [StringLength(500)]
-        public virtual string ReadyEmployeeIds { get; set; }
+        public virtual string PurchaseInformation { get; set; }
+        /// <summary>
+        /// 购买标书负责人
+        /// </summary>
+        [StringLength(50)]
+        public virtual string BuyBidingPerson { get; set; }
+        /// <summary>
+        /// 招标准备负责人
+        /// </summary>
+        [StringLength(50)]
+        public virtual string PreparationPerson { get; set; }
+        /// <summary>
+        /// 资质证明
+        /// </summary>
+        [StringLength(500)]
+        public virtual string Qualification { get; set; }
+        /// <summary>
+        /// 投标文件书写，整理人
+        /// </summary>
+        [StringLength(50)]
+        public virtual string Organizer { get; set; }
+        /// <summary>
+        /// 投标文件检查、核对
+        /// </summary>
+        [StringLength(50)]
+        public virtual string Inspector { get; set; }
+        /// <summary>
+        /// 投标文件装订
+        /// </summary>
+        [StringLength(50)]
+        public virtual string Binder { get; set; }
         /// <summary>
         /// 是否中标
         /// </summary>
-        public virtual bool? IsWinbid { get; set; }
+        public virtual bool IsWinbid { get; set; }
         /// <summary>
-        /// 标书附件 多个 逗号分隔
+        /// 标书附件 多个逗号分隔
         /// </summary>
         [StringLength(500)]
         public virtual string Attachments { get; set; }
+        /// <summary>
+        /// 标书凭证 多个逗号分隔
+        /// </summary>
+        [StringLength(500)]
+        public virtual string Voucher { get; set; }
     }
 
 }
