@@ -58,7 +58,7 @@ namespace HC.AbpCore.Implements
         public async Task<PagedResultDto<ImplementListDto>> GetPagedAsync(GetImplementsInput input)
 		{
 
-		    var query = _entityRepository.GetAll();
+		    var query = _entityRepository.GetAll().WhereIf(input.ProjectId.HasValue,aa=>aa.ProjectId==input.ProjectId.Value);
 			// TODO:根据传入的参数添加过滤条件
             
 
@@ -66,7 +66,7 @@ namespace HC.AbpCore.Implements
 
 			var entityList = await query
 					.OrderBy(input.Sorting).AsNoTracking()
-					.PageBy(input)
+					//.PageBy(input)
 					.ToListAsync();
 
 			// var entityListDtos = ObjectMapper.Map<List<ImplementListDto>>(entityList);
@@ -122,16 +122,16 @@ ImplementEditDto editDto;
 		/// <param name="input"></param>
 		/// <returns></returns>
 		
-		public async Task CreateOrUpdateAsync(CreateOrUpdateImplementInput input)
+		public async Task<ImplementEditDto> CreateOrUpdateAsync(CreateOrUpdateImplementInput input)
 		{
 
 			if (input.Implement.Id.HasValue)
 			{
-				await UpdateAsync(input.Implement);
+				return await UpdateAsync(input.Implement);
 			}
 			else
 			{
-				await CreateAsync(input.Implement);
+				return await CreateAsync(input.Implement);
 			}
 		}
 
@@ -156,16 +156,17 @@ ImplementEditDto editDto;
 		/// 编辑Implement
 		/// </summary>
 		
-		protected virtual async Task UpdateAsync(ImplementEditDto input)
+		protected virtual async Task<ImplementEditDto> UpdateAsync(ImplementEditDto input)
 		{
 			//TODO:更新前的逻辑判断，是否允许更新
 
 			var entity = await _entityRepository.GetAsync(input.Id.Value);
 			input.MapTo(entity);
 
-			// ObjectMapper.Map(input, entity);
-		    await _entityRepository.UpdateAsync(entity);
-		}
+            // ObjectMapper.Map(input, entity);
+            entity= await _entityRepository.UpdateAsync(entity);
+            return entity.MapTo<ImplementEditDto>();
+        }
 
 
 

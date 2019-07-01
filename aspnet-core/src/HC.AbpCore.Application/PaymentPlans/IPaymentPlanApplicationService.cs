@@ -40,7 +40,7 @@ namespace HC.AbpCore.PaymentPlans
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task CreateOrUpdateAsync(CreateOrUpdatePaymentPlanInput input);
+        Task<PaymentPlanEditDto> CreateOrUpdateAsync(CreateOrUpdatePaymentPlanInput input);
 
 
         /// <summary>

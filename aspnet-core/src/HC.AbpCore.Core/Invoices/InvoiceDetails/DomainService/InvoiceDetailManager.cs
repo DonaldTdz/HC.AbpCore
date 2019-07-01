@@ -55,10 +55,7 @@ namespace HC.AbpCore.Invoices.InvoiceDetails.DomainService
             if (input.InvoiceId.HasValue)
             {
                 var invoice = await _invoicerepository.GetAsync(input.InvoiceId.Value);
-                decimal detailAmount=0;
-                if (input.Num.HasValue && input.Price.HasValue)
-                    detailAmount = input.Num.Value * input.Price.Value;
-                invoice.Amount += detailAmount;
+                invoice.Amount += input.TotalAmount;
                 await _invoicerepository.UpdateAsync(invoice);
             }
             input = await _repository.InsertAsync(input);
@@ -75,12 +72,9 @@ namespace HC.AbpCore.Invoices.InvoiceDetails.DomainService
             var entity = await _repository.GetAsync(Id);
             if (entity.InvoiceId.HasValue)
             {
-                var contract = await _invoicerepository.GetAsync(entity.InvoiceId.Value);
-                decimal detailAmount = 0;
-                if (entity.Num.HasValue && entity.Price.HasValue)
-                    detailAmount = entity.Num.Value * entity.Price.Value;
-                contract.Amount -= detailAmount;
-                await _invoicerepository.UpdateAsync(contract);
+                var invoice = await _invoicerepository.GetAsync(entity.InvoiceId.Value);
+                invoice.Amount -= entity.TotalAmount;
+                await _invoicerepository.UpdateAsync(invoice);
             }
             await _repository.DeleteAsync(Id);
         }
@@ -95,23 +89,21 @@ namespace HC.AbpCore.Invoices.InvoiceDetails.DomainService
             //TODO:更新前的逻辑判断，是否允许更新
 
             var entity = await _repository.GetAsync(input.Id);
-            //修改合同金额
+            //修改发票金额
             if (input.InvoiceId.HasValue)
             {
                 var invoice = await _invoicerepository.GetAsync(input.InvoiceId.Value);
-                decimal detailAmount = 0;
-                if (input.Num.HasValue && input.Price.HasValue)
-                    detailAmount = input.Num.Value * input.Price.Value;
-                invoice.Amount += detailAmount-entity.Num.Value*entity.Price.Value;
+                invoice.Amount = invoice.Amount - entity.TotalAmount + input.TotalAmount;
                 await _invoicerepository.UpdateAsync(invoice);
             }
             entity.Price = input.Price;
             entity.Num = input.Num;
             entity.Name = input.Name;
-            //entity.RefId = input.RefId;
+            entity.Amount = input.Amount;
             entity.Specification = input.Specification;
             entity.TaxRate = input.TaxRate;
-            //entity.Unit = input.Unit;
+            entity.TaxAmount = input.TaxAmount;
+            entity.TotalAmount = input.TotalAmount;
             //ObjectMapper.Map(input, entity);
             await _repository.UpdateAsync(entity);
         }

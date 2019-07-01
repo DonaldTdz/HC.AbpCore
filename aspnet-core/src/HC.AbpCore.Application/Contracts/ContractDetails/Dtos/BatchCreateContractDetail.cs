@@ -7,9 +7,9 @@ namespace HC.AbpCore.Contracts.ContractDetails.Dtos
 {
     public class BatchCreateContractDetail
     {
-        [Required]
         public List<ContractDetailEditDto> ContractDetails { get; set; }
 
+        [Required]
         public Guid ContractId { get; set; }
     }
 }

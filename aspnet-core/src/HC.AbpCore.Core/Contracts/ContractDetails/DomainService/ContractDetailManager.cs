@@ -101,8 +101,12 @@ namespace HC.AbpCore.Contracts.ContractDetails.DomainService
                 contract.Amount = contract.Amount + input.Num * input.Price - entity.Num * entity.Price;
                 await _contractRepository.UpdateAsync(contract);
             }
-            ObjectMapper.Map(input, entity);
-            entity= await _repository.UpdateAsync(input);
+            //ObjectMapper.Map(input, entity);
+            entity.Model = input.Model;
+            entity.Name = input.Name;
+            entity.Num = input.Num;
+            entity.Price = input.Price;
+            entity = await _repository.UpdateAsync(entity);
             return entity;
         }
 

@@ -1,12 +1,13 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using Abp.Application.Services.Dto;
 using Abp.Domain.Entities.Auditing;
 using HC.AbpCore.Invoices;
 
 namespace  HC.AbpCore.Invoices.Dtos
 {
-    public class InvoiceEditDto: FullAuditedEntity<Guid?>
+    public class InvoiceEditDto: FullAuditedEntityDto<Guid?>
     {   
 
 

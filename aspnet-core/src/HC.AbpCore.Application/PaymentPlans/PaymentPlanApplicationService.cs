@@ -141,16 +141,16 @@ namespace HC.AbpCore.PaymentPlans
         /// <param name="input"></param>
         /// <returns></returns>
 
-        public async Task CreateOrUpdateAsync(CreateOrUpdatePaymentPlanInput input)
+        public async Task<PaymentPlanEditDto> CreateOrUpdateAsync(CreateOrUpdatePaymentPlanInput input)
         {
 
             if (input.PaymentPlan.Id.HasValue)
             {
-                await UpdateAsync(input.PaymentPlan);
+               return await UpdateAsync(input.PaymentPlan);
             }
             else
             {
-                await CreateAsync(input.PaymentPlan);
+                return await CreateAsync(input.PaymentPlan);
             }
         }
 
@@ -199,7 +199,7 @@ namespace HC.AbpCore.PaymentPlans
         /// 编辑PaymentPlan
         /// </summary>
 
-        protected virtual async Task UpdateAsync(PaymentPlanEditDto input)
+        protected virtual async Task<PaymentPlanEditDto> UpdateAsync(PaymentPlanEditDto input)
         {
 
             var entity = await _entityRepository.GetAsync(input.Id.Value);
@@ -255,7 +255,8 @@ namespace HC.AbpCore.PaymentPlans
             }
             input.MapTo(entity);
             // ObjectMapper.Map(input, entity);
-            await _entityRepository.UpdateAsync(entity);
+            entity= await _entityRepository.UpdateAsync(entity);
+            return entity.MapTo<PaymentPlanEditDto>();
         }
 
 

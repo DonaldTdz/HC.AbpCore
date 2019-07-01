@@ -55,7 +55,7 @@ namespace HC.AbpCore.Implements
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task CreateOrUpdateAsync(CreateOrUpdateImplementInput input);
+        Task<ImplementEditDto> CreateOrUpdateAsync(CreateOrUpdateImplementInput input);
 
 
         /// <summary>

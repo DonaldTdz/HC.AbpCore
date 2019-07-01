@@ -14,6 +14,7 @@ namespace HC.AbpCore.DataDictionarys
             公共配置=4,
             税率=5,
             招标=6,
+            执行=7,
         }
     }
 }

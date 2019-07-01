@@ -65,42 +65,43 @@ namespace HC.AbpCore.Invoices.InvoiceDetails
 
 		    var query = _entityRepository.GetAll().WhereIf(input.InvoiceId.HasValue,aa=>aa.InvoiceId==input.InvoiceId);
             // TODO:根据传入的参数添加过滤条件
-            var projectDetails = await _projectDetailRepository.GetAll().AsNoTracking().ToListAsync();
-            var purchaseDetails = await _purchaseDetailRepository.GetAll().AsNoTracking().ToListAsync();
+            //var projectDetails = await _projectDetailRepository.GetAll().AsNoTracking().ToListAsync();
+            //var purchaseDetails = await _purchaseDetailRepository.GetAll().AsNoTracking().ToListAsync();
 
             var count = await query.CountAsync();
 
 			var entityList = await query
 					.OrderBy(input.Sorting).AsNoTracking()
-					//.PageBy(input)
-					.ToListAsync();
+                     .OrderByDescending(aa => aa.CreationTime)
+                    //.PageBy(input)
+                    .ToListAsync();
 
             // var entityListDtos = ObjectMapper.Map<List<InvoiceDetailListDto>>(entityList);
-            List<InvoiceDetailListDto> InvoiceDetailListDtos = new List<InvoiceDetailListDto>();
-            foreach (var item in entityList)
-            {
-                var InvoiceDetailListDto = item.MapTo<InvoiceDetailListDto>();
-                //if (InvoiceDetailListDto.RefId.HasValue)
-                //{
-                //    if (input.Type == InvoiceTypeEnum.销项)
-                //    {
-                //        InvoiceDetailListDto.RefName = projectDetails.Where(aa => aa.Id == InvoiceDetailListDto.RefId.Value).FirstOrDefault() != null ? projectDetails.Where(aa => aa.Id == InvoiceDetailListDto.RefId.Value).FirstOrDefault().Name : null;
-                //    }
-                //    else
-                //    {
-                //        var projectDetailId = purchaseDetails.Where(aa => aa.Id == InvoiceDetailListDto.RefId.Value).FirstOrDefault() != null ? purchaseDetails.Where(aa => aa.Id == InvoiceDetailListDto.RefId.Value).FirstOrDefault().ProjectDetailId : null;
-                //        if (projectDetailId.HasValue)
-                //            InvoiceDetailListDto.RefName = projectDetails.Where(aa => aa.Id == projectDetailId.Value).FirstOrDefault() != null ? projectDetails.Where(aa => aa.Id == projectDetailId.Value).FirstOrDefault().Name : null;
-                //        else
-                //            InvoiceDetailListDto.RefName = null;
-                //    }
-                //}
-                //else
-                //{
-                //    InvoiceDetailListDto.RefName = null;
-                //}
-                InvoiceDetailListDtos.Add(InvoiceDetailListDto);
-            }
+            List<InvoiceDetailListDto> InvoiceDetailListDtos = entityList.MapTo<List<InvoiceDetailListDto>>();
+            //foreach (var item in entityList)
+            //{
+            //    var InvoiceDetailListDto = item.MapTo<InvoiceDetailListDto>();
+            //    if (InvoiceDetailListDto.RefId.HasValue)
+            //    {
+            //        if (input.Type == InvoiceTypeEnum.销项)
+            //        {
+            //            InvoiceDetailListDto.RefName = projectDetails.Where(aa => aa.Id == InvoiceDetailListDto.RefId.Value).FirstOrDefault() != null ? projectDetails.Where(aa => aa.Id == InvoiceDetailListDto.RefId.Value).FirstOrDefault().Name : null;
+            //        }
+            //        else
+            //        {
+            //            var projectDetailId = purchaseDetails.Where(aa => aa.Id == InvoiceDetailListDto.RefId.Value).FirstOrDefault() != null ? purchaseDetails.Where(aa => aa.Id == InvoiceDetailListDto.RefId.Value).FirstOrDefault().ProjectDetailId : null;
+            //            if (projectDetailId.HasValue)
+            //                InvoiceDetailListDto.RefName = projectDetails.Where(aa => aa.Id == projectDetailId.Value).FirstOrDefault() != null ? projectDetails.Where(aa => aa.Id == projectDetailId.Value).FirstOrDefault().Name : null;
+            //            else
+            //                InvoiceDetailListDto.RefName = null;
+            //        }
+            //    }
+            //    else
+            //    {
+            //        InvoiceDetailListDto.RefName = null;
+            //    }
+            //    InvoiceDetailListDtos.Add(InvoiceDetailListDto);
+            //}
 
             return new PagedResultDto<InvoiceDetailListDto>(count, InvoiceDetailListDtos);
         }

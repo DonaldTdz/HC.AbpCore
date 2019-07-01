@@ -2,6 +2,7 @@
 using Abp.Runtime.Validation;
 using HC.AbpCore.Dtos;
 using HC.AbpCore.Implements;
+using System;
 
 namespace HC.AbpCore.Implements.Dtos
 {
@@ -18,6 +19,11 @@ namespace HC.AbpCore.Implements.Dtos
                 Sorting = "Id";
             }
         }
+
+        /// <summary>
+        /// 查询条件-项目Id
+        /// </summary>
+        public Guid? ProjectId { get; set; }
 
     }
 }
