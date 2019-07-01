@@ -195,17 +195,37 @@ ImplementEditDto editDto;
 		}
 
 
-		/// <summary>
-		/// 导出Implement为excel表,等待开发。
-		/// </summary>
-		/// <returns></returns>
-		//public async Task<FileDto> GetToExcel()
-		//{
-		//	var users = await UserManager.Users.ToListAsync();
-		//	var userListDtos = ObjectMapper.Map<List<UserListDto>>(users);
-		//	await FillRoleNames(userListDtos);
-		//	return _userListExcelExporter.ExportToFile(userListDtos);
-		//}
+        /// <summary>
+        /// 批量新增
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public async Task BatchCreateOrUpdateAsync(BatchCreateOrUpdateImplementInput input)
+        {
+            foreach (var item in input.Implements)
+            {
+                if (item.Id.HasValue)
+                {
+                    await UpdateAsync(item);
+                }
+                else
+                {
+                    await CreateAsync(item);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 导出Implement为excel表,等待开发。
+        /// </summary>
+        /// <returns></returns>
+        //public async Task<FileDto> GetToExcel()
+        //{
+        //	var users = await UserManager.Users.ToListAsync();
+        //	var userListDtos = ObjectMapper.Map<List<UserListDto>>(users);
+        //	await FillRoleNames(userListDtos);
+        //	return _userListExcelExporter.ExportToFile(userListDtos);
+        //}
 
     }
 }

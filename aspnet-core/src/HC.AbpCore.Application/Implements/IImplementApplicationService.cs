@@ -72,11 +72,17 @@ namespace HC.AbpCore.Implements
         Task BatchDeleteAsync(List<Guid> input);
 
 
-		/// <summary>
+        /// <summary>
+        /// 批量新增Implement
+        /// </summary>
+        Task BatchCreateOrUpdateAsync(BatchCreateOrUpdateImplementInput input);
+
+
+        /// <summary>
         /// 导出Implement为excel表
         /// </summary>
         /// <returns></returns>
-		//Task<FileDto> GetToExcel();
+        //Task<FileDto> GetToExcel();
 
     }
 }

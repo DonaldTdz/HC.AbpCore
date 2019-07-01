@@ -180,7 +180,7 @@ namespace HC.AbpCore.Invoices
             }
             else
             {
-               return await CreateAsync(input.Invoice);
+                return await CreateAsync(input.Invoice);
             }
         }
 
@@ -213,7 +213,7 @@ namespace HC.AbpCore.Invoices
             input.MapTo(entity);
 
             // ObjectMapper.Map(input, entity);
-            var item=await _entityRepository.UpdateAsync(entity);
+            var item = await _entityRepository.UpdateAsync(entity);
             return item.MapTo<InvoiceEditDto>();
         }
 

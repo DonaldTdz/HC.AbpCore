@@ -26,7 +26,7 @@ namespace HC.AbpCore.Implements
         /// <summary>
         /// 附件 多个用逗号分隔
         /// </summary>
-        [StringLength(50)]
+        [StringLength(500)]
         public virtual string Attachments { get; set; }
     }
 

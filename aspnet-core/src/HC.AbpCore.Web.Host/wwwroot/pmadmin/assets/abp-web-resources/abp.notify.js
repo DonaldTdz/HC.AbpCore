@@ -24,7 +24,7 @@ var abp = abp || {};
 
         options.html = (title ? '' : icon) + '<span class="m--font-light">' + message + '</span>';
         var combinedOptions = Object.assign(options, defaultOptions);
-        
+
         swal(combinedOptions);
     };
 
