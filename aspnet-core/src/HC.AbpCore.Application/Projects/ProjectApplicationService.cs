@@ -79,7 +79,9 @@ namespace HC.AbpCore.Projects
                 .WhereIf(!String.IsNullOrEmpty(input.Name), a => a.Name.Contains(input.Name))
                 .WhereIf(input.Status.HasValue, a => a.Status == input.Status.Value)
                 .WhereIf(input.CustomerId.HasValue, a => a.CustomerId == input.CustomerId.Value)
-                .WhereIf(input.Id.HasValue, a => a.Id == input.Id.Value);
+                .WhereIf(input.Id.HasValue, a => a.Id == input.Id.Value)
+                .WhereIf(!String.IsNullOrEmpty(input.ProjectCode), a => a.ProjectCode == input.ProjectCode)
+                .WhereIf(input.StartDate.HasValue && input.EndDate.HasValue, a => a.CreationTime >= input.StartDate.Value && a.CreationTime <= input.EndDate.Value);
             // TODO:根据传入的参数添加过滤条件
 
             var customerList = await _customerRepository.GetAll().AsNoTracking().ToListAsync();
@@ -310,11 +312,11 @@ namespace HC.AbpCore.Projects
         /// <param name="input"></param>
         /// <param name="projectStatus"></param>
         /// <returns></returns>
-        public async Task<bool> ModifyProjectStatusAsync(Guid id,int projectStatus)
+        public async Task<bool> ModifyProjectStatusAsync(Guid id, int projectStatus)
         {
             var entity = await _entityRepository.GetAsync(id);
             entity.Status = (ProjectStatus)Enum.ToObject(typeof(ProjectStatus), projectStatus);
-            entity=await _entityRepository.UpdateAsync(entity);
+            entity = await _entityRepository.UpdateAsync(entity);
             if (entity != null)
                 return true;
             else

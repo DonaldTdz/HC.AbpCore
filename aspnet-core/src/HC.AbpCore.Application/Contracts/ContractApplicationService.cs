@@ -245,8 +245,11 @@ namespace HC.AbpCore.Contracts
 
         public async Task<string> GetContractCodeAsync(ContractTypeEnum type)
         {
-            var contracts = await _entityRepository.GetAll().Where(aa => aa.Type == type && aa.CreationTime >= DateTime.Now.Date
-            && aa.CreationTime <= DateTime.Now.Date.AddDays(1)).AsNoTracking().ToListAsync();
+            var dateTime = DateTime.Now;
+            var startTime = new DateTime(dateTime.Year, dateTime.Month, 1);
+            var endTime = new DateTime(dateTime.Year, dateTime.Month + 1, 1);
+            var contracts = await _entityRepository.GetAll().Where(aa => aa.Type == type && aa.CreationTime >= startTime
+            && aa.CreationTime < endTime).AsNoTracking().ToListAsync();
             var contractCode = contracts.Max(aa => aa.ContractCode);
             if (!String.IsNullOrEmpty(contractCode))
             {

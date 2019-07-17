@@ -41,5 +41,20 @@ namespace HC.AbpCore.Projects.Dtos
         /// </summary>
         public ProjectStatus? Status { get; set; }
 
+        /// <summary>
+        /// 查询条件-项目编号
+        /// </summary>
+        public string ProjectCode { get; set; }
+
+        /// <summary>
+        /// 查询条件-创建开始日期
+        /// </summary>
+        public DateTime? StartDate { get; set; }
+
+        /// <summary>
+        /// 查询条件-创建结束日期
+        /// </summary>
+        public DateTime? EndDate { get; set; }
+
     }
 }

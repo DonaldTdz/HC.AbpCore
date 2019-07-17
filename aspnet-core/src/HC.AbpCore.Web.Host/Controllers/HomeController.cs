@@ -19,8 +19,8 @@ namespace HC.AbpCore.Web.Host.Controllers
 
         public IActionResult Index()
         {
-            return Redirect("/pmadmin/index.html");
-            //return Redirect("/swagger");
+            //return Redirect("/pmadmin/index.html");
+            return Redirect("/swagger");
         }
 
         /// <summary>
