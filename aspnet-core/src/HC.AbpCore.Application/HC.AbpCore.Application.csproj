@@ -12,6 +12,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Abp.Quartz" Version="4.5.0" />
+    <PackageReference Include="PinYinConverterCore" Version="1.0.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HC.AbpCore.Core\HC.AbpCore.Core.csproj" />

@@ -23,6 +23,8 @@ using HC.AbpCore.Customers.Dtos;
 using HC.AbpCore.Customers.DomainService;
 using HC.AbpCore.Dtos;
 using Abp.Json;
+using Abp.Runtime.Session;
+using HC.AbpCore.Authorization.Users;
 
 namespace HC.AbpCore.Customers
 {
@@ -33,17 +35,22 @@ namespace HC.AbpCore.Customers
     public class CustomerAppService : AbpCoreAppServiceBase, ICustomerAppService
     {
         private readonly IRepository<Customer> _entityRepository;
-
+        private readonly IAbpSession _abpSession;
         private readonly ICustomerManager _entityManager;
+        private readonly UserManager _userManager;
 
         /// <summary>
         /// 构造函数 
         ///</summary>
         public CustomerAppService(
         IRepository<Customer> entityRepository
+        , IAbpSession abpSession
+        , UserManager userManager
         , ICustomerManager entityManager
         )
         {
+            _userManager = userManager;
+            _abpSession = abpSession;
             _entityRepository = entityRepository;
             _entityManager = entityManager;
         }
@@ -61,11 +68,13 @@ namespace HC.AbpCore.Customers
                   || u.Phone.Contains(input.FilterText))
                   .WhereIf(input.Status.HasValue, v => v.UserType == input.Status.Value);
                   */
-
             var query = _entityRepository.GetAll()
                 .WhereIf(!string.IsNullOrEmpty(input.name), u => u.Name.Contains(input.name))
                 .WhereIf(input.type.HasValue, v => v.Type == input.type.Value);
             // TODO:根据传入的参数添加过滤条件
+            var user = await _userManager.GetUserByIdAsync(_abpSession.UserId.Value);
+            if (user.EmployeeId != "0205151055692871" && user.EmployeeId != "192656451022556048")
+                query = query.Where(aa => aa.CreatorUserId == _abpSession.UserId);
 
 
             var count = await query.CountAsync();

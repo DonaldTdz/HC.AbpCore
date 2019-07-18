@@ -8,6 +8,9 @@ namespace HC.AbpCore.Authorization.Users
     public class User : AbpUser<User>
     {
         public const string DefaultPassword = "123qwe";
+        public string EmployeeId { get; set; }
+        public string EmployeeName { get; set; }
+        public string UnionId { get; set; }
 
         public static string CreateRandomPassword()
         {

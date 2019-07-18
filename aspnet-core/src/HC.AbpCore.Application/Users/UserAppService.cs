@@ -13,14 +13,19 @@ using Abp.Linq.Extensions;
 using Abp.Localization;
 using Abp.Runtime.Session;
 using Abp.UI;
+using GYSWP.Users.Dto;
 using HC.AbpCore.Authorization;
 using HC.AbpCore.Authorization.Accounts;
 using HC.AbpCore.Authorization.Roles;
 using HC.AbpCore.Authorization.Users;
+using HC.AbpCore.DingTalk;
+using HC.AbpCore.DingTalk.Organizations.Dtos;
+using HC.AbpCore.Dtos;
 using HC.AbpCore.Roles.Dto;
 using HC.AbpCore.Users.Dto;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.International.Converters.PinYinConverter;
 
 namespace HC.AbpCore.Users
 {
@@ -33,6 +38,7 @@ namespace HC.AbpCore.Users
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IAbpSession _abpSession;
         private readonly LogInManager _logInManager;
+        private readonly IDingTalkManager _dingTalkManager;
 
         public UserAppService(
             IRepository<User, long> repository,
@@ -41,6 +47,7 @@ namespace HC.AbpCore.Users
             IRepository<Role> roleRepository,
             IPasswordHasher<User> passwordHasher,
             IAbpSession abpSession,
+            IDingTalkManager dingTalkManager,
             LogInManager logInManager)
             : base(repository)
         {
@@ -50,6 +57,7 @@ namespace HC.AbpCore.Users
             _passwordHasher = passwordHasher;
             _abpSession = abpSession;
             _logInManager = logInManager;
+            _dingTalkManager = dingTalkManager;
         }
 
         public override async Task<UserDto> Create(CreateUserDto input)
@@ -217,6 +225,99 @@ namespace HC.AbpCore.Users
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// 同步钉钉用户
+        /// </summary>
+        /// <returns></returns>
+        public async Task<APIResultDto> SynchroDingUserAsync()
+        {
+             var assessToken = await _dingTalkManager.GetAccessTokenByAppAsync(DingDingAppEnum.智能办公);
+            var depts = Senparc.CO2NET.HttpUtility.Get.GetJson<DingDepartmentDto>(string.Format("https://oapi.dingtalk.com/department/list?access_token={0}", assessToken));
+            var entityByDD = depts.department.Select(o => new OrganizationListDto()
+            {
+                Id = o.id
+            }).ToList();
+
+            foreach (var item in entityByDD)
+            {
+                if (item.Id != 1)
+                    await CreateOrUpdateUsers(item.Id, assessToken);
+            }
+            await CurrentUnitOfWork.SaveChangesAsync();
+            return new APIResultDto() { Code = 0, Msg = "同步钉钉用户成功" };
+        }
+
+
+        private async Task<UserDto> CreateOrUpdateUsers(long deptId, string accessToken)
+        {
+            string[] relesName = await _roleRepository.GetAll().Where(aa => aa.DisplayName == "员工").Select(aa => aa.Name).ToArrayAsync();
+            var url = string.Format("https://oapi.dingtalk.com/user/list?access_token={0}&department_id={1}", accessToken, deptId);
+            var user = Senparc.CO2NET.HttpUtility.Get.GetJson<DingUserListDto>(url);
+            var entityByDD = user.userlist.Select(e => new SynchroDingUser()
+            {
+                UserName = GetPinyin(e.name),
+                IsActive = true,
+                EmailAddress = !string.IsNullOrEmpty(e.email) ? e.email : "PM" + GetPinyin(e.name) + "@hc.com",
+                Name = e.name,
+                Surname = e.name.Substring(0, 1),
+                Password = GetPinyin(e.name) + "123456",
+                EmployeeId = e.userid,
+                EmployeeName = e.name,
+                UnionId = e.unionid,
+                RoleNames = relesName,
+                PhoneNumber = e.mobile
+            }).ToList();
+            //int emailCode = 001;
+            foreach (var item in entityByDD)
+            {
+                //emailCode += 1;
+                //item.EmailAddress = "GYSWP" + emailCode + "@gy.com";
+                CheckCreatePermission();
+
+                var users = ObjectMapper.Map<User>(item);
+
+                users.TenantId = AbpSession.TenantId;
+                users.IsEmailConfirmed = true;
+
+                await _userManager.InitializeOptionsAsync(AbpSession.TenantId);
+
+                CheckErrors(await _userManager.CreateAsync(users, item.Password));
+
+                if (item.RoleNames != null)
+                {
+                    CheckErrors(await _userManager.SetRoles(users, item.RoleNames));
+                }
+
+                //return MapToEntityDto(users);
+            }
+            await CurrentUnitOfWork.SaveChangesAsync();
+            return null;
+        }
+
+        /// <summary> 
+        /// 汉字转化为拼音
+        /// </summary> 
+        /// <param name="str">汉字</param> 
+        /// <returns>全拼</returns> 
+        private static string GetPinyin(string str)
+        {
+            string r = string.Empty;
+            foreach (char obj in str)
+            {
+                try
+                {
+                    ChineseChar chineseChar = new ChineseChar(obj);
+                    string t = chineseChar.Pinyins[0].ToString();
+                    r += t.Substring(0, t.Length - 1);
+                }
+                catch
+                {
+                    r += obj.ToString();
+                }
+            }
+            return r.ToLower();
         }
     }
 }

@@ -26,6 +26,8 @@ using HC.AbpCore.Purchases;
 using HC.AbpCore.Purchases.PurchaseDetails;
 using HC.AbpCore.Projects;
 using HC.AbpCore.Projects.ProjectDetails;
+using HC.AbpCore.Authorization.Users;
+using Abp.Runtime.Session;
 
 namespace HC.AbpCore.Suppliers
 {
@@ -40,18 +42,24 @@ namespace HC.AbpCore.Suppliers
         private readonly IRepository<PurchaseDetail, Guid> _purchaseDetailRepository;
         private readonly IRepository<ProjectDetail, Guid> _projectDetailRepository;
         private readonly ISupplierManager _entityManager;
+        private readonly IAbpSession _abpSession;
+        private readonly UserManager _userManager;
 
         /// <summary>
         /// 构造函数 
         ///</summary>
         public SupplierAppService(
-        IRepository<Supplier, int> entityRepository,
-                 IRepository<ProjectDetail, Guid> projectDetailRepository,
-         IRepository<Purchase, Guid> purchaseRepository,
-         IRepository<PurchaseDetail, Guid> purchaseDetailRepository
+        IRepository<Supplier, int> entityRepository
+         , IRepository<ProjectDetail, Guid> projectDetailRepository
+         , IRepository<Purchase, Guid> purchaseRepository
+         , IAbpSession abpSession
+         , IRepository<PurchaseDetail, Guid> purchaseDetailRepository
+         , UserManager userManager
         , ISupplierManager entityManager
         )
         {
+            _userManager = userManager;
+            _abpSession = abpSession;
             _purchaseDetailRepository = purchaseDetailRepository;
             _projectDetailRepository = projectDetailRepository;
             _purchaseRepository = purchaseRepository;
@@ -71,6 +79,9 @@ namespace HC.AbpCore.Suppliers
 
             var query = _entityRepository.GetAll().WhereIf(!String.IsNullOrEmpty(input.Name), a => a.Name.Contains(input.Name));
             // TODO:根据传入的参数添加过滤条件
+            var user = await _userManager.GetUserByIdAsync(_abpSession.UserId.Value);
+            if (user.EmployeeId != "0205151055692871" && user.EmployeeId != "192656451022556048")
+                query = query.Where(aa => aa.CreatorUserId == _abpSession.UserId);
 
 
             var count = await query.CountAsync();

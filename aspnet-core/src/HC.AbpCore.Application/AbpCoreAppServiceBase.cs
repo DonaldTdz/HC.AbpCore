@@ -15,6 +15,7 @@ namespace HC.AbpCore
     /// </summary>
     public abstract class AbpCoreAppServiceBase : ApplicationService
     {
+
         public TenantManager TenantManager { get; set; }
 
         public UserManager UserManager { get; set; }

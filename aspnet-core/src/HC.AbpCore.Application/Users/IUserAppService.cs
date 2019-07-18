@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Abp.Application.Services;
 using Abp.Application.Services.Dto;
+using HC.AbpCore.Dtos;
 using HC.AbpCore.Roles.Dto;
 using HC.AbpCore.Users.Dto;
 
@@ -11,5 +12,11 @@ namespace HC.AbpCore.Users
         Task<ListResultDto<RoleDto>> GetRoles();
 
         Task ChangeLanguage(ChangeUserLanguageDto input);
+
+        /// <summary>
+        /// 同步钉钉用户
+        /// </summary>
+        /// <returns></returns>
+        Task<APIResultDto> SynchroDingUserAsync();
     }
 }

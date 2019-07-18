@@ -22,6 +22,8 @@ using HC.AbpCore.Products;
 using HC.AbpCore.Products.Dtos;
 using HC.AbpCore.Products.DomainService;
 using HC.AbpCore.Dtos;
+using Abp.Runtime.Session;
+using HC.AbpCore.Authorization.Users;
 
 namespace HC.AbpCore.Products
 {
@@ -32,7 +34,8 @@ namespace HC.AbpCore.Products
     public class ProductAppService : AbpCoreAppServiceBase, IProductAppService
     {
         private readonly IRepository<Product, int> _entityRepository;
-
+        //private readonly IAbpSession _abpSession;
+        //private readonly UserManager _userManager;
         private readonly IProductManager _entityManager;
 
         /// <summary>
@@ -40,9 +43,13 @@ namespace HC.AbpCore.Products
         ///</summary>
         public ProductAppService(
         IRepository<Product, int> entityRepository
+        //, IAbpSession abpSession
+        //, UserManager userManager
         , IProductManager entityManager
         )
         {
+            //_userManager = userManager;
+            //_abpSession = abpSession;
             _entityRepository = entityRepository;
             _entityManager = entityManager;
         }
@@ -60,6 +67,9 @@ namespace HC.AbpCore.Products
             var query = _entityRepository.GetAll().WhereIf(!string.IsNullOrEmpty(input.Name), u => u.Name.Contains(input.Name))
                 .WhereIf(input.Type.HasValue, a => a.Type == input.Type).WhereIf(input.IsEnabled.HasValue,a=>a.IsEnabled==input.IsEnabled.Value);
             // TODO:根据传入的参数添加过滤条件
+            //var user = await _userManager.GetUserByIdAsync(_abpSession.UserId.Value);
+            //if (user.EmployeeId != "0205151055692871" && user.EmployeeId != "192656451022556048")
+            //    query = query.Where(aa => aa.cr == _abpSession.UserId);
 
 
             var count = await query.CountAsync();
