@@ -43,6 +43,20 @@ namespace HC.AbpCore.Reimburses.Dtos
 
 
         /// <summary>
+        /// Type
+        /// </summary>
+        public ReimburseTypeEnum Type { get; set; }
+
+
+
+        /// <summary>
+        /// Remark
+        /// </summary>
+        public string Remark { get; set; }
+
+
+
+        /// <summary>
         /// SubmitDate
         /// </summary>
         public DateTime? SubmitDate { get; set; }

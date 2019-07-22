@@ -172,7 +172,7 @@ namespace HC.AbpCore.Users
             identityResult.CheckErrors(LocalizationManager);
         }
 
-        public async Task<bool> ChangePassword(ChangePasswordDto input)
+        public async Task<bool> ChangePassword(string currentPassword,string newPassword)
         {
             if (_abpSession.UserId == null)
             {
@@ -180,16 +180,16 @@ namespace HC.AbpCore.Users
             }
             long userId = _abpSession.UserId.Value;
             var user = await _userManager.GetUserByIdAsync(userId);
-            var loginAsync = await _logInManager.LoginAsync(user.UserName, input.CurrentPassword, shouldLockout: false);
+            var loginAsync = await _logInManager.LoginAsync(user.UserName, currentPassword, shouldLockout: false);
             if (loginAsync.Result != AbpLoginResultType.Success)
             {
                 throw new UserFriendlyException("Your 'Existing Password' did not match the one on record.  Please try again or contact an administrator for assistance in resetting your password.");
             }
-            if (!new Regex(AccountAppService.PasswordRegex).IsMatch(input.NewPassword))
+            if (!new Regex(AccountAppService.PasswordRegex).IsMatch(newPassword))
             {
-                throw new UserFriendlyException("Passwords must be at least 8 characters, contain a lowercase, uppercase, and number.");
+                throw new UserFriendlyException("密码必须至少为8个字符，包含小写、大写和数字。");
             }
-            user.Password = _passwordHasher.HashPassword(user, input.NewPassword);
+            user.Password = _passwordHasher.HashPassword(user, newPassword);
             CurrentUnitOfWork.SaveChanges();
             return true;
         }

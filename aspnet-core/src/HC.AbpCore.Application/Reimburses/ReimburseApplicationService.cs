@@ -98,6 +98,7 @@ namespace HC.AbpCore.Reimburses
                                  Amount = item.Amount,
                                  Status = item.Status,
                                  SubmitDate = item.SubmitDate,
+                                 Type=item.Type,
                                  ApproverId = item.ApproverId,
                                  ApprovalTime = item.ApprovalTime,
                                  //ApproverName = cc.Name,

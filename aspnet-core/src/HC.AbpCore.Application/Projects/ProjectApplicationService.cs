@@ -89,10 +89,10 @@ namespace HC.AbpCore.Projects
                 .WhereIf(input.CustomerId.HasValue, a => a.CustomerId == input.CustomerId.Value)
                 .WhereIf(input.Id.HasValue, a => a.Id == input.Id.Value)
                 .WhereIf(!String.IsNullOrEmpty(input.ProjectCode), a => a.ProjectCode == input.ProjectCode)
-                .WhereIf(input.StartDate.HasValue && input.EndDate.HasValue, a => a.CreationTime >= input.StartDate.Value && a.CreationTime <= input.EndDate.Value);
+                .WhereIf(input.StartDate.HasValue && input.EndDate.HasValue, a => a.CreationTime >= input.StartDate.Value && a.CreationTime < input.EndDate.Value.AddDays(1));
             // TODO:根据传入的参数添加过滤条件
             var user = await _userManager.GetUserByIdAsync(_abpSession.UserId.Value);
-            if (user.EmployeeId != "0205151055692871" && user.EmployeeId != "192656451022556048")
+            if (user.EmployeeId != "0205151055692871" && user.EmployeeId != "1706561401635019335")
                 query = query.Where(aa => aa.ProjectSalesId == user.EmployeeId || aa.SalesAssistantId == user.EmployeeId);
 
             var customerList = await _customerRepository.GetAll().AsNoTracking().ToListAsync();

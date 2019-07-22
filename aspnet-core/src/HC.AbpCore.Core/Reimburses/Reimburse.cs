@@ -29,6 +29,16 @@ namespace HC.AbpCore.Reimburses
         /// </summary>
         public virtual ReimburseStatusEnum? Status { get; set; }
         /// <summary>
+        /// 报销类型（项目型报销 = 1, 非项目报销 = 2）
+        /// </summary>
+        [Required]
+        public virtual ReimburseTypeEnum Type { get; set; }
+        /// <summary>
+        /// 备注
+        /// </summary>
+        [StringLength(500)]
+        public virtual string Remark { get; set; }
+        /// <summary>
         /// 申请时间
         /// </summary>
         public virtual DateTime? SubmitDate { get; set; }

@@ -73,7 +73,7 @@ namespace HC.AbpCore.Customers
                 .WhereIf(input.type.HasValue, v => v.Type == input.type.Value);
             // TODO:根据传入的参数添加过滤条件
             var user = await _userManager.GetUserByIdAsync(_abpSession.UserId.Value);
-            if (user.EmployeeId != "0205151055692871" && user.EmployeeId != "192656451022556048")
+            if (user.EmployeeId != "0205151055692871" && user.EmployeeId != "1706561401635019335")
                 query = query.Where(aa => aa.CreatorUserId == _abpSession.UserId);
 
 
