@@ -16,8 +16,8 @@ namespace HC.AbpCore.EntityMapper.PurchaseDetails
             
 			builder.Property(a => a.PurchaseId).HasMaxLength(YoYoAbpefCoreConsts.EntityLengthNames.Length64);
 			builder.Property(a => a.SupplierId).HasMaxLength(YoYoAbpefCoreConsts.EntityLengthNames.Length64);
-			builder.Property(a => a.Price).HasMaxLength(YoYoAbpefCoreConsts.EntityLengthNames.Length64);
-			builder.Property(a => a.ProjectDetailId).HasMaxLength(YoYoAbpefCoreConsts.EntityLengthNames.Length64);
+			builder.Property(a => a.ProductId).HasMaxLength(YoYoAbpefCoreConsts.EntityLengthNames.Length64);
+			builder.Property(a => a.Num).HasMaxLength(YoYoAbpefCoreConsts.EntityLengthNames.Length64);
 
 
         }

@@ -1,4 +1,5 @@
 ﻿using Abp.Domain.Entities;
+using Abp.Domain.Entities.Auditing;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -8,7 +9,7 @@ using System.Text;
 namespace HC.AbpCore.Products
 {
     [Table("Products")]
-    public class Product : Entity<int> //注意修改主键Id数据类型
+    public class Product : Entity<int>, IHasCreationTime //注意修改主键Id数据类型
     {
         /// <summary>
         /// 分类 枚举（暂无）
@@ -27,10 +28,20 @@ namespace HC.AbpCore.Products
         [Required]
         public virtual string Specification { get; set; }
         /// <summary>
-        /// 单位
+        /// 数量
         /// </summary>
-        [StringLength(50)]
-        public virtual string Unit { get; set; }
+        public virtual int? Num { get; set; }
+        /// <summary>
+        /// 税率 数据字典配置，如：16%
+        /// </summary>
+        [StringLength(100)]
+        [Required]
+        public virtual string TaxRate { get; set; }
+        /// <summary>
+        /// 单价
+        /// </summary>
+        [Required]
+        public virtual decimal Price { get; set; }
         /// <summary>
         /// 是否启用
         /// </summary>

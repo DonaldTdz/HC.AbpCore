@@ -8,7 +8,7 @@ using HC.AbpCore.Products;
 
 namespace HC.AbpCore.Products.Dtos
 {
-    public class ProductListDto : EntityDto<int> 
+    public class ProductListDto : EntityDto<int>, IHasCreationTime
     {
 
         
@@ -35,17 +35,33 @@ namespace HC.AbpCore.Products.Dtos
 
 
 
-		/// <summary>
-		/// Unit
-		/// </summary>
-		public string Unit { get; set; }
+        /// <summary>
+        /// Num
+        /// </summary>
+        public int? Num { get; set; }
 
 
 
-		/// <summary>
-		/// IsEnabled
-		/// </summary>
-		public bool? IsEnabled { get; set; }
+        /// <summary>
+        /// TaxRate
+        /// </summary>
+        [Required(ErrorMessage = "税率不能为空")]
+        public string TaxRate { get; set; }
+
+
+
+        /// <summary>
+        /// Price
+        /// </summary>
+        [Required(ErrorMessage = "单价不能为空")]
+        public decimal Price { get; set; }
+
+
+
+        /// <summary>
+        /// IsEnabled
+        /// </summary>
+        public bool? IsEnabled { get; set; }
 
 
 

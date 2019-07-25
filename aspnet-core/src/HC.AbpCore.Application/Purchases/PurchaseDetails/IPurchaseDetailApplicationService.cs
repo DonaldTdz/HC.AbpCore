@@ -20,7 +20,6 @@ using Abp.Application.Services.Dto;
 
 using HC.AbpCore.Purchases.PurchaseDetails.Dtos;
 using HC.AbpCore.Purchases.PurchaseDetails;
-using HC.AbpCore.Dtos;
 
 namespace HC.AbpCore.Purchases.PurchaseDetails
 {
@@ -34,7 +33,7 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
 		///</summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<PagedResultDto<PurchaseDetailListDto>> GetPagedAsync(GetPurchaseDetailsInput input);
+        Task<PagedResultDto<PurchaseDetailListDtoNew>> GetPagedAsync(GetPurchaseDetailsInput input);
 
 
 		/// <summary>
@@ -49,12 +48,6 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
         /// <param name="input"></param>
         /// <returns></returns>
         Task<GetPurchaseDetailForEditOutput> GetForEditAsync(NullableIdDto<Guid> input);
-
-        /// <summary>
-        /// 根据采购id获取采购明细下拉列表
-        /// </summary>
-        /// <returns></returns>
-        Task<List<DropDownDto>> GetDropDownsByPurchaseIdAsync(Guid purchaseId);
 
 
         /// <summary>
@@ -79,11 +72,35 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
         Task BatchDeleteAsync(List<Guid> input);
 
 
-		/// <summary>
+        /// <summary>
+        /// 添加PurchaseDetail并且更新Products的公共方法
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        Task CreateDetailAndUpdateproductAsync(CreatePurchaseDetailAndUpdateproductInput input);
+
+
+        /// <summary>
+        /// 删除PurchaseDetail并更新Products的方法
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        Task DeleteAndUpdatePurchaseAsync(EntityDto<Guid> input);
+
+
+        /// <summary>
+        /// 更新PurchaseDetail并且更新Products的公共方法
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        Task UpdateDetailAndUpdateproductAsync(CreateOrUpdatePurchaseDetailInput input);
+
+
+        /// <summary>
         /// 导出PurchaseDetail为excel表
         /// </summary>
         /// <returns></returns>
-		//Task<FileDto> GetToExcel();
+        //Task<FileDto> GetToExcel();
 
     }
 }

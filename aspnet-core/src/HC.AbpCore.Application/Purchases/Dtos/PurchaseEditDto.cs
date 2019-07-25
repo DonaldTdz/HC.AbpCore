@@ -8,9 +8,8 @@ using HC.AbpCore.Purchases;
 namespace  HC.AbpCore.Purchases.Dtos
 {
     public class PurchaseEditDto : FullAuditedEntityDto<Guid?>
-    {       
+    {
 
-        
 		/// <summary>
 		/// Code
 		/// </summary>
@@ -19,20 +18,9 @@ namespace  HC.AbpCore.Purchases.Dtos
 
 
 		/// <summary>
-		/// ProjectId
+		/// EmployeeId
 		/// </summary>
-		public Guid? ProjectId { get; set; }
-
-        /// <summary>
-        /// Type
-        /// </summary>
-        public PurchaseTypeEnum Type { get; set; }
-
-
-        /// <summary>
-        /// EmployeeId
-        /// </summary>
-        public string EmployeeId { get; set; }
+		public string EmployeeId { get; set; }
 
 
 
@@ -47,6 +35,27 @@ namespace  HC.AbpCore.Purchases.Dtos
 		/// Desc
 		/// </summary>
 		public string Desc { get; set; }
+
+
+
+		/// <summary>
+		/// ArrivalDate
+		/// </summary>
+		public DateTime? ArrivalDate { get; set; }
+
+
+
+		/// <summary>
+		/// InvoiceIssuance
+		/// </summary>
+		public bool? InvoiceIssuance { get; set; }
+
+
+
+		/// <summary>
+		/// Attachments
+		/// </summary>
+		public string Attachments { get; set; }
 
 
 

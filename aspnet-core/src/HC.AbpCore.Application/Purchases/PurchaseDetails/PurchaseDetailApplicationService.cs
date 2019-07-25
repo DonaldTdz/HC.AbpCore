@@ -21,10 +21,8 @@ using Abp.Linq.Extensions;
 using HC.AbpCore.Purchases.PurchaseDetails;
 using HC.AbpCore.Purchases.PurchaseDetails.Dtos;
 using HC.AbpCore.Purchases.PurchaseDetails.DomainService;
+using HC.AbpCore.Products;
 using HC.AbpCore.Suppliers;
-using HC.AbpCore.Projects.ProjectDetails;
-using HC.AbpCore.Dtos;
-using HC.AbpCore.Projects;
 
 namespace HC.AbpCore.Purchases.PurchaseDetails
 {
@@ -35,24 +33,21 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
     public class PurchaseDetailAppService : AbpCoreAppServiceBase, IPurchaseDetailAppService
     {
         private readonly IRepository<PurchaseDetail, Guid> _entityRepository;
-        private readonly IRepository<Purchase, Guid> _purchaseRepository;
         private readonly IRepository<Supplier, int> _supplierRepository;
-        private readonly IRepository<ProjectDetail, Guid> _projectDetailRepository;
+        private readonly IRepository<Product, int> _productIdRepository;
         private readonly IPurchaseDetailManager _entityManager;
 
         /// <summary>
         /// 构造函数 
         ///</summary>
         public PurchaseDetailAppService(
-        IRepository<PurchaseDetail, Guid> entityRepository,
-                IRepository<Supplier, int> supplierRepository
-            , IRepository<ProjectDetail, Guid> projectDetailRepository
-            , IRepository<Purchase, Guid> purchaseRepository
+        IRepository<PurchaseDetail, Guid> entityRepository
+        , IRepository<Supplier, int> supplierRepository
+        , IRepository<Product, int> productIdRepository
         , IPurchaseDetailManager entityManager
         )
         {
-            _projectDetailRepository = projectDetailRepository;
-            _purchaseRepository = purchaseRepository;
+            _productIdRepository = productIdRepository;
             _supplierRepository = supplierRepository;
             _entityRepository = entityRepository;
             _entityManager = entityManager;
@@ -65,37 +60,44 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
         /// <param name="input"></param>
         /// <returns></returns>
 
-        public async Task<PagedResultDto<PurchaseDetailListDto>> GetPagedAsync(GetPurchaseDetailsInput input)
+        public async Task<PagedResultDto<PurchaseDetailListDtoNew>> GetPagedAsync(GetPurchaseDetailsInput input)
         {
-            var query = _entityRepository.GetAll().WhereIf(input.PurchaseId.HasValue, aa => aa.PurchaseId == input.PurchaseId.Value)
-                .WhereIf(input.SupplierId.HasValue, aa => aa.SupplierId == input.SupplierId.Value);
+
+            var query = _entityRepository.GetAll().WhereIf(input.PurchaseId.HasValue, aa => aa.PurchaseId == input.PurchaseId.Value);
             // TODO:根据传入的参数添加过滤条件
-            var suppliers = await _supplierRepository.GetAll().OrderByDescending(aa => aa.CreationTime).AsNoTracking().ToListAsync();
-            var projectDetails = await _projectDetailRepository.GetAll().OrderByDescending(aa => aa.CreationTime).AsNoTracking().ToListAsync();
+            var suppliers = _supplierRepository.GetAll().AsNoTracking();
+            var products = _productIdRepository.GetAll().AsNoTracking();
 
+            var items = from item in query
+                        join supplier in suppliers on item.SupplierId equals supplier.Id into temp
+                        join product in products on item.ProductId equals product.Id into bbs
+                        from tem in temp.DefaultIfEmpty()
+                        from bb in bbs.DefaultIfEmpty()
+                        select new PurchaseDetailListDtoNew()
+                        {
+                            Id = item.Id,
+                            PurchaseId = item.PurchaseId,
+                            SupplierId = item.SupplierId,
+                            ProductId = item.ProductId,
+                            Num = item.Num,
+                            Name = bb.Name,
+                            Specification = bb.Specification,
+                            TaxRate = bb.TaxRate,
+                            Price = bb.Price,
+                            SupplierName = tem.Name
+                        };
 
-            var count = await query.CountAsync();
+            var count = await items.CountAsync();
 
-            var entityList = await query
+            var entityList = await items
                     .OrderBy(input.Sorting).AsNoTracking()
-                    .OrderByDescending(aa => aa.CreationTime)
-                    .Select(bb => new PurchaseDetailListDto()
-                    {
-                        Id = bb.Id,
-                        PurchaseId = bb.PurchaseId,
-                        SupplierId = bb.SupplierId,
-                        Num=bb.Num,
-                        Price = bb.Price,
-                        ProjectDetailId = bb.ProjectDetailId,
-                        SupplierName = bb.SupplierId.HasValue ? suppliers.Where(aa => aa.Id == bb.SupplierId.Value).FirstOrDefault().Name : null,
-                        ProjectDetailName = bb.ProjectDetailId.HasValue ? projectDetails.Where(aa => aa.Id == bb.ProjectDetailId.Value).FirstOrDefault().Name : null,
-                    })
                     //.PageBy(input)
                     .ToListAsync();
 
             // var entityListDtos = ObjectMapper.Map<List<PurchaseDetailListDto>>(entityList);
+            //var entityListDtos = entityList.MapTo<List<PurchaseDetailListDto>>();
 
-            return new PagedResultDto<PurchaseDetailListDto>(count,entityList);
+            return new PagedResultDto<PurchaseDetailListDtoNew>(count, entityList);
         }
 
 
@@ -150,11 +152,11 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
 
             if (input.PurchaseDetail.Id.HasValue)
             {
-                await UpdateAsync(input.PurchaseDetail);
+                await Update(input.PurchaseDetail);
             }
             else
             {
-                await CreateAsync(input.PurchaseDetail);
+                await Create(input.PurchaseDetail);
             }
         }
 
@@ -163,10 +165,9 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
         /// 新增PurchaseDetail
         /// </summary>
 
-        protected virtual async Task<PurchaseDetailEditDto> CreateAsync(PurchaseDetailEditDto input)
+        protected virtual async Task<PurchaseDetailEditDto> Create(PurchaseDetailEditDto input)
         {
             //TODO:新增前的逻辑判断，是否允许新增
-
 
             // var entity = ObjectMapper.Map <PurchaseDetail>(input);
             var entity = input.MapTo<PurchaseDetail>();
@@ -180,7 +181,7 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
         /// 编辑PurchaseDetail
         /// </summary>
 
-        protected virtual async Task UpdateAsync(PurchaseDetailEditDto input)
+        protected virtual async Task Update(PurchaseDetailEditDto input)
         {
             //TODO:更新前的逻辑判断，是否允许更新
 
@@ -218,22 +219,36 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
         }
 
         /// <summary>
-        /// 根据采购id获取采购明细下拉列表
+        /// 添加PurchaseDetail并且更新Products的公共方法
         /// </summary>
+        /// <param name="input"></param>
         /// <returns></returns>
-        public async Task<List<DropDownDto>> GetDropDownsByPurchaseIdAsync(Guid purchaseId)
+        public async Task CreateDetailAndUpdateproductAsync(CreatePurchaseDetailAndUpdateproductInput input)
         {
-            var projectId = _purchaseRepository.Get(purchaseId).ProjectId;
-            var projectDetails = await _projectDetailRepository.GetAll().Where(aa => aa.ProjectId == projectId).AsNoTracking().ToListAsync();
-            var query = _entityRepository.GetAll();
-            var entityList = await query
-                    .OrderBy(a => a.CreationTime).AsNoTracking()
-                    .Where(aa => aa.PurchaseId == purchaseId)
-                    .Select(c => new DropDownDto() { Text = projectDetails.Where(aa=>aa.Id==c.ProjectDetailId).FirstOrDefault().Name, Value = c.Id.ToString() })
-                    .ToListAsync();
-            return entityList;
+            var entity = input.PurchaseDetail.MapTo<PurchaseDetailNew>();
+            await _entityManager.CreateAsync(entity);
         }
 
+        /// <summary>
+        /// 删除PurchaseDetail并更新Products的方法
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public async Task DeleteAndUpdatePurchaseAsync(EntityDto<Guid> input)
+        {
+            await _entityManager.DeleteAsync(input.Id);
+        }
+
+        /// <summary>
+        /// 更新PurchaseDetail并且更新Products的公共方法
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public async Task UpdateDetailAndUpdateproductAsync(CreateOrUpdatePurchaseDetailInput input)
+        {
+            var entity = input.PurchaseDetail.MapTo<PurchaseDetail>();
+            await _entityManager.UpdateAsync(entity);
+        }
 
         /// <summary>
         /// 导出PurchaseDetail为excel表,等待开发。

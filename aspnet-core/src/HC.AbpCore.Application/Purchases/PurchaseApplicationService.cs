@@ -21,10 +21,9 @@ using Abp.Linq.Extensions;
 using HC.AbpCore.Purchases;
 using HC.AbpCore.Purchases.Dtos;
 using HC.AbpCore.Purchases.DomainService;
-using HC.AbpCore.DingTalk.Employees;
-using HC.AbpCore.Projects;
-using HC.AbpCore.Dtos;
 using HC.AbpCore.Purchases.PurchaseDetails;
+using HC.AbpCore.AdvancePayments;
+using HC.AbpCore.DingTalk.Employees;
 
 namespace HC.AbpCore.Purchases
 {
@@ -35,25 +34,20 @@ namespace HC.AbpCore.Purchases
     public class PurchaseAppService : AbpCoreAppServiceBase, IPurchaseAppService
     {
         private readonly IRepository<Purchase, Guid> _entityRepository;
-        private readonly IRepository<PurchaseDetail, Guid> _purchaseDetailRepository;
         private readonly IRepository<Employee, string> _employeeRepository;
-        private readonly IRepository<Project, Guid> _projectRepository;
+
         private readonly IPurchaseManager _entityManager;
 
         /// <summary>
         /// 构造函数 
         ///</summary>
         public PurchaseAppService(
-        IRepository<Purchase, Guid> entityRepository,
-        IRepository<Employee, string> employeeRepository,
-        IRepository<Project, Guid> projectRepository,
-        IRepository<PurchaseDetail, Guid> purchaseDetailRepository,
-        IPurchaseManager entityManager
+        IRepository<Purchase, Guid> entityRepository
+        , IRepository<Employee, string> employeeRepository
+        , IPurchaseManager entityManager
         )
         {
-            _purchaseDetailRepository = purchaseDetailRepository;
             _employeeRepository = employeeRepository;
-            _projectRepository = projectRepository;
             _entityRepository = entityRepository;
             _entityManager = entityManager;
         }
@@ -64,73 +58,53 @@ namespace HC.AbpCore.Purchases
         ///</summary>
         /// <param name="input"></param>
         /// <returns></returns>
+
         public async Task<PagedResultDto<PurchaseListDto>> GetPagedAsync(GetPurchasesInput input)
         {
 
-            var query = _entityRepository.GetAll().WhereIf(input.ProjectId.HasValue, AA => AA.ProjectId == input.ProjectId.Value)
-                .WhereIf(!String.IsNullOrEmpty(input.Code), aa => aa.Code.Contains(input.Code))
-                .WhereIf(input.Id.HasValue, aa => aa.Id == input.Id.Value);
+            var query = _entityRepository.GetAll().WhereIf(!String.IsNullOrEmpty(input.Code),aa=>aa.Code.Contains(input.Code))
+                .WhereIf(!String.IsNullOrEmpty(input.EmployeeId),aa=>aa.EmployeeId==input.EmployeeId);
             // TODO:根据传入的参数添加过滤条件
-            var employeeList = await _employeeRepository.GetAll().AsNoTracking().ToListAsync();
-            var projects = _projectRepository.GetAll();
+            var employees = _employeeRepository.GetAll().AsNoTracking();
 
-            var count = await query.CountAsync();
-            var entityList = from item in query
-                             join project in projects on item.ProjectId equals project.Id
-                             select new PurchaseListDto()
-                             {
-                                 Id = item.Id,
-                                 Code = item.Code,
-                                 ProjectId = item.ProjectId,
-                                 Type = item.Type,
-                                 EmployeeId = item.EmployeeId,
-                                 PurchaseDate = item.PurchaseDate,
-                                 Desc = item.Desc,
-                                 ProjectName = project.Name + "(" + project.ProjectCode + ")",
-                                 EmployeeName = !String.IsNullOrEmpty(item.EmployeeId) ? employeeList.Where(bb => bb.Id == item.EmployeeId).FirstOrDefault().Name : null,
-                                 CreationTime = item.CreationTime
-                             };
-            var items = await entityList.OrderByDescending(aa => aa.PurchaseDate)
-                .PageBy(input)
-                .ToListAsync();
+            var items= from item in query
+                       join employee in employees on item.EmployeeId equals employee.Id into temp
+                       from tem in temp.DefaultIfEmpty()
+                       select new PurchaseListDto()
+                       {
+                           Code = item.Code,
+                           EmployeeId = item.EmployeeId,
+                           PurchaseDate = item.PurchaseDate,
+                           Desc = item.Desc,
+                           ArrivalDate=item.ArrivalDate,
+                           InvoiceIssuance=item.InvoiceIssuance,
+                           Attachments=item.Attachments,
+                           EmployeeName=tem.Name
+                       };
 
-            //var entityList = await query
-            //        .OrderBy(input.Sorting).AsNoTracking()
-            //        .OrderByDescending(aa => aa.PurchaseDate)
-            //        .Select(aa => new PurchaseListDto()
-            //        {
-            //            Id = aa.Id,
-            //            Code = aa.Code,
-            //            ProjectId = aa.ProjectId,
-            //            Type = aa.Type,
-            //            EmployeeId = aa.EmployeeId,
-            //            PurchaseDate = aa.PurchaseDate,
-            //            Desc = aa.Desc,
-            //            ProjectName = aa.ProjectId.HasValue ? projectList.Where(bb => bb.Id == aa.ProjectId).FirstOrDefault().Name : null,
-            //            EmployeeName = !String.IsNullOrEmpty(aa.EmployeeId) ? employeeList.Where(bb => bb.Id == aa.EmployeeId).FirstOrDefault().Name : null,
-            //            CreationTime = aa.CreationTime
-            //        })
-            //        .PageBy(input)
-            //        .ToListAsync();
+            var count = await items.CountAsync();
+
+            var entityList = await items
+                    .OrderBy(input.Sorting).AsNoTracking()
+                    .PageBy(input)
+                    .ToListAsync();
 
             // var entityListDtos = ObjectMapper.Map<List<PurchaseListDto>>(entityList);
             //var entityListDtos = entityList.MapTo<List<PurchaseListDto>>();
 
-            return new PagedResultDto<PurchaseListDto>(count, items);
+            return new PagedResultDto<PurchaseListDto>(count, entityList);
         }
 
 
         /// <summary>
         /// 通过指定id获取PurchaseListDto信息
         /// </summary>
+
         public async Task<PurchaseListDto> GetByIdAsync(EntityDto<Guid> input)
         {
             var entity = await _entityRepository.GetAsync(input.Id);
 
-            var item = entity.MapTo<PurchaseListDto>();
-            item.EmployeeName = !String.IsNullOrEmpty(item.EmployeeId) ? (await _employeeRepository.GetAsync(item.EmployeeId)).Name : null;
-            item.ProjectName = item.ProjectId.HasValue ? (await _projectRepository.GetAsync(item.ProjectId.Value)).Name : null;
-            return item;
+            return entity.MapTo<PurchaseListDto>();
         }
 
         /// <summary>
@@ -138,6 +112,7 @@ namespace HC.AbpCore.Purchases
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
+
         public async Task<GetPurchaseForEditOutput> GetForEditAsync(NullableIdDto<Guid> input)
         {
             var output = new GetPurchaseForEditOutput();
@@ -166,95 +141,50 @@ namespace HC.AbpCore.Purchases
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task<APIResultDto> CreateOrUpdateAsync(CreateOrUpdatePurchaseInput input)
+
+        public async Task CreateOrUpdateAsync(CreateOrUpdatePurchaseInput input)
         {
 
             if (input.Purchase.Id.HasValue)
             {
-                return await UpdateAsync(input.Purchase);
+                await Update(input.Purchase);
             }
             else
             {
-                return await CreateAsync(input.Purchase);
+                await Create(input.Purchase);
             }
-        }
-
-
-        /// <summary>
-        /// 添加Purchase以及PurchaseDetail的公共方法
-        /// </summary>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        public async Task<APIResultDto> CreatePurchaseAndDetailAsync(CreatePurchaseAndDetailInput input)
-        {
-            var purchaseCount = await _entityRepository.GetAll().Where(aa => aa.Code == input.Purchase.Code).CountAsync();
-            if (purchaseCount > 0)
-                return new APIResultDto() { Code = 0, Msg = "保存失败,采购编号已存在" };
-
-            var entity = input.Purchase.MapTo<Purchase>();
-            entity = await _entityRepository.InsertAsync(entity);
-
-            foreach (var purchaseDetail in input.PurchaseDetails)
-            {
-                purchaseDetail.PurchaseId = entity.Id;
-                var detail = purchaseDetail.MapTo<PurchaseDetail>();
-                await _purchaseDetailRepository.InsertAsync(detail);
-            }
-            var item = entity.MapTo<PurchaseEditDto>();
-            if (entity != null)
-                return new APIResultDto() { Code = 1, Msg = "保存成功", Data = item };
-            else
-                return new APIResultDto() { Code = 0, Msg = "保存失败" };
         }
 
 
         /// <summary>
         /// 新增Purchase
         /// </summary>
-        protected virtual async Task<APIResultDto> CreateAsync(PurchaseEditDto input)
+
+        protected virtual async Task<PurchaseEditDto> Create(PurchaseEditDto input)
         {
             //TODO:新增前的逻辑判断，是否允许新增
-            var purchaseCount = await _entityRepository.GetAll().Where(aa => aa.Code == input.Code).CountAsync();
-            if (purchaseCount > 0)
-                return new APIResultDto() { Code = 0, Msg = "保存失败,采购编号已存在" };
 
             // var entity = ObjectMapper.Map <Purchase>(input);
             var entity = input.MapTo<Purchase>();
 
 
             entity = await _entityRepository.InsertAsync(entity);
-            var item = entity.MapTo<PurchaseEditDto>();
-
-            if (entity != null)
-                return new APIResultDto() { Code = 1, Msg = "保存成功", Data = item };
-            else
-                return new APIResultDto() { Code = 0, Msg = "保存失败" };
+            return entity.MapTo<PurchaseEditDto>();
         }
 
         /// <summary>
         /// 编辑Purchase
         /// </summary>
-        protected virtual async Task<APIResultDto> UpdateAsync(PurchaseEditDto input)
+
+        protected virtual async Task Update(PurchaseEditDto input)
         {
             //TODO:更新前的逻辑判断，是否允许更新
 
             var entity = await _entityRepository.GetAsync(input.Id.Value);
-            if (entity.Code != input.Code)
-            {
-                var purchaseCount = await _entityRepository.GetAll().Where(aa => aa.Code == input.Code).CountAsync();
-                if (purchaseCount > 0)
-                    return new APIResultDto() { Code = 0, Msg = "保存失败,采购编号已存在" };
-            }
-
             input.MapTo(entity);
 
             // ObjectMapper.Map(input, entity);
-            entity = await _entityRepository.UpdateAsync(entity);
-            var item = entity.MapTo<PurchaseEditDto>();
-            if (entity != null)
-                return new APIResultDto() { Code = 1, Msg = "保存成功", Data = item };
-            else
-                return new APIResultDto() { Code = 0, Msg = "保存失败" };
+            await _entityRepository.UpdateAsync(entity);
         }
 
 
@@ -264,6 +194,7 @@ namespace HC.AbpCore.Purchases
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
+
         public async Task DeleteAsync(EntityDto<Guid> input)
         {
             //TODO:删除前的逻辑判断，是否允许删除
@@ -275,52 +206,53 @@ namespace HC.AbpCore.Purchases
         /// <summary>
         /// 批量删除Purchase的方法
         /// </summary>
+
         public async Task BatchDeleteAsync(List<Guid> input)
         {
             // TODO:批量删除前的逻辑判断，是否允许删除
             await _entityRepository.DeleteAsync(s => input.Contains(s.Id));
         }
 
-        /// <summary>
-        /// 获取采购下拉列表
-        /// </summary>
-        /// <returns></returns>
-        public async Task<List<DropDownDto>> GetDropDownsAsync()
-        {
-            var projects = await _projectRepository.GetAll().AsNoTracking().ToListAsync();
-            var query = _entityRepository.GetAll();
-            var entityList = await query
-                    .OrderBy(a => a.CreationTime).AsNoTracking()
-                    .Select(c => new DropDownDto() { Text = projects.Where(aa => aa.Id == c.ProjectId).FirstOrDefault().Name + "(" + c.Code + ")", Value = c.Id.ToString() })
-                    .ToListAsync();
-            return entityList;
-        }
 
         /// <summary>
-        /// 根据采购分类获取自动生成的采购编号
+        /// Web一键新增采购,采购明细,产品,预付款计划
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public async Task OnekeyCreateAsync(OnekeyCreatePurchaseInput input)
+        {
+            var purchase = input.Purchase.MapTo<Purchase>();
+            var purchaseDetailNews = input.PurchaseDetailNews.MapTo<List<PurchaseDetailNew>>();
+            var advancePayments = input.AdvancePayments.MapTo<List<AdvancePayment>>();
+            await _entityManager.OnekeyCreateAsync(purchase, purchaseDetailNews, advancePayments);
+        }
+
+
+        /// <summary>
+        /// 自动生成采购编号
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public async Task<string> GetPurchaseCodeAsync(PurchaseTypeEnum type)
+        public async Task<string> GetGeneratePurchaseCodeAsync()
         {
-            var purchases = await _entityRepository.GetAll()
-                .Where(aa => aa.Type == type && aa.CreationTime >= DateTime.Now.Date && aa.CreationTime <= DateTime.Now.Date.AddDays(1))
-                .AsNoTracking().ToListAsync();
-            var code = purchases.Max(aa => aa.Code);
-            if (!String.IsNullOrEmpty(code))
+            string purchaseCode = "";
+            DateTime dt = new DateTime();
+            DateTime startDate = new DateTime(dt.Year, dt.Month, 1);
+            DateTime endDate = new DateTime(dt.Year, dt.Month + 1, 1);
+            purchaseCode = await _entityRepository.GetAll().Where(aa=>aa.CreationTime>=startDate&&aa.CreationTime<endDate).MaxAsync(aa => aa.Code);
+            if (!String.IsNullOrEmpty(purchaseCode))
             {
-                var arr = code.Split("J");
-                code = arr[0].ToString() + "J" + (long.Parse(arr[1]) + 1).ToString();
+                var arr = purchaseCode.Split("-");
+                purchaseCode = arr[0].ToString() + "-" + arr[1].ToString() + "-" + (long.Parse(arr[2]) + 1).ToString();
             }
             else
             {
-                if (type == PurchaseTypeEnum.硬件)
-                    code = "HC-C-YJ" + DateTime.Now.ToString("yyyyMMdd") + "001";
-                else
-                    code = "HC-C-RJ" + DateTime.Now.ToString("yyyyMMdd") + "001";
+                purchaseCode = "HC-C-" + DateTime.Now.ToString("yyMM") + "001";
             }
-            return code;
+            return purchaseCode;
+
         }
+
 
         /// <summary>
         /// 导出Purchase为excel表,等待开发。

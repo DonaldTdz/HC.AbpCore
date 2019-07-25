@@ -96,12 +96,12 @@ namespace HC.AbpCore.Invoices
             var item = entity.MapTo<InvoiceListDto>();
             if (item.Type == InvoiceTypeEnum.销项 && item.RefId.HasValue)
                 item.RefName = (await _projectRepository.GetAsync(item.RefId.Value)).Name;
-            if (item.Type == InvoiceTypeEnum.进项 && item.RefId.HasValue)
-            {
-                var projectId = (await _purchaseRepository.GetAsync(item.RefId.Value)).ProjectId;
-                if (projectId.HasValue)
-                    item.RefName = (await _projectRepository.GetAsync(projectId.Value)).Name;
-            }
+            //if (item.Type == InvoiceTypeEnum.进项 && item.RefId.HasValue)
+            //{
+            //    var projectId = (await _purchaseRepository.GetAsync(item.RefId.Value)).ProjectId;
+            //    if (projectId.HasValue)
+            //        item.RefName = (await _projectRepository.GetAsync(projectId.Value)).Name;
+            //}
             return item;
         }
 
@@ -222,18 +222,18 @@ namespace HC.AbpCore.Invoices
         {
             string title = null;
             int? customerId;
-            if (type == InvoiceTypeEnum.销项)
-            {
+            //if (type == InvoiceTypeEnum.销项)
+            //{
                 customerId = (await _projectRepository.GetAsync(refId)).CustomerId;
-            }
-            else
-            {
-                Guid? projectId = (await _purchaseRepository.GetAsync(refId)).ProjectId;
-                if (projectId.HasValue)
-                    customerId = (await _projectRepository.GetAsync(projectId.Value)).CustomerId;
-                else
-                    return title;
-            }
+            //}
+            //else
+            //{
+            //    Guid? projectId = (await _purchaseRepository.GetAsync(refId)).ProjectId;
+            //    if (projectId.HasValue)
+            //        customerId = (await _projectRepository.GetAsync(projectId.Value)).CustomerId;
+            //    else
+            //        return title;
+            //}
             if (customerId.HasValue)
                 return title = (await _customerRepository.GetAsync(customerId.Value)).Name;
             else

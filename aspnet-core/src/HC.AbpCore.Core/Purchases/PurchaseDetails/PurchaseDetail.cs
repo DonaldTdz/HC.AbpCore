@@ -19,17 +19,71 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
         /// </summary>
         public virtual int? SupplierId { get; set; }
         /// <summary>
+        /// 产品Id外键 
+        /// </summary>
+        public virtual int? ProductId { get; set; }
+        /// <summary>
         /// 采购数量
         /// </summary>
         public virtual int? Num { get; set; }
+    }
+
+    public class PurchaseDetailNew
+    {
+
         /// <summary>
-        /// 采购单价
+        /// PurchaseId
         /// </summary>
-        public virtual decimal? Price { get; set; }
+        public Guid? PurchaseId { get; set; }
+
+
+
         /// <summary>
-        /// 项目明细Id 外键
+        /// SupplierId
         /// </summary>
-        public virtual Guid? ProjectDetailId { get; set; }
+        public int? SupplierId { get; set; }
+
+
+
+        /// <summary>
+        /// ProductId
+        /// </summary>
+        public int? ProductId { get; set; }
+
+
+
+        /// <summary>
+        /// Num
+        /// </summary>
+        public int? Num { get; set; }
+
+
+
+        /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; set; }
+
+
+
+        /// <summary>
+        /// Specification
+        /// </summary>
+        public string Specification { get; set; }
+
+
+
+        /// <summary>
+        /// TaxRate
+        /// </summary>
+        public string TaxRate { get; set; }
+
+
+
+        /// <summary>
+        /// Price
+        /// </summary>
+        public decimal Price { get; set; }
     }
 
 }

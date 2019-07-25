@@ -43,11 +43,7 @@ namespace HC.AbpCore.Projects
         private readonly IRepository<Project, Guid> _entityRepository;
         private readonly IRepository<Customer, int> _customerRepository;
         private readonly IRepository<Employee, string> _employeeRepository;
-        private readonly IProjectDetailManager _projectDetailManager;
-        private readonly IProjectManager _entityManager;
-        private readonly IAbpSession _abpSession;
         private readonly UserManager _userManager;
-        private readonly ICustomerManager _customerManager;
 
         /// <summary>
         /// 构造函数 
@@ -55,20 +51,12 @@ namespace HC.AbpCore.Projects
         public ProjectAppService(
         IRepository<Project, Guid> entityRepository,
         IRepository<Customer, int> customerRepository,
-        IRepository<Employee, string> employeeRepository,
-        IProjectDetailManager projectDetailManager
-        , IAbpSession abpSession
-        , UserManager userManager,
-        ICustomerManager customerManager
-        , IProjectManager entityManager
+        IRepository<Employee, string> employeeRepository
+        , UserManager userManager
         )
         {
             _userManager = userManager;
-            _abpSession = abpSession;
-            _customerManager = customerManager;
-            _projectDetailManager = projectDetailManager;
             _entityRepository = entityRepository;
-            _entityManager = entityManager;
             _customerRepository = customerRepository;
             _employeeRepository = employeeRepository;
         }
@@ -91,7 +79,7 @@ namespace HC.AbpCore.Projects
                 .WhereIf(!String.IsNullOrEmpty(input.ProjectCode), a => a.ProjectCode == input.ProjectCode)
                 .WhereIf(input.StartDate.HasValue && input.EndDate.HasValue, a => a.CreationTime >= input.StartDate.Value && a.CreationTime < input.EndDate.Value.AddDays(1));
             // TODO:根据传入的参数添加过滤条件
-            var user = await _userManager.GetUserByIdAsync(_abpSession.UserId.Value);
+            var user = await _userManager.GetUserByIdAsync(AbpSession.UserId.Value);
             if (user.EmployeeId != "0205151055692871" && user.EmployeeId != "1706561401635019335")
                 query = query.Where(aa => aa.ProjectSalesId == user.EmployeeId || aa.SalesAssistantId == user.EmployeeId);
 

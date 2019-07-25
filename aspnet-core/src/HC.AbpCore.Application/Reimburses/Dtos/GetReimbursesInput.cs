@@ -37,5 +37,10 @@ namespace HC.AbpCore.Reimburses.Dtos
         /// 查询条件-状态
         /// </summary>
         public ReimburseStatusEnum? Status { get; set; }
+
+        /// <summary>
+        /// 查询条件-类型
+        /// </summary>
+        public ReimburseTypeEnum? type { get; set; }
     }
 }

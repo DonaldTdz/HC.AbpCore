@@ -1,6 +1,7 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Abp;
 using Abp.Domain.Entities;
@@ -8,7 +9,7 @@ using Abp.Domain.Services;
 using HC.AbpCore.Common;
 using HC.AbpCore.DingTalk;
 using HC.AbpCore.Reimburses;
-
+using HC.AbpCore.Reimburses.ReimburseDetails;
 
 namespace HC.AbpCore.Reimburses.DomainService
 {
@@ -26,7 +27,7 @@ namespace HC.AbpCore.Reimburses.DomainService
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<ResultCode> SubmitApproval(Guid Id);
+        Task<ResultCode> SubmitApprovalAsync(Reimburse reimburse, List<ReimburseDetail> reimburseDetail);
 
 
         /// <summary>

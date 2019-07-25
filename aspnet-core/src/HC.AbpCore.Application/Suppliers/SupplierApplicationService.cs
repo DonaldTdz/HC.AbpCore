@@ -28,6 +28,7 @@ using HC.AbpCore.Projects;
 using HC.AbpCore.Projects.ProjectDetails;
 using HC.AbpCore.Authorization.Users;
 using Abp.Runtime.Session;
+using HC.AbpCore.Products;
 
 namespace HC.AbpCore.Suppliers
 {
@@ -41,6 +42,7 @@ namespace HC.AbpCore.Suppliers
         private readonly IRepository<Purchase, Guid> _purchaseRepository;
         private readonly IRepository<PurchaseDetail, Guid> _purchaseDetailRepository;
         private readonly IRepository<ProjectDetail, Guid> _projectDetailRepository;
+        private readonly IRepository<Product, int> _productRepository;
         private readonly ISupplierManager _entityManager;
         private readonly IAbpSession _abpSession;
         private readonly UserManager _userManager;
@@ -54,6 +56,7 @@ namespace HC.AbpCore.Suppliers
          , IRepository<Purchase, Guid> purchaseRepository
          , IAbpSession abpSession
          , IRepository<PurchaseDetail, Guid> purchaseDetailRepository
+         , IRepository<Product, int> productRepository
          , UserManager userManager
         , ISupplierManager entityManager
         )
@@ -65,6 +68,7 @@ namespace HC.AbpCore.Suppliers
             _purchaseRepository = purchaseRepository;
             _entityRepository = entityRepository;
             _entityManager = entityManager;
+            _productRepository = productRepository;
         }
 
 
@@ -105,12 +109,12 @@ namespace HC.AbpCore.Suppliers
         /// <returns></returns>
         public async Task<PagedResultDto<GetPurchaseProductListDto>> GetPurchaseProductListAsync(GetSuppliersInput input)
         {
-            var projectDetails = _projectDetailRepository.GetAll().AsNoTracking();
+            var products = _productRepository.GetAll().AsNoTracking();
             var purchases = _purchaseRepository.GetAll().AsNoTracking();
-            var Ids = _purchaseDetailRepository.GetAll().Where(aa => aa.SupplierId == input.Id).Select(aa=>new { purchaseId =aa.PurchaseId, projectDetailId=aa.ProjectDetailId});
+            var Ids = _purchaseDetailRepository.GetAll().Where(aa => aa.SupplierId == input.Id).Select(aa=>new { purchaseId =aa.PurchaseId, productId = aa.ProductId});
             var items = from item in Ids
                         join purchase in purchases on item.purchaseId equals purchase.Id
-                        join projectDetail in projectDetails on item.projectDetailId equals projectDetail.Id into temp
+                        join product in products on item.productId equals product.Id into temp
                         from tem in temp.DefaultIfEmpty()
                         select new GetPurchaseProductListDto()
                         {

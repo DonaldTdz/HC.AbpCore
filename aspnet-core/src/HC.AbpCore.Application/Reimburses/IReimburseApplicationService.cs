@@ -74,11 +74,11 @@ namespace HC.AbpCore.Reimburses
 
 
         /// <summary>
-        /// 提交审批
+        /// 提交审批(并保存报销与报销详情)
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<APIResultDto> SubmitApproval(EntityDto<Guid> input);
+        Task<APIResultDto> SubmitApprovalAsync(CreateReimburseAndDetailInput input);
 
 
         /// <summary>

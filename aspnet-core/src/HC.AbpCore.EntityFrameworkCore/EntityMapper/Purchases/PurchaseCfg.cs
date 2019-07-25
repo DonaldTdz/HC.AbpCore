@@ -15,10 +15,12 @@ namespace HC.AbpCore.EntityMapper.Purchases
 
             
 			builder.Property(a => a.Code).HasMaxLength(YoYoAbpefCoreConsts.EntityLengthNames.Length64);
-			builder.Property(a => a.ProjectId).HasMaxLength(YoYoAbpefCoreConsts.EntityLengthNames.Length64);
 			builder.Property(a => a.EmployeeId).HasMaxLength(YoYoAbpefCoreConsts.EntityLengthNames.Length64);
 			builder.Property(a => a.PurchaseDate).HasMaxLength(YoYoAbpefCoreConsts.EntityLengthNames.Length64);
 			builder.Property(a => a.Desc).HasMaxLength(YoYoAbpefCoreConsts.EntityLengthNames.Length64);
+			builder.Property(a => a.ArrivalDate).HasMaxLength(YoYoAbpefCoreConsts.EntityLengthNames.Length64);
+			builder.Property(a => a.InvoiceIssuance).HasMaxLength(YoYoAbpefCoreConsts.EntityLengthNames.Length64);
+			builder.Property(a => a.Attachments).HasMaxLength(YoYoAbpefCoreConsts.EntityLengthNames.Length64);
 
 
         }

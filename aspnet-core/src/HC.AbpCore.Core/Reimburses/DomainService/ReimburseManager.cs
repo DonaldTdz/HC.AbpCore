@@ -119,7 +119,7 @@ namespace HC.AbpCore.Reimburses.DomainService
                 foreach (var employeeId in employeeIdList)
                 {
                     Message message = new Message();
-                    message.Content = string.Format("您好! 项目:{0}有一笔报销费用，报销人:{1}，报销金额:{2},申请时间:{3}", item.ProjectName, item.Name, item.Amount, item.SubmitDate.Value.ToString("yyyy-MM-dd"));
+                    message.Content = string.Format("您好! 有一笔报销费用需要你审批，报销人:{0}，报销金额:{1},申请时间:{2}", item.Name, item.Amount, item.SubmitDate.Value.ToString("yyyy-MM-dd"));
                     message.SendTime = DateTime.Now;
                     message.Type = MessageTypeEnum.审批提醒;
                     message.IsRead = false;
@@ -133,7 +133,7 @@ namespace HC.AbpCore.Reimburses.DomainService
                     dingMsgs.agent_id = dingDingAppConfig.AgentID;
                     dingMsgs.msg.msgtype = "link";
                     dingMsgs.msg.link.title = "审批提醒";
-                    dingMsgs.msg.link.text = string.Format("您好! 项目:{0}有一笔报销费用，报销人:{1},点击查看详情", item.ProjectName, item.Name);
+                    dingMsgs.msg.link.text = string.Format("您好! 有一笔报销费用需要你审批，报销人:{0},点击查看详情", item.Name);
                     dingMsgs.msg.link.picUrl = "eapp://";
                     dingMsgs.msg.link.messageUrl = "eapp://page/messages/detail-messages/detail-messages?id=" + messageId;
                     var jsonString = SerializerHelper.GetJsonString(dingMsgs, null);
@@ -160,27 +160,18 @@ namespace HC.AbpCore.Reimburses.DomainService
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task<ResultCode> SubmitApproval(Guid Id)
+        public async Task<ResultCode> SubmitApprovalAsync(Reimburse reimburse, List<ReimburseDetail> reimburseDetails)
         {
             ResultCode resultCode = new ResultCode();
             var config = await _dingTalkManager.GetDingDingConfigByAppAsync(DingDingAppEnum.智能办公);
-            string accessToken = await _dingTalkManager.GetAccessTokenByAppAsync(DingDingAppEnum.智能办公); //GetAccessToken();
-            var reimburse = await _repository.GetAsync(Id);
-            var project = await _projectRepository.GetAsync(reimburse.ProjectId.Value);
-            if (project == null)
-            {
-                resultCode.Code = 1;
-                resultCode.Msg = "所属项目不存在";
-                return resultCode;
-            }
+            string accessToken = await _dingTalkManager.GetAccessTokenByAppAsync(DingDingAppEnum.智能办公); 
             var employee = await _employeeRepository.GetAsync(reimburse.EmployeeId);
             if (employee == null)
             {
-                resultCode.Code = 2;
+                resultCode.Code = 1;
                 resultCode.Msg = "所属报销人不存在";
                 return resultCode;
             }
-            var reimburseDetails = await _detailRepository.GetAll().Where(aa => aa.ReimburseId == Id).AsNoTracking().ToListAsync();
             
             var url = string.Format("https://oapi.dingtalk.com/topapi/processinstance/create?access_token={0}", accessToken);
             SubmitApprovalEntity request = new SubmitApprovalEntity();
@@ -189,7 +180,12 @@ namespace HC.AbpCore.Reimburses.DomainService
             request.agent_id = config.AgentID;
             request.dept_id= Convert.ToInt32(employee.Department);
             List<Approval> approvalList = new List<Approval>();
-            approvalList.Add(new Approval() { name = "所属项目", value = project.Name + "(" + project.ProjectCode + ")" });
+            if (reimburse.ProjectId.HasValue)
+            {
+                var project = await _projectRepository.GetAsync(reimburse.ProjectId.Value);
+                approvalList.Add(new Approval() { name = "所属项目", value = project.Name + "(" + project.ProjectCode + ")" });
+            }
+            approvalList.Add(new Approval() { name = "报销类型", value = reimburse.Type.ToString() });
             approvalList.Add(new Approval() { name = "报销总金额", value = reimburse.Amount.Value.ToString() });
             approvalList.Add(new Approval() { name = "报销人", value = employee.Name });
             approvalList.Add(new Approval() { name = "申请日期", value = reimburse.SubmitDate.Value.ToString() });
@@ -218,15 +214,15 @@ namespace HC.AbpCore.Reimburses.DomainService
             };
             if (approvalReturn.errcode == 0)
             {
-                reimburse.ProcessInstanceId = approvalReturn.process_instance_id;
-                reimburse.Status = ReimburseStatusEnum.提交;
-                await _repository.UpdateAsync(reimburse);
-                return new ResultCode() { Code = 0, Msg = "提交成功" };
+                //reimburse.ProcessInstanceId = approvalReturn.process_instance_id;
+                //reimburse.Status = ReimburseStatusEnum.提交;
+                //await _repository.UpdateAsync(reimburse);
+                return new ResultCode() { Code = 0, Msg = "提交成功",Data= approvalReturn.process_instance_id };
 
             }
             else
             {
-                return new ResultCode() { Code = 4, Msg = "提交失败" };
+                return new ResultCode() { Code = 1, Msg = "提交失败" };
             }
         }
 
@@ -246,9 +242,19 @@ namespace HC.AbpCore.Reimburses.DomainService
             item.ApprovalTime = DateTime.Now;
             item.ApproverId = String.Join(",", employeeIdList);
             if (result == "agree")
+            {
                 item.Status = ReimburseStatusEnum.审批通过;
-            else
+            }
+            else if (result == "refuse")
+            {
                 item.Status = ReimburseStatusEnum.拒绝;
+            }
+            else
+            {
+
+                item.Status = ReimburseStatusEnum.取消;
+                item.CancelTime = DateTime.Now;
+            }
             await _repository.UpdateAsync(item);
         }
     }

@@ -20,7 +20,6 @@ using Abp.Application.Services.Dto;
 
 using HC.AbpCore.Purchases.Dtos;
 using HC.AbpCore.Purchases;
-using HC.AbpCore.Dtos;
 
 namespace HC.AbpCore.Purchases
 {
@@ -41,7 +40,7 @@ namespace HC.AbpCore.Purchases
 		/// 通过指定id获取PurchaseListDto信息
 		/// </summary>
 		Task<PurchaseListDto> GetByIdAsync(EntityDto<Guid> input);
-        
+
 
         /// <summary>
         /// 返回实体的EditDto
@@ -56,15 +55,7 @@ namespace HC.AbpCore.Purchases
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<APIResultDto> CreateOrUpdateAsync(CreateOrUpdatePurchaseInput input);
-
-
-        /// <summary>
-        /// 添加Purchase以及PurchaseDetail的公共方法
-        /// </summary>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        Task<APIResultDto> CreatePurchaseAndDetailAsync(CreatePurchaseAndDetailInput input);
+        Task CreateOrUpdateAsync(CreateOrUpdatePurchaseInput input);
 
 
         /// <summary>
@@ -80,18 +71,21 @@ namespace HC.AbpCore.Purchases
         /// </summary>
         Task BatchDeleteAsync(List<Guid> input);
 
-        /// <summary>
-        /// 获取采购下拉列表
-        /// </summary>
-        /// <returns></returns>
-        Task<List<DropDownDto>> GetDropDownsAsync();
 
         /// <summary>
-        /// 根据采购分类获取自动生成的采购编号
+        /// Web一键新增采购,采购明细,产品,预付款计划
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="input"></param>
         /// <returns></returns>
-        Task<string> GetPurchaseCodeAsync(PurchaseTypeEnum type);
+        Task OnekeyCreateAsync(OnekeyCreatePurchaseInput input);
+
+
+        /// <summary>
+        /// 自动生成采购编号
+        /// </summary>
+        /// <returns></returns>
+        Task<string> GetGeneratePurchaseCodeAsync();
+
 
         /// <summary>
         /// 导出Purchase为excel表

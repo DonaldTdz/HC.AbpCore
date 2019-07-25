@@ -33,6 +33,7 @@ using System.Threading.Tasks;
 using HC.AbpCore.Tasks;
 using HC.AbpCore.Customers.CustomerContacts;
 using HC.AbpCore.Implements;
+using HC.AbpCore.AdvancePayments;
 
 namespace HC.AbpCore.EntityFrameworkCore
 {
@@ -102,5 +103,7 @@ namespace HC.AbpCore.EntityFrameworkCore
         public virtual DbSet<CustomerContact> CustomerContacts { get; set; }
 
         public virtual DbSet<Implement> Implements { get; set; }
+
+        public virtual DbSet<AdvancePayment> AdvancePayments { get; set; }
     }
 }

@@ -119,10 +119,22 @@ namespace HC.AbpCore.Web.Host.Controllers
                     }
                     else//审批实例终止
                     {
-                        return;
+                        string title = tb["title"].ToString();
+                        //string result = tb["result"].ToString();
+                        string processInstanceId = tb["processInstanceId"].ToString();
+                        if (title.Contains("报销"))
+                        {
+                            await _reimburseManager.UpdateReimburseByPIIdAsync(processInstanceId, "");
+                            return;
+                        }
+                        else //工时
+                        {
+                            await _timeSheetManager.UpdateTimeSheetByPIIdAsync(processInstanceId, "");
+                            return;
+                        }
                     }
+
                     #endregion
-                    break;
                 default:
                     break;
             }

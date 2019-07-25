@@ -27,6 +27,9 @@ using Abp.Auditing;
 using HC.AbpCore.Dtos;
 using HC.AbpCore.DingTalk;
 using Microsoft.AspNetCore.Http;
+using Abp.Runtime.Session;
+using HC.AbpCore.Authorization.Users;
+using HC.AbpCore.Reimburses.ReimburseDetails;
 
 namespace HC.AbpCore.Reimburses
 {
@@ -37,11 +40,11 @@ namespace HC.AbpCore.Reimburses
     public class ReimburseAppService : AbpCoreAppServiceBase, IReimburseAppService
     {
         private readonly IRepository<Reimburse, Guid> _entityRepository;
+        private readonly IRepository<ReimburseDetail, Guid> _reimburseDetailRepository;
         private readonly IRepository<Project, Guid> _projectRepository;
         private readonly IRepository<Employee, string> _employeeRepository;
         private readonly IReimburseManager _entityManager;
-        private readonly IDingTalkManager _dingTalkManager;
-        private readonly IHttpContextAccessor _httpContext;
+        private readonly UserManager _userManager;
 
         /// <summary>
         /// 构造函数 
@@ -50,17 +53,17 @@ namespace HC.AbpCore.Reimburses
         IRepository<Reimburse, Guid> entityRepository
         , IRepository<Project, Guid> projectRepository
         , IRepository<Employee, string> employeeRepository
-        , IDingTalkManager dingTalkManager
-        , IHttpContextAccessor httpContext
+        , IRepository<ReimburseDetail, Guid> reimburseDetailRepository
         , IReimburseManager entityManager
+        , UserManager userManager
         )
         {
-            _httpContext = httpContext;
+            _reimburseDetailRepository = reimburseDetailRepository;
+            _userManager = userManager;
             _entityRepository = entityRepository;
             _entityManager = entityManager;
             _projectRepository = projectRepository;
             _employeeRepository = employeeRepository;
-            _dingTalkManager = dingTalkManager;
         }
 
 
@@ -75,36 +78,48 @@ namespace HC.AbpCore.Reimburses
         {
             var query = _entityRepository.GetAll().WhereIf(input.ProjectId.HasValue, aa => aa.ProjectId == input.ProjectId.Value)
                 .WhereIf(input.Status.HasValue, aa => aa.Status == input.Status.Value)
-                .WhereIf(!String.IsNullOrEmpty(input.EmployeeId), aa => aa.EmployeeId == input.EmployeeId);
+                .WhereIf(input.type.HasValue, aa => aa.Type == input.type.Value);
             // TODO:根据传入的参数添加过滤条件
+            if (!String.IsNullOrEmpty(input.EmployeeId))
+            {
+                query = query.Where(aa => aa.EmployeeId == input.EmployeeId);
+            }
+            else
+            {
+                var user = await _userManager.GetUserByIdAsync(AbpSession.UserId.Value);
+                if (user.EmployeeId != "0205151055692871" && user.EmployeeId != "1706561401635019335")  //如果是代姐或吴总则可以查看全部
+                    query = query.Where(aa => aa.EmployeeId == user.EmployeeId);
+            }
+
+
             var projects = _projectRepository.GetAll();
             var employees = _employeeRepository.GetAll();
-
             //var count = await query.CountAsync();
-
             var entityList = from item in query
-                             join project in projects on item.ProjectId equals project.Id
+                             join project in projects on item.ProjectId equals project.Id into projectName
                              join employee in employees on item.EmployeeId equals employee.Id into employeeName
                              //join approver in employees on item.ApproverId equals approver.Id into approverName
                              from bb in employeeName.DefaultIfEmpty()
-                             //from cc in approverName.DefaultIfEmpty()
+                             from cc in projectName.DefaultIfEmpty()
+                                 //from cc in approverName.DefaultIfEmpty()
                              select new ReimburseListDto()
                              {
                                  Id = item.Id,
                                  ProjectId = item.ProjectId,
-                                 ProjectName = project.Name + "(" + project.ProjectCode + ")",
+                                 ProjectName = cc.Name + "(" + cc.ProjectCode + ")",
                                  EmployeeId = item.EmployeeId,
                                  EmployeeName = bb.Name,
                                  Amount = item.Amount,
                                  Status = item.Status,
                                  SubmitDate = item.SubmitDate,
-                                 Type=item.Type,
+                                 Type = item.Type,
                                  ApproverId = item.ApproverId,
                                  ApprovalTime = item.ApprovalTime,
                                  //ApproverName = cc.Name,
                                  CancelTime = item.CancelTime,
                                  CreationTime = item.CreationTime
                              };
+
             var count = await entityList.CountAsync();
 
             var items = await entityList
@@ -136,10 +151,10 @@ namespace HC.AbpCore.Reimburses
             if (!String.IsNullOrEmpty(item.ApproverId))
             {
                 var approverIds = item.ApproverId.Split(",");
-                var employeesList = await _employeeRepository.GetAll().Where(aa => approverIds.Contains(aa.Id)).Select(aa=>aa.Name).AsNoTracking().ToListAsync();
+                var employeesList = await _employeeRepository.GetAll().Where(aa => approverIds.Contains(aa.Id)).Select(aa => aa.Name).AsNoTracking().ToListAsync();
                 item.ApproverName = String.Join(",", employeesList);
             }
-                //item.ApproverName = (await _employeeRepository.FirstOrDefaultAsync(aa => aa.Id == item.ApproverId)).Name;
+            //item.ApproverName = (await _employeeRepository.FirstOrDefaultAsync(aa => aa.Id == item.ApproverId)).Name;
             return item;
         }
 
@@ -184,7 +199,7 @@ namespace HC.AbpCore.Reimburses
 
             if (input.Reimburse.Id.HasValue)
             {
-               return await UpdateAsync(input.Reimburse);
+                return await UpdateAsync(input.Reimburse);
             }
             else
             {
@@ -200,11 +215,17 @@ namespace HC.AbpCore.Reimburses
         protected virtual async Task<ReimburseEditDto> CreateAsync(ReimburseEditDto input)
         {
             //TODO:新增前的逻辑判断，是否允许新增
-
-            // var entity = ObjectMapper.Map <Reimburse>(input);
             var entity = input.MapTo<Reimburse>();
-            //entity.Status = ReimburseStatusEnum.提交;
 
+            entity.Status = ReimburseStatusEnum.提交; //新增报销默认为提交状态
+
+            //如果报销人为空则为当前登录人
+            //if (String.IsNullOrEmpty(entity.EmployeeId))
+            //{
+            //    var user = await _userManager.GetUserByIdAsync(AbpSession.UserId.Value);
+            //    entity.EmployeeId = user.EmployeeId;
+            //}
+            //entity.SubmitDate = DateTime.Now;
             entity = await _entityRepository.InsertAsync(entity);
             return entity.MapTo<ReimburseEditDto>();
         }
@@ -221,7 +242,7 @@ namespace HC.AbpCore.Reimburses
             input.MapTo(entity);
 
             // ObjectMapper.Map(input, entity);
-            entity=await _entityRepository.UpdateAsync(entity);
+            entity = await _entityRepository.UpdateAsync(entity);
             return entity.MapTo<ReimburseEditDto>();
         }
 
@@ -254,17 +275,45 @@ namespace HC.AbpCore.Reimburses
 
 
         /// <summary>
-        /// 提交审批
+        /// 提交审批(并保存报销与报销详情)
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
         [AbpAllowAnonymous]
         [Audited]
-        public async Task<APIResultDto> SubmitApproval(EntityDto<Guid> input)
+        public async Task<APIResultDto> SubmitApprovalAsync(CreateReimburseAndDetailInput input)
         {
-            //var reimburse = await _entityManager.SubmitApproval(input.Id);
-            var apiResult = await _entityManager.SubmitApproval(input.Id);
-            return apiResult.MapTo<APIResultDto>();
+            //如果报销人为空则为当前登录人
+            if (String.IsNullOrEmpty(input.Reimburse.EmployeeId))
+            {
+                var user = await _userManager.GetUserByIdAsync(AbpSession.UserId.Value);
+                input.Reimburse.EmployeeId = user.EmployeeId;
+            }
+            input.Reimburse.SubmitDate = DateTime.Now;
+            List<ReimburseDetail> reimburseDetails = input.ReimburseDetails.MapTo<List<ReimburseDetail>>();
+            Reimburse reimburse = input.Reimburse.MapTo<Reimburse>();
+
+            var apiResult = await _entityManager.SubmitApprovalAsync(reimburse, reimburseDetails);
+            if (apiResult.Code == 0)
+            {
+                input.Reimburse.ProcessInstanceId = apiResult.Data.ToString();
+                ReimburseEditDto reimburseModel = await CreateAsync(input.Reimburse);  //保存报销
+                //List<ReimburseDetail> reimburseDetails = new List<ReimburseDetail>();
+
+                foreach (var item in input.ReimburseDetails)
+                {
+                    var entity = item.MapTo<ReimburseDetail>();
+                    entity.ReimburseId = reimburseModel.Id.Value;
+                    entity = await _reimburseDetailRepository.InsertAsync(entity);
+                    //reimburseDetails.Add(entity);
+                }
+                return apiResult.MapTo<APIResultDto>();
+            }
+            else
+            {
+                return apiResult.MapTo<APIResultDto>();
+            }
+
         }
 
 

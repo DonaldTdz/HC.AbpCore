@@ -105,6 +105,14 @@ namespace HC.AbpCore.Reimburses.Dtos
         }
 
         /// <summary>
+        /// 报销类型
+        /// </summary>
+        public string TypeName
+        {
+            get { return Type.ToString(); }
+        }
+
+        /// <summary>
         /// 所属项目名称
         /// </summary>
         public string ProjectName { get; set; }

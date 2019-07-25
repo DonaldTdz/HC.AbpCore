@@ -2,7 +2,6 @@
 using Abp.Runtime.Validation;
 using HC.AbpCore.Dtos;
 using HC.AbpCore.Purchases;
-using System;
 
 namespace HC.AbpCore.Purchases.Dtos
 {
@@ -26,14 +25,9 @@ namespace HC.AbpCore.Purchases.Dtos
         public string Code { get; set; }
 
         /// <summary>
-        /// 查询条件-项目Id
+        /// 查询条件-采购负责人
         /// </summary>
-        public Guid? ProjectId { get; set; }
-
-        /// <summary>
-        /// 查询条件-Id
-        /// </summary>
-        public Guid? Id { get; set; }
+        public string EmployeeId { get; set; }
 
     }
 }

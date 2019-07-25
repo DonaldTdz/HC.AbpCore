@@ -21,12 +21,6 @@ namespace HC.AbpCore.Purchases.PurchaseDetails.Dtos
         }
 
         /// <summary>
-        /// 查询条件-供应商Id
-        /// </summary>
-        public int? SupplierId { get; set; }
-
-
-        /// <summary>
         /// 查询条件-采购Id
         /// </summary>
         public Guid? PurchaseId { get; set; }

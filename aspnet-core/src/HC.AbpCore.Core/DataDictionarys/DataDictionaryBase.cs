@@ -15,6 +15,7 @@ namespace HC.AbpCore.DataDictionarys
             税率=5,
             招标=6,
             执行=7,
+            采购产品税率=8,
         }
     }
 }

@@ -65,7 +65,7 @@ namespace HC.AbpCore.Products
         {
 
             var query = _entityRepository.GetAll().WhereIf(!string.IsNullOrEmpty(input.Name), u => u.Name.Contains(input.Name))
-                .WhereIf(input.Type.HasValue, a => a.Type == input.Type).WhereIf(input.IsEnabled.HasValue,a=>a.IsEnabled==input.IsEnabled.Value);
+                .WhereIf(input.Type.HasValue, a => a.Type == input.Type).WhereIf(input.IsEnabled.HasValue, a => a.IsEnabled == input.IsEnabled.Value);
             // TODO:根据传入的参数添加过滤条件
             //var user = await _userManager.GetUserByIdAsync(_abpSession.UserId.Value);
             //if (user.EmployeeId != "0205151055692871" && user.EmployeeId != "192656451022556048")
@@ -139,11 +139,11 @@ namespace HC.AbpCore.Products
             input.Product.Specification = input.Product.Specification.Trim();
             if (input.Product.Id.HasValue)
             {
-               return await UpdateAsync(input.Product);
+                return await UpdateAsync(input.Product);
             }
             else
             {
-               return await CreateAsync(input.Product);
+                return await CreateAsync(input.Product);
             }
         }
 
@@ -155,20 +155,31 @@ namespace HC.AbpCore.Products
         protected virtual async Task<APIResultDto> CreateAsync(ProductEditDto input)
         {
             //TODO:新增前的逻辑判断，是否允许新增
-            int productCount = await _entityRepository.GetAll().Where(aa => aa.Name == input.Name&&aa.Specification==input.Specification).CountAsync();
-            if (productCount > 0)
-                return new APIResultDto() { Code = 0, Msg = "该产品已存在(规格型号完全一致)" };
-            // var entity = ObjectMapper.Map <Product>(input);
-            input.CreationTime = DateTime.Now;
-            input.IsEnabled = true;
-            var entity = input.MapTo<Product>();
-
-
-            entity = await _entityRepository.InsertAsync(entity);
-            if (entity != null)
-                return new APIResultDto() { Code = 1, Msg = "保存成功" };
+            var product = await _entityRepository.FirstOrDefaultAsync(aa => aa.Name == input.Name && aa.Specification == input.Specification
+             && aa.Price == input.Price && aa.TaxRate == input.TaxRate);
+            //有则修改,无则更新
+            if (product != null)
+            {
+                if (product.Num.HasValue)
+                    product.Num += input.Num;
+                else
+                    product.Num = input.Num;
+                product = await _entityRepository.UpdateAsync(product);
+                if (product != null)
+                    return new APIResultDto() { Code = 1, Msg = "保存成功" };
+                else
+                    return new APIResultDto() { Code = 0, Msg = "保存失败" };
+            }
             else
-                return new APIResultDto() { Code = 0, Msg = "保存失败" };
+            {
+                var entity = input.MapTo<Product>();
+                entity.IsEnabled = true;
+                entity = await _entityRepository.InsertAsync(entity);
+                if (entity != null)
+                    return new APIResultDto() { Code = 1, Msg = "保存成功" };
+                else
+                    return new APIResultDto() { Code = 0, Msg = "保存失败" };
+            }
         }
 
         /// <summary>
@@ -179,23 +190,43 @@ namespace HC.AbpCore.Products
         {
             //TODO:更新前的逻辑判断，是否允许更新
             var entity = await _entityRepository.GetAsync(input.Id.Value);
-            
-            if (entity.Name != input.Name || entity.Specification!=input.Specification)
+            if (entity.Name == input.Name && entity.Specification == input.Specification&& entity.Price == input.Price && entity.TaxRate == input.TaxRate)
             {
-                int productCount = await _entityRepository.GetAll().Where(aa => aa.Name == input.Name && aa.Specification == input.Specification).CountAsync();
+                entity.Num = input.Num;
+                entity = await _entityRepository.UpdateAsync(entity);
+                if (entity != null)
+                    return new APIResultDto() { Code = 1, Msg = "保存成功" };
+                else
+                    return new APIResultDto() { Code = 0, Msg = "保存失败" };
+            }
+            else
+            {
+                var productCount = await _entityRepository.GetAll().Where(aa => aa.Name == input.Name && aa.Specification == input.Specification
+      && aa.Price == input.Price && aa.TaxRate == input.TaxRate).CountAsync();
                 if (productCount > 0)
-                    return new APIResultDto() { Code = 0, Msg = "该产品已存在(规格型号完全一致)" };
+                {
+                    return new APIResultDto() { Code = 1, Msg = "已经存在完全相同的产品" };
+                }
+                else
+                {
+                    input.MapTo(entity);
+                    entity = await _entityRepository.UpdateAsync(entity);
+                    if (entity != null)
+                        return new APIResultDto() { Code = 1, Msg = "保存成功" };
+                    else
+                        return new APIResultDto() { Code = 0, Msg = "保存失败" };
+                }
             }
 
-            input.MapTo(entity);
+            //    input.MapTo(entity);
 
-            // ObjectMapper.Map(input, entity);
-            entity = await _entityRepository.UpdateAsync(entity);
+            //// ObjectMapper.Map(input, entity);
+            //entity = await _entityRepository.UpdateAsync(entity);
 
-            if (entity != null)
-                return new APIResultDto() { Code = 1, Msg = "保存成功" };
-            else
-                return new APIResultDto() { Code = 0, Msg = "保存失败" };
+            //if (entity != null)
+            //    return new APIResultDto() { Code = 1, Msg = "保存成功" };
+            //else
+            //    return new APIResultDto() { Code = 0, Msg = "保存失败" };
         }
 
 
@@ -223,7 +254,7 @@ namespace HC.AbpCore.Products
             // TODO:批量删除前的逻辑判断，是否允许删除
             await _entityRepository.DeleteAsync(s => input.Contains(s.Id));
         }
-        
+
 
         /// <summary>
         /// 导出Product为excel表,等待开发。

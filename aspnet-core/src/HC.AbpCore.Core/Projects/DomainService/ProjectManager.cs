@@ -58,6 +58,12 @@ namespace HC.AbpCore.Projects.DomainService
 			throw new NotImplementedException();
 		}
 
+        /// <summary>
+        /// 项目进度提醒
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <param name="dingDingAppConfig"></param>
+        /// <returns></returns>
         public async Task ProjectStatusRemind(string accessToken, DingDingAppConfig dingDingAppConfig)
         {
             var url = string.Format("https://oapi.dingtalk.com/topapi/message/corpconversation/asyncsend_v2?access_token={0}", accessToken);
