@@ -24,6 +24,7 @@ using HC.AbpCore.Purchases.DomainService;
 using HC.AbpCore.Purchases.PurchaseDetails;
 using HC.AbpCore.AdvancePayments;
 using HC.AbpCore.DingTalk.Employees;
+using HC.AbpCore.Authorization.Users;
 
 namespace HC.AbpCore.Purchases
 {
@@ -35,7 +36,7 @@ namespace HC.AbpCore.Purchases
     {
         private readonly IRepository<Purchase, Guid> _entityRepository;
         private readonly IRepository<Employee, string> _employeeRepository;
-
+        private readonly UserManager _userManager;
         private readonly IPurchaseManager _entityManager;
 
         /// <summary>
@@ -45,8 +46,10 @@ namespace HC.AbpCore.Purchases
         IRepository<Purchase, Guid> entityRepository
         , IRepository<Employee, string> employeeRepository
         , IPurchaseManager entityManager
+        , UserManager userManager
         )
         {
+            _userManager = userManager;
             _employeeRepository = employeeRepository;
             _entityRepository = entityRepository;
             _entityManager = entityManager;
@@ -62,30 +65,43 @@ namespace HC.AbpCore.Purchases
         public async Task<PagedResultDto<PurchaseListDto>> GetPagedAsync(GetPurchasesInput input)
         {
 
-            var query = _entityRepository.GetAll().WhereIf(!String.IsNullOrEmpty(input.Code),aa=>aa.Code.Contains(input.Code))
-                .WhereIf(!String.IsNullOrEmpty(input.EmployeeId),aa=>aa.EmployeeId==input.EmployeeId);
+            var query = _entityRepository.GetAll().WhereIf(!String.IsNullOrEmpty(input.Code), aa => aa.Code.Contains(input.Code));
             // TODO:根据传入的参数添加过滤条件
+            var user = await _userManager.GetUserByIdAsync(AbpSession.UserId.Value);
+            if (user.EmployeeId != "0205151055692871" && user.EmployeeId != "1706561401635019335")//如果是代姐或吴总则可以查看全部
+            {
+                query = query.Where(aa => aa.EmployeeId == user.EmployeeId);
+            }
+            else
+            {
+                if (!String.IsNullOrEmpty(input.EmployeeId))
+                {
+                    query = query.Where(aa => aa.EmployeeId == input.EmployeeId);
+                }
+            }
             var employees = _employeeRepository.GetAll().AsNoTracking();
 
-            var items= from item in query
-                       join employee in employees on item.EmployeeId equals employee.Id into temp
-                       from tem in temp.DefaultIfEmpty()
-                       select new PurchaseListDto()
-                       {
-                           Code = item.Code,
-                           EmployeeId = item.EmployeeId,
-                           PurchaseDate = item.PurchaseDate,
-                           Desc = item.Desc,
-                           ArrivalDate=item.ArrivalDate,
-                           InvoiceIssuance=item.InvoiceIssuance,
-                           Attachments=item.Attachments,
-                           EmployeeName=tem.Name
-                       };
+            var items = from item in query
+                        join employee in employees on item.EmployeeId equals employee.Id into temp
+                        from tem in temp.DefaultIfEmpty()
+                        select new PurchaseListDto()
+                        {
+                            Id = item.Id,
+                            Code = item.Code,
+                            EmployeeId = item.EmployeeId,
+                            PurchaseDate = item.PurchaseDate,
+                            Desc = item.Desc,
+                            ArrivalDate = item.ArrivalDate,
+                            InvoiceIssuance = item.InvoiceIssuance,
+                            Attachments = item.Attachments,
+                            EmployeeName = tem.Name
+                        };
 
             var count = await items.CountAsync();
 
             var entityList = await items
                     .OrderBy(input.Sorting).AsNoTracking()
+                    .OrderByDescending(aa => aa.CreationTime)
                     .PageBy(input)
                     .ToListAsync();
 
@@ -236,10 +252,10 @@ namespace HC.AbpCore.Purchases
         public async Task<string> GetGeneratePurchaseCodeAsync()
         {
             string purchaseCode = "";
-            DateTime dt = new DateTime();
+            DateTime dt = DateTime.Now;
             DateTime startDate = new DateTime(dt.Year, dt.Month, 1);
             DateTime endDate = new DateTime(dt.Year, dt.Month + 1, 1);
-            purchaseCode = await _entityRepository.GetAll().Where(aa=>aa.CreationTime>=startDate&&aa.CreationTime<endDate).MaxAsync(aa => aa.Code);
+            purchaseCode = await _entityRepository.GetAll().Where(aa => aa.CreationTime >= startDate && aa.CreationTime < endDate).MaxAsync(aa => aa.Code);
             if (!String.IsNullOrEmpty(purchaseCode))
             {
                 var arr = purchaseCode.Split("-");

@@ -36,9 +36,11 @@ namespace HC.AbpCore.Purchases.PurchaseDetails.DomainService
         ///</summary>
         public PurchaseDetailManager(
 			IRepository<PurchaseDetail, Guid> repository
-		)
+            , IRepository<Product, int> productRepository
+        )
 		{
-			_repository =  repository;
+            _productRepository = productRepository;
+            _repository =  repository;
 		}
 
         /// <summary>
@@ -83,14 +85,15 @@ namespace HC.AbpCore.Purchases.PurchaseDetails.DomainService
                     productNew.Price = purchaseDetailNew.Price;
                     productNew.Specification = purchaseDetailNew.Specification;
                     productNew.TaxRate = purchaseDetailNew.TaxRate;
+                    productNew.Type = 0;
                     productNew.IsEnabled = true;
-                    productNew= await _productRepository.InsertAsync(productNew);
-                    productId = productNew.Id;
+                    productId = await _productRepository.InsertAndGetIdAsync(productNew);
+                    //productId = productId;
                 }
             }
             PurchaseDetail purchaseDetail = new PurchaseDetail();
             purchaseDetail.Num = purchaseDetailNew.Num;
-            purchaseDetail.ProductId = purchaseDetailNew.ProductId;
+            purchaseDetail.ProductId = productId;
             purchaseDetail.PurchaseId = purchaseDetailNew.PurchaseId;
             purchaseDetail.SupplierId = purchaseDetailNew.SupplierId;
             purchaseDetail = await _repository.InsertAsync(purchaseDetail);
@@ -135,7 +138,10 @@ namespace HC.AbpCore.Purchases.PurchaseDetails.DomainService
                     product.Num += purchaseDetail.Num;
                 else
                     product.Num = purchaseDetail.Num;
+                product.Num -= entity.Num;
                 await _productRepository.UpdateAsync(product);
+                entity.Num = purchaseDetail.Num;
+                await _repository.UpdateAsync(entity);
             }
             else
             {

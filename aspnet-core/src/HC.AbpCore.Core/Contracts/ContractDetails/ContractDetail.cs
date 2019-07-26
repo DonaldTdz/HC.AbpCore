@@ -15,6 +15,11 @@ namespace HC.AbpCore.Contracts.ContractDetails
         /// </summary>
         public virtual Guid? ContractId { get; set; }
         /// <summary>
+        /// 产品Id
+        /// </summary>
+        [Required]
+        public int ProductId { get; set; }
+        /// <summary>
         /// 设备名称
         /// </summary>
         [StringLength(100)]

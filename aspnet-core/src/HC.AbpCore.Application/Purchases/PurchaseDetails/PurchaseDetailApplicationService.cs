@@ -244,7 +244,7 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task UpdateDetailAndUpdateproductAsync(CreateOrUpdatePurchaseDetailInput input)
+        public async Task ModifyDetailAndUpdateproductAsync(CreateOrUpdatePurchaseDetailInput input)
         {
             var entity = input.PurchaseDetail.MapTo<PurchaseDetail>();
             await _entityManager.UpdateAsync(entity);

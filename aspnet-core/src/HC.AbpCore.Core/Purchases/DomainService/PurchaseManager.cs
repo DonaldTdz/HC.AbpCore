@@ -103,13 +103,15 @@ namespace HC.AbpCore.Purchases.DomainService
                     }
                     else
                     {
-                        product.Name = item.Name;
-                        product.Num = item.Num;
-                        product.Price = item.Price;
-                        product.Specification = item.Specification;
-                        product.TaxRate = item.TaxRate;
-                        product.IsEnabled = true;
-                        productId= await _productrepository.InsertAndGetIdAsync(product);
+                        Product product1 = new Product();
+                        product1.Name = item.Name;
+                        product1.Num = item.Num;
+                        product1.Price = item.Price;
+                        product1.Specification = item.Specification;
+                        product1.TaxRate = item.TaxRate;
+                        product1.IsEnabled = true;
+                        product1.Type = 0;
+                        productId= await _productrepository.InsertAndGetIdAsync(product1);
                     }
                 }
                 purchaseDetail.Num = item.Num;

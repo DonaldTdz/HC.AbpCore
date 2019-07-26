@@ -80,15 +80,27 @@ namespace HC.AbpCore.Reimburses
                 .WhereIf(input.Status.HasValue, aa => aa.Status == input.Status.Value)
                 .WhereIf(input.type.HasValue, aa => aa.Type == input.type.Value);
             // TODO:根据传入的参数添加过滤条件
-            if (!String.IsNullOrEmpty(input.EmployeeId))
+            //if (!String.IsNullOrEmpty(input.EmployeeId))
+            //{
+            //    query = query.Where(aa => aa.EmployeeId == input.EmployeeId);
+            //}
+            //else
+            //{
+            //    var user = await _userManager.GetUserByIdAsync(AbpSession.UserId.Value);
+            //    if (user.EmployeeId != "0205151055692871" && user.EmployeeId != "1706561401635019335")  //如果是代姐或吴总则可以查看全部
+            //        query = query.Where(aa => aa.EmployeeId == user.EmployeeId);
+            //}
+            var user = await _userManager.GetUserByIdAsync(AbpSession.UserId.Value);
+            if (user != null &&( user.EmployeeId != "0205151055692871" && user.EmployeeId != "1706561401635019335"))//如果是代姐或吴总则可以查看全部
             {
-                query = query.Where(aa => aa.EmployeeId == input.EmployeeId);
+                query = query.Where(aa => aa.EmployeeId == user.EmployeeId);
             }
             else
             {
-                var user = await _userManager.GetUserByIdAsync(AbpSession.UserId.Value);
-                if (user.EmployeeId != "0205151055692871" && user.EmployeeId != "1706561401635019335")  //如果是代姐或吴总则可以查看全部
-                    query = query.Where(aa => aa.EmployeeId == user.EmployeeId);
+                if (!String.IsNullOrEmpty(input.EmployeeId))
+                {
+                    query = query.Where(aa => aa.EmployeeId == input.EmployeeId);
+                }
             }
 
 

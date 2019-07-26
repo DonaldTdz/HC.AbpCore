@@ -19,6 +19,14 @@ namespace  HC.AbpCore.Contracts.ContractDetails.Dtos
 
 
         /// <summary>
+        /// ²úÆ·Id
+        /// </summary>
+        [Required]
+        public int ProductId { get; set; }
+
+
+
+        /// <summary>
         /// Name
         /// </summary>
         [StringLength(100)]

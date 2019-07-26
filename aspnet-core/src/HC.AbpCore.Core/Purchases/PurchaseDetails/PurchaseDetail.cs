@@ -30,6 +30,11 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
 
     public class PurchaseDetailNew
     {
+        /// <summary>
+        /// Id
+        /// </summary>
+        public Guid? Id { get; set; }
+
 
         /// <summary>
         /// PurchaseId

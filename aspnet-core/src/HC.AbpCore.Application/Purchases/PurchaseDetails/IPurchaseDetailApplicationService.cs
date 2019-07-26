@@ -93,7 +93,7 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task UpdateDetailAndUpdateproductAsync(CreateOrUpdatePurchaseDetailInput input);
+        Task ModifyDetailAndUpdateproductAsync(CreateOrUpdatePurchaseDetailInput input);
 
 
         /// <summary>

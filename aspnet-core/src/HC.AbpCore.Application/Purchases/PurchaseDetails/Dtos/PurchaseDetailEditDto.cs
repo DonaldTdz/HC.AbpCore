@@ -40,6 +40,10 @@ namespace  HC.AbpCore.Purchases.PurchaseDetails.Dtos
 
     public class PurchaseDetailEditDtoNew
     {
+        /// <summary>
+        /// Id
+        /// </summary>
+        public Guid? Id { get; set; }
 
         /// <summary>
         /// PurchaseId
