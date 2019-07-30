@@ -55,7 +55,7 @@ namespace HC.AbpCore.AdvancePayments
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task CreateOrUpdateAsync(CreateOrUpdateAdvancePaymentInput input);
+        Task<AdvancePaymentEditDto> CreateOrUpdateAsync(CreateOrUpdateAdvancePaymentInput input);
 
 
         /// <summary>

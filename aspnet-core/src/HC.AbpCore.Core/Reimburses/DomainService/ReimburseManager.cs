@@ -34,6 +34,7 @@ using HC.AbpCore.Messages;
 using Senparc.CO2NET.Helpers;
 using System.Text;
 using HC.AbpCore.Messages.DomainService;
+using static HC.AbpCore.Projects.ProjectBase;
 
 namespace HC.AbpCore.Reimburses.DomainService
 {
@@ -162,6 +163,37 @@ namespace HC.AbpCore.Reimburses.DomainService
         /// <returns></returns>
         public async Task<ResultCode> SubmitApprovalAsync(Reimburse reimburse, List<ReimburseDetail> reimburseDetails)
         {
+            if (reimburse.Type == ReimburseTypeEnum.项目型报销)
+            {
+                var amounts = await _repository.GetAll().Where(aa => aa.Type == ReimburseTypeEnum.项目型报销 && aa.ProjectId == reimburse.ProjectId.Value).Select(aa => aa.Amount).SumAsync();
+                var project = await _projectRepository.FirstOrDefaultAsync(aa => aa.Id == reimburse.ProjectId.Value);
+                switch (project.Status)
+                {
+                    case ProjectStatus.线索:
+                        if ((reimburse.Amount + amounts) > 3000)
+                            return new ResultCode() { Code = 2, Msg = "当前项目处于线索阶段,报销费用不能超过3000元" };
+                        break;
+                    case ProjectStatus.立项:
+                        if ((reimburse.Amount + amounts) > 5000)
+                            return new ResultCode() { Code = 2, Msg = "当前项目处于立项阶段,报销费用不能超过5000元" };
+                        break;
+                    case ProjectStatus.招标:
+                        if ((reimburse.Amount + amounts) > 7000)
+                            return new ResultCode() { Code = 2, Msg = "当前项目处于招标阶段,报销费用不能超过7000元" };
+                        break;
+                    case ProjectStatus.执行:
+                        if ((reimburse.Amount + amounts) > 9000)
+                            return new ResultCode() { Code = 2, Msg = "当前项目处于执行阶段,报销费用不能超过9000元" };
+                        break;
+                    case ProjectStatus.已完成:
+                        return new ResultCode() { Code = 2, Msg = "当前项目处于已完成阶段,不能申请费用报销" };
+                        break;
+                    /* 您可以有任意数量的 case 语句 */
+                    default: /* 可选的 */
+
+                        break;
+                }
+            }
             ResultCode resultCode = new ResultCode();
             var config = await _dingTalkManager.GetDingDingConfigByAppAsync(DingDingAppEnum.智能办公);
             string accessToken = await _dingTalkManager.GetAccessTokenByAppAsync(DingDingAppEnum.智能办公); 

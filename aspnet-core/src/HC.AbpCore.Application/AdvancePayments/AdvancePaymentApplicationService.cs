@@ -122,16 +122,16 @@ AdvancePaymentEditDto editDto;
 		/// <param name="input"></param>
 		/// <returns></returns>
 		
-		public async Task CreateOrUpdateAsync(CreateOrUpdateAdvancePaymentInput input)
+		public async Task<AdvancePaymentEditDto> CreateOrUpdateAsync(CreateOrUpdateAdvancePaymentInput input)
 		{
 
 			if (input.AdvancePayment.Id.HasValue)
 			{
-				await Update(input.AdvancePayment);
+				return await Update(input.AdvancePayment);
 			}
 			else
 			{
-				await Create(input.AdvancePayment);
+				return await Create(input.AdvancePayment);
 			}
 		}
 
@@ -146,9 +146,10 @@ AdvancePaymentEditDto editDto;
 
             // var entity = ObjectMapper.Map <AdvancePayment>(input);
             var entity=input.MapTo<AdvancePayment>();
-			
 
-			entity = await _entityRepository.InsertAsync(entity);
+
+            //entity = await _entityRepository.InsertAsync(entity);
+            entity = await _entityManager.CreateAndmodifyAccountAsync(entity);
 			return entity.MapTo<AdvancePaymentEditDto>();
 		}
 
@@ -156,16 +157,18 @@ AdvancePaymentEditDto editDto;
 		/// 编辑AdvancePayment
 		/// </summary>
 		
-		protected virtual async Task Update(AdvancePaymentEditDto input)
+		protected virtual async Task<AdvancePaymentEditDto> Update(AdvancePaymentEditDto input)
 		{
 			//TODO:更新前的逻辑判断，是否允许更新
 
 			var entity = await _entityRepository.GetAsync(input.Id.Value);
 			input.MapTo(entity);
 
-			// ObjectMapper.Map(input, entity);
-		    await _entityRepository.UpdateAsync(entity);
-		}
+            // ObjectMapper.Map(input, entity);
+            //await _entityRepository.UpdateAsync(entity);
+            entity = await _entityManager.UpdateAndmodifyAccountAsync(entity);
+            return entity.MapTo<AdvancePaymentEditDto>();
+        }
 
 
 
@@ -177,8 +180,9 @@ AdvancePaymentEditDto editDto;
 		
 		public async Task DeleteAsync(EntityDto<Guid> input)
 		{
-			//TODO:删除前的逻辑判断，是否允许删除
-			await _entityRepository.DeleteAsync(input.Id);
+            //TODO:删除前的逻辑判断，是否允许删除
+            await _entityManager.DeleteAndDeleteAccountAsync(input.Id);
+			//await _entityRepository.DeleteAsync(input.Id);
 		}
 
 

@@ -21,6 +21,8 @@ using HC.AbpCore.Purchases;
 using HC.AbpCore.AdvancePayments;
 using HC.AbpCore.Products;
 using HC.AbpCore.Purchases.PurchaseDetails;
+using HC.AbpCore.Companys.Accounts;
+using HC.AbpCore.Companys;
 
 namespace HC.AbpCore.Purchases.DomainService
 {
@@ -34,6 +36,8 @@ namespace HC.AbpCore.Purchases.DomainService
         private readonly IRepository<PurchaseDetail, Guid> _purchaseDetailRepository;
         private readonly IRepository<AdvancePayment, Guid> _advancePaymentRepository;
         private readonly IRepository<Product, int> _productrepository;
+        private readonly IRepository<Account, long> _accountRepository;
+        private readonly IRepository<Company, int> _companyRepository;
 
         /// <summary>
         /// Purchase的构造方法
@@ -42,10 +46,14 @@ namespace HC.AbpCore.Purchases.DomainService
 			IRepository<Purchase, Guid> repository
             , IRepository<PurchaseDetail, Guid> purchaseDetailRepository
             , IRepository<AdvancePayment, Guid> advancePaymentRepository
+            , IRepository<Account, long> accountRepository
             , IRepository<Product, int> productrepository
+            , IRepository<Company, int> companyRepository
         )
 		{
-			_repository =  repository;
+            _companyRepository = companyRepository;
+            _accountRepository = accountRepository;
+            _repository =  repository;
             _purchaseDetailRepository = purchaseDetailRepository;
             _advancePaymentRepository = advancePaymentRepository;
             _productrepository = productrepository;
@@ -69,6 +77,9 @@ namespace HC.AbpCore.Purchases.DomainService
         /// <returns></returns>
         public async Task OnekeyCreateAsync(Purchase purchase, List<PurchaseDetailNew> purchaseDetailNews, List<AdvancePayment> advancePayments)
         {
+
+            //获取公司信息
+            var company = await _companyRepository.GetAll().FirstOrDefaultAsync();
             //新增采购
             var purchaseId = await _repository.InsertAndGetIdAsync(purchase);
             //新增采购明细和产品
@@ -124,7 +135,23 @@ namespace HC.AbpCore.Purchases.DomainService
             foreach (var item in advancePayments)
             {
                 item.PurchaseId = purchaseId;
-                await _advancePaymentRepository.InsertAsync(item);
+                var advancePayment=await _advancePaymentRepository.InsertAsync(item);
+
+                //已付款则更新公司流水
+                if (item.Status == AdvancePaymentStatusEnum.已付款)
+                {
+                    Account account = new Account();
+                    account.CompanyId = company.Id;
+                    account.Type = AccountType.出账;
+                    account.Initial = company.Balance;
+                    account.Amount = item.Amount;
+                    account.Ending = company.Balance - item.Amount;
+                    account.RefId = advancePayment.Id.ToString();
+                    await _accountRepository.InsertAsync(account);
+                    //更新公司余额信息
+                    company.Balance = account.Ending;
+                    await _companyRepository.UpdateAsync(company);
+                }
             }
         }
 

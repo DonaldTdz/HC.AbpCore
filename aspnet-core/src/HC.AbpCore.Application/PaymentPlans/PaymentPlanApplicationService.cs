@@ -181,8 +181,7 @@ namespace HC.AbpCore.PaymentPlans
                     Amount = input.Amount,
                     Ending = company.Balance + input.Amount,
                     //Desc = input.Desc,
-                    RefId = entity.Id.ToString(),
-                    CreationTime = DateTime.Now
+                    RefId = entity.Id.ToString()
                 };
                 //添加账户流水
                 await _accountRepository.InsertAsync(account);
@@ -205,52 +204,50 @@ namespace HC.AbpCore.PaymentPlans
             var entity = await _entityRepository.GetAsync(input.Id.Value);
             //TODO:更新前的逻辑判断，是否允许更新
             //已回款更新公司账户
-            Account account = new Account();
+            Account account = await _accountRepository.GetAll().FirstOrDefaultAsync(aa => aa.RefId == input.Id.Value.ToString()&&aa.Type==AccountType.入账);
+            Company company = await _companyRepository.GetAll().FirstOrDefaultAsync();
             if (input.Status == PaymentPlanStatusEnum.已回款)
             {
-                input.PaymentTime = DateTime.Now;
-                Company company = await _companyRepository.GetAll().FirstOrDefaultAsync();
-                var item = await _accountRepository.GetAll().FirstOrDefaultAsync(aa => aa.RefId == input.Id.Value.ToString());
-                if (item != null)
+                //账户流水不等于空
+                if (account != null)
                 {
-                    //account.Initial = company.Balance;
-                    item.Amount = input.Amount;
-                    item.Ending = item.Initial + input.Amount;
-                    //account.Desc = input.Desc;
-                    //更新账户流水
-                    await _accountRepository.UpdateAsync(item);
-                    //input.Amount -= entity.Amount;
+                    //发生金额不等于回款金额更新账户流水同公司余额
+                    if (account.Amount != input.Amount)
+                    {
+                        company.Balance = company.Balance - account.Amount;
+                        account.Initial = company.Balance;
+                        account.Amount = input.Amount;
+                        account.Ending = company.Balance + input.Amount;
+                        await _accountRepository.UpdateAsync(account);
+                        //更新公司余额信息
+                        company.Balance = account.Ending;
+                        await _companyRepository.UpdateAsync(company);
+                    }
                 }
-                else
+                else //账户流水等于空则新增账户流水并修改公司余额
                 {
-                    account.CompanyId =company.Id;
-                    account.Type = AccountType.入账;
-                    if (company.Balance.HasValue)
-                        account.Initial = company.Balance.Value;
-                    if (input.Amount.HasValue)
-                        account.Amount = input.Amount.Value;
-                    account.Ending = company.Balance + input.Amount;
-                    //account.Desc = input.Desc;
-                    account.RefId = input.Id.Value.ToString();
-                    account.CreationTime = DateTime.Now;
-                    //添加账户流水
-                    await _accountRepository.InsertAsync(account);
+                    Account accountNew = new Account();
+                    accountNew.CompanyId = company.Id;
+                    accountNew.Type = AccountType.入账;
+                    accountNew.Initial = company.Balance;
+                    accountNew.Amount = input.Amount;
+                    accountNew.Ending = company.Balance + input.Amount;
+                    accountNew.RefId = input.Id.Value.ToString();
+                    await _accountRepository.InsertAsync(accountNew);
+                    //更新公司余额信息
+                    company.Balance = accountNew.Ending;
+                    await _companyRepository.UpdateAsync(company);
                 }
-                company.Balance = account.Ending;
-                //更新公司账户余额
-                await _companyRepository.UpdateAsync(company);
             }
             else
             {
-                if (entity.Status != input.Status)
+                if (account != null)
                 {
-                    account = await _accountRepository.GetAll().FirstOrDefaultAsync(aa => aa.RefId == input.Id.Value.ToString());
-                    //删除公司账户流水
-                    await _accountRepository.DeleteAsync(account.Id);
-                    Company company = await _companyRepository.GetAll().FirstOrDefaultAsync();
-                    company.Balance -= input.Amount;
-                    //更新公司账户余额
+                    //更新公司余额信息
+                    company.Balance -= account.Amount;
                     await _companyRepository.UpdateAsync(company);
+                    //删除账户流水
+                    await _accountRepository.DeleteAsync(account.Id);
                 }
             }
             input.MapTo(entity);
@@ -273,11 +270,11 @@ namespace HC.AbpCore.PaymentPlans
             var item = await _entityRepository.GetAsync(input.Id);
             if (item.Status == PaymentPlanStatusEnum.已回款)
             {
-                Account account = await _accountRepository.GetAll().FirstOrDefaultAsync(aa => aa.RefId == input.Id.ToString());
+                Account account = await _accountRepository.GetAll().FirstOrDefaultAsync(aa => aa.RefId == input.Id.ToString()&&aa.Type==AccountType.入账);
                 //删除公司账户流水
                 await _accountRepository.DeleteAsync(account.Id);
                 Company company = await _companyRepository.GetAll().FirstOrDefaultAsync();
-                company.Balance -= item.Amount;
+                company.Balance -= account.Amount;
                 //更新公司账户余额
                 await _companyRepository.UpdateAsync(company);
             }

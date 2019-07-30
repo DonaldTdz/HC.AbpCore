@@ -1,18 +1,14 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using Abp.Application.Services.Dto;
 using Abp.Domain.Entities.Auditing;
 using HC.AbpCore.Companys.Accounts;
 
 namespace  HC.AbpCore.Companys.Accounts.Dtos
 {
-    public class AccountEditDto
-    {
-
-        /// <summary>
-        /// Id
-        /// </summary>
-        public long? Id { get; set; }         
+    public class AccountEditDto : EntityDto<long?>, IHasCreationTime
+    {      
 
 
         

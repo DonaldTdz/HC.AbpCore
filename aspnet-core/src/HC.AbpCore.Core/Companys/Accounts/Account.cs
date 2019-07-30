@@ -1,4 +1,5 @@
 ﻿using Abp.Domain.Entities;
+using Abp.Domain.Entities.Auditing;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -8,7 +9,7 @@ using System.Text;
 namespace HC.AbpCore.Companys.Accounts
 {
     [Table("Accounts")]
-    public class Account : Entity<long> //注意修改主键Id数据类型
+    public class Account : Entity<long>, IHasCreationTime //注意修改主键Id数据类型
     {
         /// <summary>
         /// 公司账户Id

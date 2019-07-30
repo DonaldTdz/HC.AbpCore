@@ -8,7 +8,7 @@ using HC.AbpCore.Companys.Accounts;
 
 namespace HC.AbpCore.Companys.Accounts.Dtos
 {
-    public class AccountListDto : EntityDto<long> 
+    public class AccountListDto : EntityDto<long>, IHasCreationTime
     {
 
         

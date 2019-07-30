@@ -35,6 +35,7 @@ namespace HC.AbpCore.Users
         private readonly UserManager _userManager;
         private readonly RoleManager _roleManager;
         private readonly IRepository<Role> _roleRepository;
+        private readonly IRepository<User,long> _userRepository;
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IAbpSession _abpSession;
         private readonly LogInManager _logInManager;
@@ -46,6 +47,7 @@ namespace HC.AbpCore.Users
             RoleManager roleManager,
             IRepository<Role> roleRepository,
             IPasswordHasher<User> passwordHasher,
+            IRepository<User,long> userRepository,
             IAbpSession abpSession,
             IDingTalkManager dingTalkManager,
             LogInManager logInManager)
@@ -58,6 +60,7 @@ namespace HC.AbpCore.Users
             _abpSession = abpSession;
             _logInManager = logInManager;
             _dingTalkManager = dingTalkManager;
+            _userRepository = userRepository;
         }
 
         public override async Task<UserDto> Create(CreateUserDto input)
@@ -274,20 +277,28 @@ namespace HC.AbpCore.Users
             {
                 //emailCode += 1;
                 //item.EmailAddress = "GYSWP" + emailCode + "@gy.com";
-                CheckCreatePermission();
-
-                var users = ObjectMapper.Map<User>(item);
-
-                users.TenantId = AbpSession.TenantId;
-                users.IsEmailConfirmed = true;
-
-                await _userManager.InitializeOptionsAsync(AbpSession.TenantId);
-
-                CheckErrors(await _userManager.CreateAsync(users, item.Password));
-
-                if (item.RoleNames != null)
+                var userCount = await _userRepository.CountAsync(aa => aa.UnionId == item.UnionId && aa.EmployeeId == item.EmployeeId);
+                if (userCount < 1)
                 {
-                    CheckErrors(await _userManager.SetRoles(users, item.RoleNames));
+                    CheckCreatePermission();
+
+                    var users = ObjectMapper.Map<User>(item);
+
+                    users.TenantId = AbpSession.TenantId;
+                    users.IsEmailConfirmed = true;
+
+                    await _userManager.InitializeOptionsAsync(AbpSession.TenantId);
+
+                    CheckErrors(await _userManager.CreateAsync(users, item.Password));
+
+                    if (item.RoleNames != null)
+                    {
+                        CheckErrors(await _userManager.SetRoles(users, item.RoleNames));
+                    }
+                }
+                else
+                {
+                    continue;
                 }
 
                 //return MapToEntityDto(users);
