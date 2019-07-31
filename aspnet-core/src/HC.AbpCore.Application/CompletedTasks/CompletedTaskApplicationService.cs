@@ -28,6 +28,7 @@ using HC.AbpCore.Tenders;
 using HC.AbpCore.CompletedTasks;
 using static HC.AbpCore.Projects.ProjectBase;
 using HC.AbpCore.Dtos;
+using HC.AbpCore.Messages;
 
 namespace HC.AbpCore.Tasks
 {
@@ -40,7 +41,7 @@ namespace HC.AbpCore.Tasks
         private readonly IRepository<CompletedTask, Guid> _entityRepository;
         private readonly IRepository<Project, Guid> _projectRepository;
         private readonly IRepository<Tender, Guid> _tenderRepository;
-        private readonly IRepository<Employee, string> _employeeRepository;
+        private readonly IRepository<Message, Guid> _messageRepository;
         private readonly ICompletedTaskManager _entityManager;
 
         /// <summary>
@@ -50,7 +51,7 @@ namespace HC.AbpCore.Tasks
         IRepository<CompletedTask, Guid> entityRepository
         , IRepository<Project, Guid> projectRepository
         , IRepository<Tender, Guid> tenderRepository
-        , IRepository<Employee, string> employeeRepository
+        , IRepository<Message, Guid> messageRepository
         , ICompletedTaskManager entityManager
         )
         {
@@ -58,7 +59,7 @@ namespace HC.AbpCore.Tasks
             _entityManager = entityManager;
             _tenderRepository = tenderRepository;
             _projectRepository = projectRepository;
-            _employeeRepository = employeeRepository;
+            _messageRepository = messageRepository;
         }
 
 
@@ -75,14 +76,14 @@ namespace HC.AbpCore.Tasks
             var query = _entityRepository.GetAll().WhereIf(!String.IsNullOrEmpty(input.EmployeeId), aa => aa.EmployeeId == input.EmployeeId);
             // TODO:根据传入的参数添加过滤条件
             var projects = _projectRepository.GetAll();
-            //var employees = _employeeRepository.GetAll();
+            var tenders = _tenderRepository.GetAll();
             var completedTaskList = from item in query
-                                    join project in projects on item.ProjectId equals project.Id
-                                    //join employee in employees on item.EmployeeId equals employee.Id
+                                    join tender in tenders on item.RefId equals tender.Id
+                                    join project in projects on tender.ProjectId equals project.Id
                                     select new CompletedTaskListDto()
                                     {
                                         Id = item.Id,
-                                        ProjectId = item.ProjectId,
+                                        ProjectId = tender.ProjectId,
                                         ProjectName = project.Name + "(" + project.ProjectCode + ")",
                                         Content = item.Content,
                                         IsCompleted = item.IsCompleted,
@@ -119,8 +120,8 @@ namespace HC.AbpCore.Tasks
 
             var entity = await _entityRepository.GetAsync(input.Id);
 
-
-            var project = await _projectRepository.GetAsync(entity.ProjectId);
+            var tender = await _tenderRepository.FirstOrDefaultAsync(aa => aa.Id == entity.RefId);
+            var project = await _projectRepository.GetAsync(tender.ProjectId);
             var item = entity.MapTo<CompletedTaskListDto>();
             item.ProjectName = project.Name + "(" + project.ProjectCode + ")";
             return item;
@@ -167,7 +168,7 @@ namespace HC.AbpCore.Tasks
              
             if (input.CompletedTask.Id.HasValue)
             {
-                return await UpdateAsync(input.CompletedTask, input.bond, input.isWinbid, input.messageId);
+                return await UpdateAsync(input.CompletedTask, input.messageId);
             }
             else
             {
@@ -197,45 +198,22 @@ namespace HC.AbpCore.Tasks
         /// 编辑CompletedTask
         /// </summary>
 
-        protected virtual async Task<APIResultDto> UpdateAsync(CompletedTaskEditDto input, string bond, bool? isWinbid, Guid? messageId)
+        protected virtual async Task<APIResultDto> UpdateAsync(CompletedTaskEditDto input, Guid? messageId)
         {
             //TODO:更新前的逻辑判断，是否允许更新
             var item = await _tenderRepository.GetAsync(input.RefId.Value);
+            if (messageId.HasValue)
+            {
+                var message = await _messageRepository.FirstOrDefaultAsync(aa => aa.Id == messageId.Value);
+                message.IsRead = true;
+                await _messageRepository.UpdateAsync(message);
+            }
 
-            if (input.Status == TaskStatusEnum.招标准备)
+            if (input.Status == TaskStatusEnum.招标保证金缴纳)
             {
                 item.IsPayBond = input.IsCompleted;
-                if (!string.IsNullOrEmpty(bond))
-                    item.Bond = decimal.Parse(bond);
-                else
-                    return new APIResultDto() { Code = 2, Msg = "请输入保证金" };
             }
-            else if (input.Status == TaskStatusEnum.招标准备)
-            {
-                int incompleteCount = await _entityRepository.CountAsync(aa => aa.RefId == item.Id && aa.Status == TaskStatusEnum.招标准备 && aa.Id != input.Id && aa.IsCompleted == false);
-                if (incompleteCount == 0)
-                {
-                    item.IsReady = input.IsCompleted;
-                }
-            }
-            else if (input.Status == TaskStatusEnum.购买标书)
-            {
-                if (item.IsReady == true && item.IsPayBond == true)
-                {
-                    var project = await _projectRepository.GetAsync(input.ProjectId);
-                    project.Status = isWinbid == true ? ProjectStatus.执行 : ProjectStatus.丢单;
-                    await _projectRepository.UpdateAsync(project);
-                    //item.IsWinbid = isWinbid;
-                }
-                else
-                {
-                    return new APIResultDto() { Code = 1, Msg = "请先完成招标准备与保证金缴纳" };
-                }
-            }
-            else
-            {
 
-            }
             await _tenderRepository.UpdateAsync(item);
             var entity = await _entityRepository.GetAsync(input.Id.Value);
             input.MapTo(entity);

@@ -187,7 +187,7 @@ namespace HC.AbpCore.TimeSheets.DomainService
                     dingMsgs.msg.msgtype = "link";
                     dingMsgs.msg.link.title = "审批提醒";
                     dingMsgs.msg.link.text = string.Format("您好! 项目:{0}工时审批，员工:{1}，工作日期:{2},点击查看详情", item.ProjectName, item.Name, item.WorkeDate.ToString("yyyy-MM-dd"));
-                    dingMsgs.msg.link.picUrl = "eapp://";
+                    dingMsgs.msg.link.picUrl = "@lALPDeC2uQ_7MOHMgMyA";
                     dingMsgs.msg.link.messageUrl = "eapp://page/messages/detail-messages/detail-messages?id=" + messageId;
                     var jsonString = SerializerHelper.GetJsonString(dingMsgs, null);
                     MessageResponseResult response = new MessageResponseResult();
@@ -224,8 +224,10 @@ namespace HC.AbpCore.TimeSheets.DomainService
             item.ApproverId = employeeId;
             if (result == "agree")
                 item.Status = TimeSheetStatusEnum.审批通过;
-            else
+            else if (result == "refuse")
                 item.Status = TimeSheetStatusEnum.拒绝;
+            else
+                item.Status = TimeSheetStatusEnum.取消;
             await _repository.UpdateAsync(item);
         }
     }

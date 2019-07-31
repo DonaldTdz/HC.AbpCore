@@ -25,7 +25,7 @@ namespace HC.AbpCore.Reimburses
         /// </summary>
         public virtual decimal? Amount { get; set; }
         /// <summary>
-        /// 状态枚举（1 提交 2 审批通过 3 拒绝）
+        /// 状态枚举（1 提交 2 审批通过 3 拒绝 4 取消）
         /// </summary>
         public virtual ReimburseStatusEnum? Status { get; set; }
         /// <summary>

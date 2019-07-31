@@ -91,34 +91,6 @@ namespace HC.AbpCore.DingTalk.Employees
             return entity.MapTo<EmployeeListDto>();
         }
 
-        //		/// <summary>
-        //		/// 获取编辑 Employee
-        //		/// </summary>
-        //		/// <param name="input"></param>
-        //		/// <returns></returns>
-
-        //		public async Task<GetEmployeeForEditOutput> GetForEditAsync(NullableIdDto<string> input)
-        //		{
-        //			var output = new GetEmployeeForEditOutput();
-        //EmployeeEditDto editDto;
-
-        //			if (input.Id.HasValue)
-        //			{
-        //				var entity = await _entityRepository.GetAsync(input.Id.Value);
-
-        //				editDto = entity.MapTo<EmployeeEditDto>();
-
-        //				//employeeEditDto = ObjectMapper.Map<List<employeeEditDto>>(entity);
-        //			}
-        //			else
-        //			{
-        //				editDto = new EmployeeEditDto();
-        //			}
-
-        //			output.Employee = editDto;
-        //			return output;
-        //		}
-
 
         /// <summary>
         /// 添加或者修改Employee的公共方法

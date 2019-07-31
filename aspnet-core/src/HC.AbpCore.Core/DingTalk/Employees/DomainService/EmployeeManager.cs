@@ -80,7 +80,7 @@ namespace HC.AbpCore.DingTalk.Employees.DomainService
                 dingMsgs.msg.msgtype = "link";
                 dingMsgs.msg.link.title = "周报填写提醒";
                 dingMsgs.msg.link.text = "您好!请按时填写上周周报并且提交审批,点击查看消息详情";
-                dingMsgs.msg.link.picUrl = "images/warn_y.png";
+                dingMsgs.msg.link.picUrl = "@lALPDeC2uQ_7MOHMgMyA";
                 dingMsgs.msg.link.messageUrl = "eapp://page/timesheet/create-timesheet/create-timesheet?employeeId=" + employeeId + "&messageId=" + messageId;
                 var jsonString = SerializerHelper.GetJsonString(dingMsgs, null);
                 MessageResponseResult response = new MessageResponseResult();

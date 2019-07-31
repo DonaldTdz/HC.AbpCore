@@ -84,7 +84,7 @@ namespace HC.AbpCore.Projects.DomainService
                 dingMsgs.msg.msgtype = "link";
                 dingMsgs.msg.link.title = "项目进度提醒";
                 dingMsgs.msg.link.text = string.Format("您好! 项目:{0}，当前进度为:{1},点击查看详情", project.Name + "(" + project.ProjectCode + ")", project.Status.ToString());
-                dingMsgs.msg.link.picUrl = "eapp://";
+                dingMsgs.msg.link.picUrl = "@lALPDeC2uQ_7MOHMgMyA";
                 dingMsgs.msg.link.messageUrl = "eapp://page/messages/detail-messages/detail-messages?id="+message.Id;
                 var jsonString = SerializerHelper.GetJsonString(dingMsgs, null);
                 MessageResponseResult response = new MessageResponseResult();

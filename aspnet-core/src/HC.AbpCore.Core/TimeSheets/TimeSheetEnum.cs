@@ -10,6 +10,6 @@ namespace HC.AbpCore.TimeSheets
 
     public enum TimeSheetStatusEnum
     {
-        提交=1,审批通过=2,拒绝=3
+        提交=1,审批通过=2,拒绝=3,取消=4
     }
 }

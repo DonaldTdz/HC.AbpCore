@@ -17,8 +17,7 @@ namespace HC.AbpCore.Contracts.ContractDetails
         /// <summary>
         /// 产品Id
         /// </summary>
-        [Required]
-        public int ProductId { get; set; }
+        public int? ProductId { get; set; }
         /// <summary>
         /// 设备名称
         /// </summary>

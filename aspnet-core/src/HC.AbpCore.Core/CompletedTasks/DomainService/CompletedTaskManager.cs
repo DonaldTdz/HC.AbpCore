@@ -27,6 +27,7 @@ using Senparc.CO2NET.Helpers;
 using System.Text;
 using Senparc.CO2NET.HttpUtility;
 using HC.AbpCore.Messages.DomainService;
+using HC.AbpCore.Tenders;
 
 namespace HC.AbpCore.Tasks.DomainService
 {
@@ -40,6 +41,7 @@ namespace HC.AbpCore.Tasks.DomainService
         private readonly IRepository<Project, Guid> _projectRepository;
         private readonly IRepository<Employee, string> _employeeRepository;
         private readonly IRepository<Message, Guid> _messageRepository;
+        private readonly IRepository<Tender, Guid> _tenderRepository;
         /// <summary>
         /// CompletedTask的构造方法
         ///</summary>
@@ -48,9 +50,10 @@ namespace HC.AbpCore.Tasks.DomainService
             IRepository<Project, Guid> projectRepository,
             IRepository<Employee, string> employeeRepository,
             IRepository<Message, Guid> messageRepository,
-            IMessageManager messageManager
+            IRepository<Tender, Guid> tenderRepository
         )
         {
+            _tenderRepository = tenderRepository;
             _messageRepository = messageRepository;
             _repository = repository;
             _employeeRepository = employeeRepository;
@@ -76,11 +79,13 @@ namespace HC.AbpCore.Tasks.DomainService
         /// <returns></returns>
         public async Task TaskRemindAsync(string accessToken, DingDingAppConfig dingDingAppConfig)
         {
-            var query = _repository.GetAll().Where(aa => aa.IsCompleted == false);
+            var query = _repository.GetAll().Where(aa => aa.IsCompleted == false && aa.ClosingDate <= DateTime.Now.AddDays(2) && aa.ClosingDate >= DateTime.Now);
             var projects = _projectRepository.GetAll();
             var employees = _employeeRepository.GetAll();
+            var tenders = _tenderRepository.GetAll();
             var tasks = from task in query
-                        join project in projects on task.ProjectId equals project.Id
+                        join tender in tenders on task.RefId equals tender.Id
+                        join project in projects on tender.ProjectId equals project.Id
                         join employee in employees on task.EmployeeId equals employee.Id
                         select new
                         {
@@ -113,8 +118,8 @@ namespace HC.AbpCore.Tasks.DomainService
                 dingMsgs.msg.msgtype = "link";
                 dingMsgs.msg.link.title = "待办提醒";
                 dingMsgs.msg.link.text = string.Format("您好! 项目:{0}，{1}:日期即将到达，截止日期:{2}，点击查看详情", item.ProjectName, item.Status.ToString(), item.ClosingDate.ToString("yyyy-MM-dd"));
-                dingMsgs.msg.link.picUrl = "@lALPBY0V4-AiG7vMgMyA";
-                dingMsgs.msg.link.messageUrl = "eapp://page/completedtask/modify-completedtask/modify-completedtask?id="+item.Id+ "&messageId="+messageId;
+                dingMsgs.msg.link.picUrl = "@lALPDeC2uQ_7MOHMgMyA";
+                dingMsgs.msg.link.messageUrl = "eapp://page/completedtask/modify-completedtask/modify-completedtask?id=" + item.Id + "&messageId=" + messageId;
                 var jsonString = SerializerHelper.GetJsonString(dingMsgs, null);
                 MessageResponseResult response = new MessageResponseResult();
                 using (MemoryStream ms = new MemoryStream())

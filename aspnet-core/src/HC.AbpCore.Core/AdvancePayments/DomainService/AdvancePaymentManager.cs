@@ -20,6 +20,14 @@ using HC.AbpCore;
 using HC.AbpCore.AdvancePayments;
 using HC.AbpCore.Companys.Accounts;
 using HC.AbpCore.Companys;
+using HC.AbpCore.DingTalk;
+using HC.AbpCore.Purchases;
+using HC.AbpCore.DingTalk.Employees;
+using HC.AbpCore.Messages;
+using HC.AbpCore.Common;
+using Senparc.CO2NET.Helpers;
+using System.Text;
+using Senparc.CO2NET.HttpUtility;
 
 namespace HC.AbpCore.AdvancePayments.DomainService
 {
@@ -32,6 +40,9 @@ namespace HC.AbpCore.AdvancePayments.DomainService
 		private readonly IRepository<AdvancePayment,Guid> _repository;
         private readonly IRepository<Account, long> _accountRepository;
         private readonly IRepository<Company, int> _companyRepository;
+        private readonly IRepository<Purchase, Guid> _purchaseRepository;
+        private readonly IRepository<Employee, string> _employeeRepository;
+        private readonly IRepository<Message, Guid> _messageRepository;
 
         /// <summary>
         /// AdvancePayment的构造方法
@@ -40,8 +51,14 @@ namespace HC.AbpCore.AdvancePayments.DomainService
 			IRepository<AdvancePayment, Guid> repository
             , IRepository<Company, int> companyRepository
             , IRepository<Account, long> accountRepository
+            , IRepository<Purchase, Guid> purchaseRepository
+            , IRepository<Employee, string> employeeRepository
+            , IRepository<Message, Guid> messageRepository
         )
 		{
+            _messageRepository = messageRepository;
+            _employeeRepository = employeeRepository;
+            _purchaseRepository = purchaseRepository;
             _companyRepository = companyRepository;
             _accountRepository = accountRepository;
             _repository =  repository;
@@ -159,6 +176,71 @@ namespace HC.AbpCore.AdvancePayments.DomainService
                 }
             }
             return advancePayment;
+        }
+
+        /// <summary>
+        /// 付款提醒
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <param name="dingDingAppConfig"></param>
+        /// <returns></returns>
+        public async Task PaymentRemindAsync(string accessToken, DingDingAppConfig dingDingAppConfig)
+        {
+            var purchases = _purchaseRepository.GetAll();
+            var query = _repository.GetAll()
+                .Where(aa => aa.Status == AdvancePaymentStatusEnum.未付款)
+                .Where(aa => aa.PaymentTime <= DateTime.Now.AddDays(7) && aa.PaymentTime >= DateTime.Now);
+            var advancePayment = from payment in query
+                               join purchase in purchases on payment.PurchaseId equals purchase.Id
+                               select new
+                               {
+                                   PurchaseCode = purchase.Code,
+                                   purchase.EmployeeId,
+                                   payment.PlanTime
+                               };
+            var items = await advancePayment.AsNoTracking().ToListAsync();
+            var employeeIdList = await _employeeRepository.GetAll().Where(aa => aa.IsLeaderInDepts == "key:73354253value:True").Select(aa => aa.Id)
+                .Distinct().AsNoTracking().ToListAsync();
+            var url = string.Format("https://oapi.dingtalk.com/topapi/message/corpconversation/asyncsend_v2?access_token={0}", accessToken);
+            foreach (var item in items)
+            {
+                employeeIdList.Add(item.EmployeeId);
+                foreach (var employeeId in employeeIdList)
+                {
+                    Message message = new Message();
+                    message.Content = string.Format("您好! 采购:{0}计划付款时间即将达到，计划付款时间为:{1}", item.PurchaseCode, item.PlanTime.ToString("yyyy-MM-dd"));
+                    message.SendTime = DateTime.Now;
+                    message.Type = MessageTypeEnum.付款提醒;
+                    message.IsRead = false;
+                    message.EmployeeId = employeeId;
+                    //新增到消息中心
+                    var messageId = await _messageRepository.InsertAndGetIdAsync(message);
+
+                    DingMsgs dingMsgs = new DingMsgs();
+                    dingMsgs.userid_list = employeeId;
+                    dingMsgs.to_all_user = false;
+                    dingMsgs.agent_id = dingDingAppConfig.AgentID;
+                    dingMsgs.msg.msgtype = "link";
+                    dingMsgs.msg.link.title = "付款提醒";
+                    dingMsgs.msg.link.text = string.Format("所属采购:{0}，点击查看详情", item.PurchaseCode, item.PlanTime.ToString("yyyy-MM-dd"));
+                    dingMsgs.msg.link.picUrl = "@lALPDeC2uQ_7MOHMgMyA";
+                    dingMsgs.msg.link.messageUrl = "eapp://page/messages/detail-messages/detail-messages?id=" + messageId;
+                    var jsonString = SerializerHelper.GetJsonString(dingMsgs, null);
+                    MessageResponseResult response = new MessageResponseResult();
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        var bytes = Encoding.UTF8.GetBytes(jsonString);
+                        ms.Write(bytes, 0, bytes.Length);
+                        ms.Seek(0, SeekOrigin.Begin);
+                        response = Post.PostGetJson<MessageResponseResult>(url, null, ms);
+                    };
+                    //发送失败则自动删除消息中心对应数据
+                    if (response.errcode != 0)
+                    {
+                        await _messageRepository.DeleteAsync(messageId);
+                    }
+                }
+            }
         }
 
         // TODO:编写领域业务代码

@@ -82,7 +82,6 @@ namespace HC.AbpCore.PaymentPlans.DomainService
             var items = await paymentPlans.AsNoTracking().ToListAsync();
             var employeeIdList = await _employeeRepository.GetAll().Where(aa => aa.IsLeaderInDepts == "key:73354253value:True").Select(aa => aa.Id)
                 .Distinct().AsNoTracking().ToListAsync();
-            //string employeeIds = string.Join(",", employeeIdList.ToArray());
             var url = string.Format("https://oapi.dingtalk.com/topapi/message/corpconversation/asyncsend_v2?access_token={0}", accessToken);
             foreach (var item in items)
             {
@@ -105,7 +104,7 @@ namespace HC.AbpCore.PaymentPlans.DomainService
                     dingMsgs.msg.msgtype = "link";
                     dingMsgs.msg.link.title = "催款提醒";
                     dingMsgs.msg.link.text = string.Format("所属项目:{0}，点击查看详情", item.ProjectName, item.PlanTime.ToString("yyyy-MM-dd"));
-                    dingMsgs.msg.link.picUrl = "eapp://";
+                    dingMsgs.msg.link.picUrl = "@lALPDeC2uQ_7MOHMgMyA";
                     dingMsgs.msg.link.messageUrl = "eapp://page/messages/detail-messages/detail-messages?id=" + messageId;
                     var jsonString = SerializerHelper.GetJsonString(dingMsgs, null);
                     MessageResponseResult response = new MessageResponseResult();

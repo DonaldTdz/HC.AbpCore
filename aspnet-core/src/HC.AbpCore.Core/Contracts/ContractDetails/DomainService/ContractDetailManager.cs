@@ -112,7 +112,7 @@ namespace HC.AbpCore.Contracts.ContractDetails.DomainService
             }
             else
             {
-                var productOld = await _productRepository.GetAsync(input.ProductId);
+                var productOld = await _productRepository.GetAsync(input.ProductId.Value);
                 product.Num += entity.Num;
                 await _productRepository.UpdateAsync(product);
                 if (productOld.Num.HasValue)

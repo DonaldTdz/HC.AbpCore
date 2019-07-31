@@ -134,7 +134,7 @@ namespace HC.AbpCore.Web.Host.Controllers
                         }
                     }
 
-                    #endregion
+                #endregion
                 default:
                     break;
             }
@@ -249,16 +249,46 @@ namespace HC.AbpCore.Web.Host.Controllers
         /// <param name="fileUrl"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<OapiMediaUploadResponse> UploadMediaAsync()
+        public async Task<string> UploadMediaAsync(string path)
         {
-            string path = "image/taskDefault.png";
-            DefaultDingTalkClient client = new DefaultDingTalkClient("https://oapi.dingtalk.com/media/upload");
-            OapiMediaUploadRequest request = new OapiMediaUploadRequest();
-            request.Type = "image";
-            request.Media = new FileItem(path);
             string accessToken = await _dingTalkManager.GetAccessTokenByAppAsync(DingDingAppEnum.智能办公);
-            OapiMediaUploadResponse response = client.Execute(request, accessToken);
-            return response;
+            var url = string.Format("https://oapi.dingtalk.com/media/upload?access_token={0}&type=image", accessToken);
+            string mediaId = PostMediaAsync(url, path);
+            return mediaId;
+        }
+
+        public string PostMediaAsync(string url, string filePath)
+        {
+            var result = string.Empty;
+            var request = (HttpWebRequest)WebRequest.Create(url);
+            var boundary = "----------" + DateTime.Now.Ticks.ToString("x");
+            request.ContentType = "multipart/form-data; boundary=" + boundary;
+            request.Method = "POST";
+            using (Stream requestStream = request.GetRequestStream())
+            {
+                byte[] boundarybytes = Encoding.UTF8.GetBytes("--" + boundary + "\r\n");
+                byte[] trailer = Encoding.UTF8.GetBytes("\r\n--" + boundary + "–-\r\n");
+                var filename = Path.GetFileName(filePath);
+                using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                {
+                    byte[] bArr = new byte[fs.Length];
+                    fs.Read(bArr, 0, bArr.Length);
+                    requestStream.Write(boundarybytes, 0, boundarybytes.Length);
+                    var header = $"Content-Disposition:form-data;name=\"media\";filename=\"{filename}\"\r\nfilelength=\"{fs.Length}\"\r\nContent-Type:application/octet-stream\r\n\r\n";
+                    byte[] postHeaderBytes = Encoding.UTF8.GetBytes(header.ToString());
+                    requestStream.Write(postHeaderBytes, 0, postHeaderBytes.Length);
+                    fs.Close();
+                    requestStream.Write(bArr, 0, bArr.Length);
+                    requestStream.Write(trailer, 0, trailer.Length);
+                }
+            }
+            var response = (HttpWebResponse)request.GetResponse();
+            var responseStream = response.GetResponseStream();
+            using (var streamReader = new StreamReader(response.GetResponseStream()))
+            {
+                result = streamReader.ReadToEnd();
+            }
+            return result;
         }
     }
 

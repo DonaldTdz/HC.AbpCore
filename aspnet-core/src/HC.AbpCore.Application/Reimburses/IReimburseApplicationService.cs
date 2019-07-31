@@ -74,6 +74,14 @@ namespace HC.AbpCore.Reimburses
 
 
         /// <summary>
+        /// 提交审批(钉钉端使用)
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        Task<APIResultDto> DingSubmitApprovalAsync(CreateOrUpdateReimburseInput input);
+
+
+        /// <summary>
         /// 提交审批(并保存报销与报销详情)
         /// </summary>
         /// <param name="input"></param>

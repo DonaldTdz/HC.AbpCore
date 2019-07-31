@@ -135,7 +135,7 @@ namespace HC.AbpCore.Reimburses.DomainService
                     dingMsgs.msg.msgtype = "link";
                     dingMsgs.msg.link.title = "审批提醒";
                     dingMsgs.msg.link.text = string.Format("您好! 有一笔报销费用需要你审批，报销人:{0},点击查看详情", item.Name);
-                    dingMsgs.msg.link.picUrl = "eapp://";
+                    dingMsgs.msg.link.picUrl = "@lALPDeC2uQ_7MOHMgMyA";
                     dingMsgs.msg.link.messageUrl = "eapp://page/messages/detail-messages/detail-messages?id=" + messageId;
                     var jsonString = SerializerHelper.GetJsonString(dingMsgs, null);
                     MessageResponseResult response = new MessageResponseResult();
@@ -165,7 +165,8 @@ namespace HC.AbpCore.Reimburses.DomainService
         {
             if (reimburse.Type == ReimburseTypeEnum.项目型报销)
             {
-                var amounts = await _repository.GetAll().Where(aa => aa.Type == ReimburseTypeEnum.项目型报销 && aa.ProjectId == reimburse.ProjectId.Value).Select(aa => aa.Amount).SumAsync();
+                var amounts = await _repository.GetAll().Where(aa => aa.Type == ReimburseTypeEnum.项目型报销 &&
+                aa.ProjectId == reimburse.ProjectId.Value&&aa.Status!=null&&aa.Status!=ReimburseStatusEnum.取消).Select(aa => aa.Amount).SumAsync();
                 var project = await _projectRepository.FirstOrDefaultAsync(aa => aa.Id == reimburse.ProjectId.Value);
                 switch (project.Status)
                 {

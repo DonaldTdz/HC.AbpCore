@@ -12,8 +12,6 @@ namespace HC.AbpCore.Tasks
     [Table("CompletedTasks")]
     public class CompletedTask : Entity<Guid>, IHasCreationTime //注意修改主键Id数据类型
     {
-        [Required]
-        public Guid ProjectId { get; set; }
 
         /// <summary>
         /// 内容

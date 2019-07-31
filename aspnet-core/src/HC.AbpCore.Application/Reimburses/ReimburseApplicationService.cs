@@ -79,7 +79,8 @@ namespace HC.AbpCore.Reimburses
         {
             var query = _entityRepository.GetAll().WhereIf(input.ProjectId.HasValue, aa => aa.ProjectId == input.ProjectId.Value)
                 .WhereIf(input.Status.HasValue, aa => aa.Status == input.Status.Value)
-                .WhereIf(input.type.HasValue, aa => aa.Type == input.type.Value);
+                .WhereIf(input.type.HasValue, aa => aa.Type == input.type.Value)
+                .Where(aa => aa.Status != null);
             // TODO:根据传入的参数添加过滤条件
             //if (!String.IsNullOrEmpty(input.EmployeeId))
             //{
@@ -91,17 +92,20 @@ namespace HC.AbpCore.Reimburses
             //    if (user.EmployeeId != "0205151055692871" && user.EmployeeId != "1706561401635019335")  //如果是代姐或吴总则可以查看全部
             //        query = query.Where(aa => aa.EmployeeId == user.EmployeeId);
             //}
-            var user = await _userManager.GetUserByIdAsync(AbpSession.UserId.Value);
-            if (user != null &&( user.EmployeeId != "0205151055692871" && user.EmployeeId != "1706561401635019335"))//如果是代姐或吴总则可以查看全部
+
+            if (AbpSession.UserId.HasValue)
             {
-                query = query.Where(aa => aa.EmployeeId == user.EmployeeId);
+                User user = new User() { Id = AbpSession.UserId.Value };
+                var roles = await _userManager.GetRolesAsync(user);
+                if (!roles.Contains("Admin") && !roles.Contains("Finance") && !roles.Contains("GeneralManager"))
+                {
+                    user = await _userManager.GetUserByIdAsync(AbpSession.UserId.Value);
+                    query = query.Where(aa => aa.EmployeeId == user.EmployeeId);
+                }
             }
             else
             {
-                if (!String.IsNullOrEmpty(input.EmployeeId))
-                {
-                    query = query.Where(aa => aa.EmployeeId == input.EmployeeId);
-                }
+                query = query.Where(aa => aa.EmployeeId == input.EmployeeId);
             }
 
 
@@ -228,17 +232,10 @@ namespace HC.AbpCore.Reimburses
         protected virtual async Task<ReimburseEditDto> CreateAsync(ReimburseEditDto input)
         {
             //TODO:新增前的逻辑判断，是否允许新增
+            if (input.Type == ReimburseTypeEnum.非项目报销)
+                input.ProjectId = null;
             var entity = input.MapTo<Reimburse>();
 
-            entity.Status = ReimburseStatusEnum.提交; //新增报销默认为提交状态
-
-            //如果报销人为空则为当前登录人
-            //if (String.IsNullOrEmpty(entity.EmployeeId))
-            //{
-            //    var user = await _userManager.GetUserByIdAsync(AbpSession.UserId.Value);
-            //    entity.EmployeeId = user.EmployeeId;
-            //}
-            //entity.SubmitDate = DateTime.Now;
             entity = await _entityRepository.InsertAsync(entity);
             return entity.MapTo<ReimburseEditDto>();
         }
@@ -288,12 +285,44 @@ namespace HC.AbpCore.Reimburses
 
 
         /// <summary>
-        /// 提交审批(并保存报销与报销详情)
+        /// 提交审批(钉钉端使用)
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
         [AbpAllowAnonymous]
         [Audited]
+        public async Task<APIResultDto> DingSubmitApprovalAsync(CreateOrUpdateReimburseInput input)
+        {
+            //List<ReimburseDetail> reimburseDetails = input.ReimburseDetails.MapTo<List<ReimburseDetail>>();
+            var reimburse = await _entityRepository.GetAsync(input.Reimburse.Id.Value);
+            reimburse.SubmitDate = DateTime.Now;
+            reimburse.Status = ReimburseStatusEnum.提交;
+            reimburse.ProjectId = input.Reimburse.ProjectId;
+            reimburse.Type = input.Reimburse.Type;
+            if (input.Reimburse.Type == ReimburseTypeEnum.非项目报销)
+                reimburse.ProjectId = null;
+            //Reimburse reimburse = input.Reimburse.MapTo<Reimburse>();
+            var reimburseDetails = await _reimburseDetailRepository.GetAllListAsync(aa => aa.ReimburseId == input.Reimburse.Id.Value);
+            var apiResult = await _entityManager.SubmitApprovalAsync(reimburse, reimburseDetails);
+            if (apiResult.Code == 0)
+            {
+                reimburse.ProcessInstanceId = apiResult.Data.ToString();
+                reimburse = await _entityRepository.UpdateAsync(reimburse);  //更新报销
+                return new APIResultDto() { Code = apiResult.Code, Msg = apiResult.Msg };
+            }
+            else
+            {
+                return apiResult.MapTo<APIResultDto>();
+            }
+
+        }
+
+
+        /// <summary>
+        /// 提交审批(并保存报销与报销详情)
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         public async Task<APIResultDto> SubmitApprovalAsync(CreateReimburseAndDetailInput input)
         {
             //如果报销人为空则为当前登录人
@@ -303,6 +332,9 @@ namespace HC.AbpCore.Reimburses
                 input.Reimburse.EmployeeId = user.EmployeeId;
             }
             input.Reimburse.SubmitDate = DateTime.Now;
+            input.Reimburse.Status = ReimburseStatusEnum.提交;
+            if (input.Reimburse.Type == ReimburseTypeEnum.非项目报销)
+                input.Reimburse.ProjectId = null;
             List<ReimburseDetail> reimburseDetails = input.ReimburseDetails.MapTo<List<ReimburseDetail>>();
             Reimburse reimburse = input.Reimburse.MapTo<Reimburse>();
 

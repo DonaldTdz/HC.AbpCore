@@ -3,11 +3,13 @@ using Abp.Auditing;
 using Abp.Authorization;
 using Abp.Domain.Repositories;
 using Abp.Runtime.Session;
+using HC.AbpCore.AdvancePayments.DomainService;
 using HC.AbpCore.DingTalk.Employees.DomainService;
 using HC.AbpCore.PaymentPlans.DomainService;
 using HC.AbpCore.Projects.DomainService;
 using HC.AbpCore.Reimburses.DomainService;
 using HC.AbpCore.Tasks.DomainService;
+using HC.AbpCore.Tenders.DomainService;
 using HC.AbpCore.TimeSheets.DomainService;
 using System;
 using System.Collections.Generic;
@@ -30,6 +32,8 @@ namespace HC.AbpCore.DingTalk
         private readonly IProjectManager _projectManager;
         private readonly IEmployeeManager _employeeManager;
         private readonly ICompletedTaskManager _completedTaskManager;
+        private readonly IAdvancePaymentManager _advancePaymentManager;
+        private readonly ITenderManager _tenderManager;
 
         /// <summary>
         /// 构造函数 
@@ -41,9 +45,13 @@ namespace HC.AbpCore.DingTalk
         IEmployeeManager employeeManager,
         IProjectManager projectManager,
         IReimburseManager reimburseManager,
-        ICompletedTaskManager completedTaskManager
+        ICompletedTaskManager completedTaskManager,
+        IAdvancePaymentManager advancePaymentManager,
+        ITenderManager tenderManager
         )
         {
+            _tenderManager = tenderManager;
+            _advancePaymentManager = advancePaymentManager;
             _completedTaskManager = completedTaskManager;
             _dingTalkManager = dingTalkManager;
             _employeeManager = employeeManager;
@@ -69,10 +77,14 @@ namespace HC.AbpCore.DingTalk
             await _paymentPlanManager.PaymentRemindAsync(accessToken, ddConfig);
             //报销审批提醒
             await _reimburseManager.ReimburseApprovalRemind(accessToken, ddConfig);
-            //工时报销提醒
+            //工时审批提醒
             await _timeSheetManager.TimeSheetApprovalRemind(accessToken, ddConfig);
             //任务提醒
             await _completedTaskManager.TaskRemindAsync(accessToken, ddConfig);
+            //付款提醒
+            await _advancePaymentManager.PaymentRemindAsync(accessToken, ddConfig);
+            //招标提醒
+            await _tenderManager.TenderRemindAsync(accessToken, ddConfig);
         }
 
         /// <summary>

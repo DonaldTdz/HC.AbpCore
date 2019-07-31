@@ -21,8 +21,7 @@ namespace  HC.AbpCore.Contracts.ContractDetails.Dtos
         /// <summary>
         /// ²úÆ·Id
         /// </summary>
-        [Required]
-        public int ProductId { get; set; }
+        public int? ProductId { get; set; }
 
 
 

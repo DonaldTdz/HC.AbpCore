@@ -27,6 +27,7 @@ using HC.AbpCore.Dtos;
 using Abp.Auditing;
 using Abp.Runtime.Session;
 using HC.AbpCore.Messages.DomainService;
+using HC.AbpCore.Authorization.Users;
 
 namespace HC.AbpCore.TimeSheets
 {
@@ -36,6 +37,7 @@ namespace HC.AbpCore.TimeSheets
     [AbpAuthorize]
     public class TimeSheetAppService : AbpCoreAppServiceBase, ITimeSheetAppService
     {
+        private readonly UserManager _userManager;
         private readonly IRepository<TimeSheet, Guid> _entityRepository;
         private readonly IRepository<Project, Guid> _projectRepository;
         private readonly IRepository<Employee, string> _employeeRepository;
@@ -52,8 +54,10 @@ namespace HC.AbpCore.TimeSheets
         , IRepository<Employee, string> employeeRepository
         , IMessageManager messageManager
         , ITimeSheetManager entityManager
+        , UserManager userManager
         )
         {
+            _userManager = userManager;
             _messageManager = messageManager;
             _entityRepository = entityRepository;
             _entityManager = entityManager;
@@ -73,10 +77,23 @@ namespace HC.AbpCore.TimeSheets
         {
 
             var query = _entityRepository.GetAll().WhereIf(input.ProjectId.HasValue, aa => aa.ProjectId == input.ProjectId.Value)
-               .WhereIf(input.Status.HasValue, aa => aa.Status == input.Status.Value)
-               .WhereIf(!String.IsNullOrEmpty(input.EmployeeId), aa => aa.EmployeeId == input.EmployeeId);
+               .WhereIf(input.Status.HasValue, aa => aa.Status == input.Status.Value);
+            //  .WhereIf(!String.IsNullOrEmpty(input.EmployeeId), aa => aa.EmployeeId == input.EmployeeId)
             // TODO:根据传入的参数添加过滤条件
-
+            if (AbpSession.UserId.HasValue)
+            {
+                User user = new User() { Id = AbpSession.UserId.Value };
+                var roles = await _userManager.GetRolesAsync(user);
+                if (!roles.Contains("Admin") && !roles.Contains("Finance") && !roles.Contains("GeneralManager"))
+                {
+                    user = await _userManager.GetUserByIdAsync(AbpSession.UserId.Value);
+                    query = query.Where(aa => aa.EmployeeId == user.EmployeeId);
+                }
+            }
+            else
+            {
+                query = query.Where(aa => aa.EmployeeId == input.EmployeeId);
+            }
             //var counts = await query.CountAsync();
 
             var projects = _projectRepository.GetAll();

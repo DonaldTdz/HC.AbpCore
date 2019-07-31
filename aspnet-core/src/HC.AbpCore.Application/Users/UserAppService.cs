@@ -35,7 +35,6 @@ namespace HC.AbpCore.Users
         private readonly UserManager _userManager;
         private readonly RoleManager _roleManager;
         private readonly IRepository<Role> _roleRepository;
-        private readonly IRepository<User,long> _userRepository;
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IAbpSession _abpSession;
         private readonly LogInManager _logInManager;
@@ -47,7 +46,6 @@ namespace HC.AbpCore.Users
             RoleManager roleManager,
             IRepository<Role> roleRepository,
             IPasswordHasher<User> passwordHasher,
-            IRepository<User,long> userRepository,
             IAbpSession abpSession,
             IDingTalkManager dingTalkManager,
             LogInManager logInManager)
@@ -60,13 +58,11 @@ namespace HC.AbpCore.Users
             _abpSession = abpSession;
             _logInManager = logInManager;
             _dingTalkManager = dingTalkManager;
-            _userRepository = userRepository;
         }
 
         public override async Task<UserDto> Create(CreateUserDto input)
         {
             CheckCreatePermission();
-
             var user = ObjectMapper.Map<User>(input);
 
             user.TenantId = AbpSession.TenantId;
@@ -80,7 +76,6 @@ namespace HC.AbpCore.Users
             {
                 CheckErrors(await _userManager.SetRoles(user, input.RoleNames));
             }
-
             CurrentUnitOfWork.SaveChanges();
 
             return MapToEntityDto(user);
@@ -277,7 +272,7 @@ namespace HC.AbpCore.Users
             {
                 //emailCode += 1;
                 //item.EmailAddress = "GYSWP" + emailCode + "@gy.com";
-                var userCount = await _userRepository.CountAsync(aa => aa.UnionId == item.UnionId && aa.EmployeeId == item.EmployeeId);
+                var userCount = await Repository.CountAsync(aa => aa.UnionId == item.UnionId && aa.EmployeeId == item.EmployeeId);
                 if (userCount < 1)
                 {
                     CheckCreatePermission();

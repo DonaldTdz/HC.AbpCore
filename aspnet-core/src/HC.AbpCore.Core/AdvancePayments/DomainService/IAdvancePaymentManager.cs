@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Abp;
 using Abp.Domain.Services;
 using HC.AbpCore.AdvancePayments;
-
+using HC.AbpCore.DingTalk;
 
 namespace HC.AbpCore.AdvancePayments.DomainService
 {
@@ -40,6 +40,13 @@ namespace HC.AbpCore.AdvancePayments.DomainService
         /// <param name="input"></param>
         /// <returns></returns>
         Task DeleteAndDeleteAccountAsync(Guid input);
+
+
+        /// <summary>
+        /// 付款提醒 
+        /// </summary>
+        /// <returns>employeeIds</returns>
+        Task PaymentRemindAsync(string accessToken, DingDingAppConfig dingDingAppConfig);
 
     }
 }
