@@ -36,7 +36,6 @@ namespace HC.AbpCore.Purchases
     {
         private readonly IRepository<Purchase, Guid> _entityRepository;
         private readonly IRepository<Employee, string> _employeeRepository;
-        private readonly UserManager _userManager;
         private readonly IPurchaseManager _entityManager;
 
         /// <summary>
@@ -46,10 +45,8 @@ namespace HC.AbpCore.Purchases
         IRepository<Purchase, Guid> entityRepository
         , IRepository<Employee, string> employeeRepository
         , IPurchaseManager entityManager
-        , UserManager userManager
         )
         {
-            _userManager = userManager;
             _employeeRepository = employeeRepository;
             _entityRepository = entityRepository;
             _entityManager = entityManager;
@@ -67,9 +64,10 @@ namespace HC.AbpCore.Purchases
 
             var query = _entityRepository.GetAll().WhereIf(!String.IsNullOrEmpty(input.Code), aa => aa.Code.Contains(input.Code));
             // TODO:根据传入的参数添加过滤条件
-            var user = await _userManager.GetUserByIdAsync(AbpSession.UserId.Value);
-            if (user.EmployeeId != "0205151055692871" && user.EmployeeId != "1706561401635019335")//如果是代姐或吴总则可以查看全部
+            var roles = await GetUserRolesAsync();
+            if (!roles.Contains("Admin") && !roles.Contains("Finance") && !roles.Contains("GeneralManager"))
             {
+                var user = await GetCurrentUserAsync();
                 query = query.Where(aa => aa.EmployeeId == user.EmployeeId);
             }
             else
@@ -79,6 +77,7 @@ namespace HC.AbpCore.Purchases
                     query = query.Where(aa => aa.EmployeeId == input.EmployeeId);
                 }
             }
+
             var employees = _employeeRepository.GetAll().AsNoTracking();
 
             var items = from item in query
@@ -92,7 +91,6 @@ namespace HC.AbpCore.Purchases
                             PurchaseDate = item.PurchaseDate,
                             Desc = item.Desc,
                             ArrivalDate = item.ArrivalDate,
-                            InvoiceIssuance = item.InvoiceIssuance,
                             Attachments = item.Attachments,
                             EmployeeName = tem.Name
                         };
@@ -235,12 +233,13 @@ namespace HC.AbpCore.Purchases
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task OnekeyCreateAsync(OnekeyCreatePurchaseInput input)
+        public async Task<string> OnekeyCreateAsync(OnekeyCreatePurchaseInput input)
         {
             var purchase = input.Purchase.MapTo<Purchase>();
             var purchaseDetailNews = input.PurchaseDetailNews.MapTo<List<PurchaseDetailNew>>();
             var advancePayments = input.AdvancePayments.MapTo<List<AdvancePayment>>();
-            await _entityManager.OnekeyCreateAsync(purchase, purchaseDetailNews, advancePayments);
+            var purchaseId= await _entityManager.OnekeyCreateAsync(purchase, purchaseDetailNews, advancePayments);
+            return purchaseId;
         }
 
 

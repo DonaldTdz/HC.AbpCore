@@ -77,7 +77,7 @@ namespace HC.AbpCore.Purchases
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task OnekeyCreateAsync(OnekeyCreatePurchaseInput input);
+        Task<string> OnekeyCreateAsync(OnekeyCreatePurchaseInput input);
 
 
         /// <summary>

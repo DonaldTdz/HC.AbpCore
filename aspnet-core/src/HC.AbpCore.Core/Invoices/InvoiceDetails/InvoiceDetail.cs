@@ -24,6 +24,11 @@ namespace HC.AbpCore.Invoices.InvoiceDetails
         [StringLength(200)]
         public virtual string Specification { get; set; }
         /// <summary>
+        /// 单位
+        /// </summary>
+        [StringLength(50)]
+        public virtual string Unit { get; set; }
+        /// <summary>
         /// 数量
         /// </summary>
         public virtual decimal? Num { get; set; }

@@ -50,13 +50,6 @@ namespace HC.AbpCore.Purchases.Dtos
 
 
 		/// <summary>
-		/// InvoiceIssuance
-		/// </summary>
-		public bool? InvoiceIssuance { get; set; }
-
-
-
-		/// <summary>
 		/// Attachments
 		/// </summary>
 		public string Attachments { get; set; }

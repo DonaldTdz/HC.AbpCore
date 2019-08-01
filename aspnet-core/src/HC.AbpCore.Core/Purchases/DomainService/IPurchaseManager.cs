@@ -27,7 +27,7 @@ namespace HC.AbpCore.Purchases.DomainService
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task OnekeyCreateAsync(Purchase purchase, List<PurchaseDetailNew> purchaseDetailNews, List<AdvancePayment> advancePayments);
+        Task<string> OnekeyCreateAsync(Purchase purchase, List<PurchaseDetailNew> purchaseDetailNews, List<AdvancePayment> advancePayments);
 
 
 

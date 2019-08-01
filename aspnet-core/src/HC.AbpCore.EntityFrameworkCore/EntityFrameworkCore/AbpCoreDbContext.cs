@@ -34,6 +34,7 @@ using HC.AbpCore.Tasks;
 using HC.AbpCore.Customers.CustomerContacts;
 using HC.AbpCore.Implements;
 using HC.AbpCore.AdvancePayments;
+using HC.AbpCore.InventoryFlows;
 
 namespace HC.AbpCore.EntityFrameworkCore
 {
@@ -105,5 +106,7 @@ namespace HC.AbpCore.EntityFrameworkCore
         public virtual DbSet<Implement> Implements { get; set; }
 
         public virtual DbSet<AdvancePayment> AdvancePayments { get; set; }
+
+        public virtual DbSet<InventoryFlow> InventoryFlows { get; set; }
     }
 }

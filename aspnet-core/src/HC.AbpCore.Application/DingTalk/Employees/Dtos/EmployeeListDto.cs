@@ -113,6 +113,8 @@ namespace HC.AbpCore.DingTalk.Employees.Dtos
 
         public string Avatar { get; set; }
 
+        public string Department { get; set; }
+
     }
 
     public class NzTreeNode

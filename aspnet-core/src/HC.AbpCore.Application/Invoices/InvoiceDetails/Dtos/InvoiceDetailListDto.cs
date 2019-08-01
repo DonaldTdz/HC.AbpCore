@@ -36,10 +36,18 @@ namespace HC.AbpCore.Invoices.InvoiceDetails.Dtos
 
 
 
-		/// <summary>
-		/// Num
-		/// </summary>
-		public decimal? Num { get; set; }
+        /// <summary>
+        /// 单位
+        /// </summary>
+        [StringLength(50)]
+        public string Unit { get; set; }
+
+
+
+        /// <summary>
+        /// Num
+        /// </summary>
+        public decimal? Num { get; set; }
 
 
 

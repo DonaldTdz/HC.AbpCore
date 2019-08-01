@@ -29,11 +29,6 @@ namespace HC.AbpCore.Purchases
         public virtual DateTime? ArrivalDate { get; set; }
 
         /// <summary>
-        /// 发票开具
-        /// </summary>
-        public virtual bool? InvoiceIssuance { get; set; }
-
-        /// <summary>
         /// 采购附件 多个 逗号分隔
         /// </summary>
         [StringLength(500)]

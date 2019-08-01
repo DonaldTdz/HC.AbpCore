@@ -19,6 +19,7 @@ using Abp.Domain.Services;
 using HC.AbpCore;
 using HC.AbpCore.Purchases.PurchaseDetails;
 using HC.AbpCore.Products;
+using HC.AbpCore.InventoryFlows;
 
 namespace HC.AbpCore.Purchases.PurchaseDetails.DomainService
 {
@@ -30,6 +31,7 @@ namespace HC.AbpCore.Purchases.PurchaseDetails.DomainService
 		
 		private readonly IRepository<PurchaseDetail,Guid> _repository;
         private readonly IRepository<Product, int> _productRepository;
+        private readonly IRepository<InventoryFlow, long> _inventoryFlowRepository;
 
         /// <summary>
         /// PurchaseDetail的构造方法
@@ -37,8 +39,10 @@ namespace HC.AbpCore.Purchases.PurchaseDetails.DomainService
         public PurchaseDetailManager(
 			IRepository<PurchaseDetail, Guid> repository
             , IRepository<Product, int> productRepository
+            , IRepository<InventoryFlow, long> inventoryFlowRepository
         )
 		{
+            _inventoryFlowRepository = inventoryFlowRepository;
             _productRepository = productRepository;
             _repository =  repository;
 		}
@@ -51,14 +55,22 @@ namespace HC.AbpCore.Purchases.PurchaseDetails.DomainService
         public async Task<PurchaseDetail> CreateAsync(PurchaseDetailNew purchaseDetailNew)
         {
             //TODO:新增前的逻辑判断，是否允许新增
+            //库存流水
+            InventoryFlow inventoryFlow = new InventoryFlow();
+
             int productId=0;
             if (purchaseDetailNew.ProductId.HasValue)
             {
                 var product = await _productRepository.GetAsync(purchaseDetailNew.ProductId.Value);
+                //新增到库存流水
+                inventoryFlow.Initial = product.Num;
+                inventoryFlow.StreamNumber = purchaseDetailNew.Num;
+
                 if (product.Num.HasValue)
                     product.Num += purchaseDetailNew.Num;
                 else
                     product.Num = purchaseDetailNew.Num;
+                inventoryFlow.Ending = product.Num;
                 await _productRepository.UpdateAsync(product);
                 productId = product.Id;
             }
@@ -70,10 +82,13 @@ namespace HC.AbpCore.Purchases.PurchaseDetails.DomainService
                 //有则修改,无则更新
                 if (product != null)
                 {
+                    inventoryFlow.Initial = product.Num;
+                    inventoryFlow.StreamNumber = purchaseDetailNew.Num;
                     if (product.Num.HasValue)
                         product.Num += purchaseDetailNew.Num;
                     else
                         product.Num = purchaseDetailNew.Num;
+                    inventoryFlow.Ending = product.Num;
                     await _productRepository.UpdateAsync(product);
                     productId = product.Id;
                 }
@@ -88,9 +103,17 @@ namespace HC.AbpCore.Purchases.PurchaseDetails.DomainService
                     productNew.Type = 0;
                     productNew.IsEnabled = true;
                     productId = await _productRepository.InsertAndGetIdAsync(productNew);
+                    inventoryFlow.Initial = 0;
+                    inventoryFlow.StreamNumber = purchaseDetailNew.Num;
+                    inventoryFlow.Ending = purchaseDetailNew.Num + 0;
                     //productId = productId;
                 }
             }
+            inventoryFlow.Desc = "采购";
+            inventoryFlow.ProductId = productId;
+            inventoryFlow.RefId = purchaseDetailNew.PurchaseId.ToString();
+            inventoryFlow.Type = InventoryFlowType.入库;
+            await _inventoryFlowRepository.InsertAsync(inventoryFlow);
             PurchaseDetail purchaseDetail = new PurchaseDetail();
             purchaseDetail.Num = purchaseDetailNew.Num;
             purchaseDetail.ProductId = productId;
@@ -109,6 +132,18 @@ namespace HC.AbpCore.Purchases.PurchaseDetails.DomainService
         {
             var entity = await _repository.GetAsync(id);
             var product = await _productRepository.GetAsync(entity.ProductId.Value);
+
+            //更新库存流水
+            InventoryFlow inventoryFlow = new InventoryFlow();
+            inventoryFlow.Initial = product.Num;
+            inventoryFlow.StreamNumber = entity.Num;
+            inventoryFlow.Ending = product.Num-entity.Num;
+            inventoryFlow.Desc = "更改采购明细";
+            inventoryFlow.ProductId = product.Id;
+            inventoryFlow.RefId = entity.PurchaseId.ToString();
+            inventoryFlow.Type = InventoryFlowType.出库;
+            await _inventoryFlowRepository.InsertAsync(inventoryFlow);
+
             product.Num -= entity.Num;
             await _productRepository.UpdateAsync(product);
             await _repository.DeleteAsync(id);
@@ -132,8 +167,25 @@ namespace HC.AbpCore.Purchases.PurchaseDetails.DomainService
         {
             var entity = await _repository.GetAsync(purchaseDetail.Id);
             var product = await _productRepository.GetAsync(purchaseDetail.ProductId.Value);
-            if (entity.ProductId == purchaseDetail.ProductId)
-            {
+            //更新库存流水
+            InventoryFlow inventoryFlow = new InventoryFlow();
+                inventoryFlow.Initial = product.Num;
+                if (entity.Num >= purchaseDetail.Num)
+                {
+                    inventoryFlow.StreamNumber = entity.Num- purchaseDetail.Num;
+                    inventoryFlow.Ending = product.Num - inventoryFlow.StreamNumber;
+                    inventoryFlow.Type = InventoryFlowType.出库;
+                }
+                else
+                {
+                    inventoryFlow.StreamNumber = purchaseDetail.Num- entity.Num;
+                    inventoryFlow.Ending = product.Num + inventoryFlow.StreamNumber;
+                    inventoryFlow.Type = InventoryFlowType.入库;
+                }
+                inventoryFlow.Desc = "更改采购明细";
+                inventoryFlow.ProductId = product.Id;
+                inventoryFlow.RefId = entity.PurchaseId.ToString();
+                await _inventoryFlowRepository.InsertAsync(inventoryFlow);
                 if (product.Num.HasValue)
                     product.Num += purchaseDetail.Num;
                 else
@@ -142,21 +194,6 @@ namespace HC.AbpCore.Purchases.PurchaseDetails.DomainService
                 await _productRepository.UpdateAsync(product);
                 entity.Num = purchaseDetail.Num;
                 await _repository.UpdateAsync(entity);
-            }
-            else
-            {
-                var productOld = await _productRepository.GetAsync(entity.ProductId.Value);
-                productOld.Num -= purchaseDetail.Num;
-                await _productRepository.UpdateAsync(productOld);
-                if (product.Num.HasValue)
-                    product.Num += purchaseDetail.Num;
-                else
-                    product.Num = purchaseDetail.Num;
-                await _productRepository.UpdateAsync(product);
-                entity.Num = purchaseDetail.Num;
-                entity.ProductId = purchaseDetail.ProductId;
-                await _repository.UpdateAsync(entity);
-            }
         }
 
         // TODO:编写领域业务代码
