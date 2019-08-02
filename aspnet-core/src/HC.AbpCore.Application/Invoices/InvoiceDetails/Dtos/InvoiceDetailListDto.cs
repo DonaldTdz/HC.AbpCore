@@ -21,10 +21,17 @@ namespace HC.AbpCore.Invoices.InvoiceDetails.Dtos
 
 
 
-		/// <summary>
-		/// Name
-		/// </summary>
-		[Required(ErrorMessage="Name不能为空")]
+        /// <summary>
+        /// 项目明细或采购明细Id
+        /// </summary>
+        public virtual Guid? RefId { get; set; }
+
+
+
+        /// <summary>
+        /// Name
+        /// </summary>
+        [Required(ErrorMessage="Name不能为空")]
 		public string Name { get; set; }
 
 

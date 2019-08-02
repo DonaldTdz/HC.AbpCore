@@ -26,10 +26,17 @@ namespace  HC.AbpCore.Invoices.InvoiceDetails.Dtos
 
 
 
-		/// <summary>
-		/// Specification
-		/// </summary>
-		public string Specification { get; set; }
+        /// <summary>
+        /// 项目明细或采购明细Id
+        /// </summary>
+        public virtual Guid? RefId { get; set; }
+
+
+
+        /// <summary>
+        /// Specification
+        /// </summary>
+        public string Specification { get; set; }
 
 
 

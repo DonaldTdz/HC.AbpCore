@@ -23,6 +23,7 @@ using HC.AbpCore.Purchases.PurchaseDetails.Dtos;
 using HC.AbpCore.Purchases.PurchaseDetails.DomainService;
 using HC.AbpCore.Products;
 using HC.AbpCore.Suppliers;
+using HC.AbpCore.Dtos;
 
 namespace HC.AbpCore.Purchases.PurchaseDetails
 {
@@ -248,6 +249,27 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
         {
             var entity = input.PurchaseDetail.MapTo<PurchaseDetail>();
             await _entityManager.UpdateAsync(entity);
+        }
+
+        /// <summary>
+        /// 获取采购明细选择列表
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public async Task<List<DropDownDto>> GetDetailSelectAsync(EntityDto<Guid> input)
+        {
+            var query = _entityRepository.GetAll().Where(aa => aa.PurchaseId == input.Id);
+            var products = _productIdRepository.GetAll();
+            var items = from item in query
+                        join product in products on item.ProductId equals product.Id into bb
+                        from aa in bb.DefaultIfEmpty()
+                        select (new DropDownDto()
+                        {
+                            Value = item.Id.ToString(),
+                            Text = aa.Name + "(" + aa.Specification + ")"
+                        });
+            var entityList = await items.AsNoTracking().ToListAsync();
+            return entityList;
         }
 
         /// <summary>

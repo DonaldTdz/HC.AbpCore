@@ -20,6 +20,7 @@ using Abp.Application.Services.Dto;
 
 using HC.AbpCore.Purchases.PurchaseDetails.Dtos;
 using HC.AbpCore.Purchases.PurchaseDetails;
+using HC.AbpCore.Dtos;
 
 namespace HC.AbpCore.Purchases.PurchaseDetails
 {
@@ -94,6 +95,14 @@ namespace HC.AbpCore.Purchases.PurchaseDetails
         /// <param name="input"></param>
         /// <returns></returns>
         Task ModifyDetailAndUpdateproductAsync(CreateOrUpdatePurchaseDetailInput input);
+
+
+        /// <summary>
+        /// 获取采购明细选择列表
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        Task<List<DropDownDto>> GetDetailSelectAsync(EntityDto<Guid> input);
 
 
         /// <summary>
