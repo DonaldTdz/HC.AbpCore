@@ -216,6 +216,22 @@ namespace HC.AbpCore.Contracts.ContractDetails
         }
 
         /// <summary>
+        /// 获取合同明细选择列表
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public async Task<List<DropDownDto>> GetDetailSelectAsync(EntityDto<Guid> input)
+        {
+            var query = await _entityRepository.GetAll().Where(aa => aa.ContractId == input.Id)
+                .Select(aa => new DropDownDto()
+                {
+                    Value = aa.Id.ToString(),
+                    Text = aa.Name + "(" + aa.Model + ")"
+                }).AsNoTracking().ToListAsync();
+            return query;
+        }
+
+        /// <summary>
         /// 导出ContractDetail为excel表,等待开发。
         /// </summary>
         /// <returns></returns>

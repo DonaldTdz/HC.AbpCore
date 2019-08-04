@@ -80,6 +80,14 @@ namespace HC.AbpCore.Contracts.ContractDetails
 
 
         /// <summary>
+        /// 获取合同明细选择列表
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        Task<List<DropDownDto>> GetDetailSelectAsync(EntityDto<Guid> input);
+
+
+        /// <summary>
         /// 导出ContractDetail为excel表
         /// </summary>
         /// <returns></returns>
