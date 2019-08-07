@@ -25,6 +25,7 @@ using HC.AbpCore.Dtos;
 using static HC.AbpCore.Contracts.ContractEnum;
 using HC.AbpCore.Projects.ProjectDetails;
 using HC.AbpCore.Purchases.PurchaseDetails;
+using HC.AbpCore.Products;
 
 namespace HC.AbpCore.Contracts.ContractDetails
 {
@@ -35,25 +36,19 @@ namespace HC.AbpCore.Contracts.ContractDetails
     public class ContractDetailAppService : AbpCoreAppServiceBase, IContractDetailAppService
     {
         private readonly IRepository<ContractDetail, Guid> _entityRepository;
-        private readonly IRepository<Contract, Guid> _contractRepository;
-        private readonly IRepository<ProjectDetail, Guid> _projectDetailRepository;
-        private readonly IRepository<PurchaseDetail, Guid> _purchaseDetailRepository;
+        private readonly IRepository<Product, int> _productRepository;
         private readonly IContractDetailManager _entityManager;
 
         /// <summary>
         /// 构造函数 
         ///</summary>
         public ContractDetailAppService(
-        IRepository<ContractDetail, Guid> entityRepository,
-             IRepository<Contract, Guid> contractRepository
-                        , IRepository<ProjectDetail, Guid> projectDetailRepository
-            , IRepository<PurchaseDetail, Guid> purchaseDetailRepository
+        IRepository<ContractDetail, Guid> entityRepository
+        , IRepository<Product, int> productRepository
         , IContractDetailManager entityManager
         )
         {
-            _contractRepository = contractRepository;
-            _projectDetailRepository = projectDetailRepository;
-            _purchaseDetailRepository = purchaseDetailRepository;
+            _productRepository = productRepository;
             _entityRepository = entityRepository;
             _entityManager = entityManager;
         }
@@ -205,6 +200,11 @@ namespace HC.AbpCore.Contracts.ContractDetails
             await _entityRepository.DeleteAsync(s => input.Contains(s.Id));
         }
 
+        /// <summary>
+        /// 批量新增合同明细
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         public async Task BatchCreateAsync(BatchCreateContractDetail input)
         {
             foreach (var contractDetail in input.ContractDetails)
@@ -212,6 +212,8 @@ namespace HC.AbpCore.Contracts.ContractDetails
                 contractDetail.ContractId = input.ContractId;
                 var detail = contractDetail.MapTo<ContractDetail>();
                 await _entityManager.CreateAsync(detail);
+                //var products = await _productRepository.FirstOrDefaultAsync(aa => aa.Id == contractDetail.ProductId);
+
             }
         }
 

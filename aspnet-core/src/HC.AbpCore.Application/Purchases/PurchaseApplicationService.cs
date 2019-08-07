@@ -229,7 +229,7 @@ namespace HC.AbpCore.Purchases
 
 
         /// <summary>
-        /// Web一键新增采购,采购明细,产品,预付款计划
+        /// Web一键新增采购,采购明细,产品
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
@@ -237,8 +237,8 @@ namespace HC.AbpCore.Purchases
         {
             var purchase = input.Purchase.MapTo<Purchase>();
             var purchaseDetailNews = input.PurchaseDetailNews.MapTo<List<PurchaseDetailNew>>();
-            var advancePayments = input.AdvancePayments.MapTo<List<AdvancePayment>>();
-            var purchaseId= await _entityManager.OnekeyCreateAsync(purchase, purchaseDetailNews, advancePayments);
+            //var advancePayments = input.AdvancePayments.MapTo<List<AdvancePayment>>();
+            var purchaseId= await _entityManager.OnekeyCreateAsync(purchase, purchaseDetailNews);
             return purchaseId;
         }
 

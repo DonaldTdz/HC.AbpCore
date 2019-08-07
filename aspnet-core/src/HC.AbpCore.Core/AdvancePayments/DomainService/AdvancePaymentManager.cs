@@ -113,9 +113,12 @@ namespace HC.AbpCore.AdvancePayments.DomainService
             var company = await _companyRepository.GetAll().FirstOrDefaultAsync();
             var account = await _accountRepository.FirstOrDefaultAsync(aa => aa.Type == AccountType.出账 && aa.RefId == input.ToString());
             //更新公司账户
-            company.Balance += account.Amount;
-            await _companyRepository.UpdateAsync(company);
-            await _accountRepository.DeleteAsync(account.Id);
+            if (account != null)
+            {
+                company.Balance += account.Amount;
+                await _companyRepository.UpdateAsync(company);
+                await _accountRepository.DeleteAsync(account.Id);
+            }
             await _repository.DeleteAsync(input);
         }
 

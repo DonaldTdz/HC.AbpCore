@@ -80,7 +80,7 @@ namespace HC.AbpCore.TimeSheets
                .WhereIf(input.Status.HasValue, aa => aa.Status == input.Status.Value);
             //  .WhereIf(!String.IsNullOrEmpty(input.EmployeeId), aa => aa.EmployeeId == input.EmployeeId)
             // TODO:根据传入的参数添加过滤条件
-            if (AbpSession.UserId.HasValue)
+            if (String.IsNullOrEmpty(input.EmployeeId))
             {
                 User user = new User() { Id = AbpSession.UserId.Value };
                 var roles = await _userManager.GetRolesAsync(user);

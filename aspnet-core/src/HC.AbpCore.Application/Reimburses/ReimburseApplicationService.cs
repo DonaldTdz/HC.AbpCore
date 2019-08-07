@@ -93,7 +93,7 @@ namespace HC.AbpCore.Reimburses
             //        query = query.Where(aa => aa.EmployeeId == user.EmployeeId);
             //}
 
-            if (AbpSession.UserId.HasValue)
+            if (String.IsNullOrEmpty(input.EmployeeId))
             {
                 User user = new User() { Id = AbpSession.UserId.Value };
                 var roles = await _userManager.GetRolesAsync(user);

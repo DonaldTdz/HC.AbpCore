@@ -72,10 +72,15 @@ namespace HC.AbpCore.Customers
                 .WhereIf(!string.IsNullOrEmpty(input.name), u => u.Name.Contains(input.name))
                 .WhereIf(input.type.HasValue, v => v.Type == input.type.Value);
             // TODO:根据传入的参数添加过滤条件
-            var user = await _userManager.GetUserByIdAsync(_abpSession.UserId.Value);
-            if (user.EmployeeId != "0205151055692871" && user.EmployeeId != "1706561401635019335")
+            //var user = await _userManager.GetUserByIdAsync(_abpSession.UserId.Value);
+            //if (user.EmployeeId != "0205151055692871" && user.EmployeeId != "1706561401635019335")
+            //    query = query.Where(aa => aa.CreatorUserId == _abpSession.UserId);
+            var roles = await GetUserRolesAsync();
+            if (!roles.Contains("Admin") && !roles.Contains("Finance") && !roles.Contains("GeneralManager"))
+            {
+                var user = await GetCurrentUserAsync();
                 query = query.Where(aa => aa.CreatorUserId == _abpSession.UserId);
-
+            }
 
             var count = await query.CountAsync();
 

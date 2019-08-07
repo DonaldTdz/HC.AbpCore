@@ -14,8 +14,5 @@ namespace HC.AbpCore.Purchases.Dtos
 
         [Required]
         public List<PurchaseDetailEditDtoNew> PurchaseDetailNews { get; set; }
-
-        [Required]
-        public List<AdvancePaymentEditDto> AdvancePayments { get; set; }
     }
 }

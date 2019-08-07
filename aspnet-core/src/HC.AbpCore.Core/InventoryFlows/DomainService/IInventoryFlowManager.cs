@@ -18,10 +18,14 @@ namespace HC.AbpCore.InventoryFlows.DomainService
         void InitInventoryFlow();
 
 
+        Task CreateAsync(Guid? contractId,int productId,int num);
 
-		 
-      
-         
+
+        Task UpdateAsync(Guid? contractId, int productId, int num);
+
+
+
+
 
     }
 }

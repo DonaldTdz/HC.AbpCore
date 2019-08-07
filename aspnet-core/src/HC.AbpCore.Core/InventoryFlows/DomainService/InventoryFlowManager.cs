@@ -18,7 +18,7 @@ using Abp.Domain.Services;
 
 using HC.AbpCore;
 using HC.AbpCore.InventoryFlows;
-
+using HC.AbpCore.Products;
 
 namespace HC.AbpCore.InventoryFlows.DomainService
 {
@@ -29,15 +29,18 @@ namespace HC.AbpCore.InventoryFlows.DomainService
     {
 		
 		private readonly IRepository<InventoryFlow,long> _repository;
+        private readonly IRepository<Product, int> _productRepository;
 
-		/// <summary>
-		/// InventoryFlow的构造方法
-		///</summary>
-		public InventoryFlowManager(
+        /// <summary>
+        /// InventoryFlow的构造方法
+        ///</summary>
+        public InventoryFlowManager(
 			IRepository<InventoryFlow, long> repository
-		)
+            , IRepository<Product, int> productRepository
+        )
 		{
-			_repository =  repository;
+            _productRepository = productRepository;
+            _repository =  repository;
 		}
 
 
@@ -49,13 +52,27 @@ namespace HC.AbpCore.InventoryFlows.DomainService
 			throw new NotImplementedException();
 		}
 
-		// TODO:编写领域业务代码
+        public Task UpdateAsync(Guid? contractId, int productId, int num)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task CreateAsync(Guid? contractId, int productId, int num)
+        {
+            //var products = await _productRepository.FirstOrDefaultAsync(aa => aa.Id == productId);
+            //InventoryFlow inventoryFlow = new InventoryFlow();
+            //inventoryFlow.Desc = "合同明细出库";
+            //inventoryFlow
+            throw new NotImplementedException();
+        }
+
+        // TODO:编写领域业务代码
 
 
 
-		 
-		  
-		 
 
-	}
+
+
+
+    }
 }

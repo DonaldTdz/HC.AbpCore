@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace HC.AbpCore.Reports.AccountsReceivableReport.Dtos
+namespace HC.AbpCore.Reports.AccountsPayableReport.Dtos
 {
-    public class GetAccountsReceivableInput : PagedSortedAndFilteredInputDto, IShouldNormalize
+    public class GetAccountsPayableInput : PagedSortedAndFilteredInputDto, IShouldNormalize
     {
         /// <summary>
         /// 正常化排序使用
@@ -20,13 +20,13 @@ namespace HC.AbpCore.Reports.AccountsReceivableReport.Dtos
         }
 
         /// <summary>
-        /// 查询条件-客户Id
+        /// 查询条件-供应商Id
         /// </summary>
-        public int? CustomerId { get; set; }
+        public int? SupplierId { get; set; }
 
         /// <summary>
-        /// 查询条件-项目Id
+        /// 查询条件-产品Id
         /// </summary>
-        public Guid? ProjectId { get; set; }
+        public int? ProductId { get; set; }
     }
 }

@@ -181,9 +181,9 @@ AdvancePaymentEditDto editDto;
 		public async Task DeleteAsync(EntityDto<Guid> input)
 		{
             //TODO:删除前的逻辑判断，是否允许删除
-            await _entityManager.DeleteAndDeleteAccountAsync(input.Id);
-			//await _entityRepository.DeleteAsync(input.Id);
-		}
+            //await _entityManager.DeleteAndDeleteAccountAsync(input.Id);
+            await _entityRepository.DeleteAsync(input.Id);
+        }
 
 
 

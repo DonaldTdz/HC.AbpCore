@@ -73,7 +73,7 @@ namespace HC.AbpCore.Purchases
 
 
         /// <summary>
-        /// Web一键新增采购,采购明细,产品,预付款计划
+        /// Web一键新增采购,采购明细,产品
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>

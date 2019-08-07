@@ -73,17 +73,16 @@ namespace HC.AbpCore.Purchases.DomainService
         }
 
         /// <summary>
-        ///  Web一键新增采购,采购明细,产品,预付款计划
+        ///  Web一键新增采购,采购明细,产品
         /// </summary>
         /// <param name="purchase"></param>
         /// <param name="purchaseDetailNews"></param>
-        /// <param name="advancePayments"></param>
         /// <returns></returns>
-        public async Task<string> OnekeyCreateAsync(Purchase purchase, List<PurchaseDetailNew> purchaseDetailNews, List<AdvancePayment> advancePayments)
+        public async Task<string> OnekeyCreateAsync(Purchase purchase, List<PurchaseDetailNew> purchaseDetailNews)
         {
 
             //获取公司信息
-            var company = await _companyRepository.GetAll().FirstOrDefaultAsync();
+            //var company = await _companyRepository.GetAll().FirstOrDefaultAsync();
             //新增采购
             var purchaseId = await _repository.InsertAndGetIdAsync(purchase);
             //新增采购明细和产品
@@ -155,31 +154,6 @@ namespace HC.AbpCore.Purchases.DomainService
                     purchaseDetail.PurchaseId = purchaseId;
                     purchaseDetail.SupplierId = item.SupplierId;
                     await _purchaseDetailRepository.InsertAsync(purchaseDetail);
-                }
-            }
-            //新增预付款计划
-            if (advancePayments?.Count > 0)
-            {
-                foreach (var item in advancePayments)
-                {
-                    item.PurchaseId = purchaseId;
-                    var advancePayment = await _advancePaymentRepository.InsertAsync(item);
-
-                    //已付款则更新公司流水
-                    if (item.Status == AdvancePaymentStatusEnum.已付款)
-                    {
-                        Account account = new Account();
-                        account.CompanyId = company.Id;
-                        account.Type = AccountType.出账;
-                        account.Initial = company.Balance;
-                        account.Amount = item.Amount;
-                        account.Ending = company.Balance - item.Amount;
-                        account.RefId = advancePayment.Id.ToString();
-                        await _accountRepository.InsertAsync(account);
-                        //更新公司余额信息
-                        company.Balance = account.Ending;
-                        await _companyRepository.UpdateAsync(company);
-                    }
                 }
             }
             return purchaseId.ToString();

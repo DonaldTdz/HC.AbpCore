@@ -23,11 +23,11 @@ namespace HC.AbpCore.Purchases.DomainService
 
 
         /// <summary>
-        /// Web一键新增采购,采购明细,产品,预付款计划
+        /// Web一键新增采购,采购明细,产品
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<string> OnekeyCreateAsync(Purchase purchase, List<PurchaseDetailNew> purchaseDetailNews, List<AdvancePayment> advancePayments);
+        Task<string> OnekeyCreateAsync(Purchase purchase, List<PurchaseDetailNew> purchaseDetailNews);
 
 
 
