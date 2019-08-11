@@ -78,77 +78,90 @@ namespace HC.AbpCore.Reports.AccountsPayableReport
                             .OrderByDescending(aa => aa.CreationTime).AsNoTracking()
                             //.PageBy(input)
                             .ToListAsync();
-            entityList.Add(new AccountsPayableListDto() { Name = "合计", TotalAmount = entityList.Sum(aa => aa.TotalAmount) });
+            if (count > 0)
+                entityList.Add(new AccountsPayableListDto() { Name = "合计", TotalAmount = entityList.Sum(aa => aa.TotalAmount) });
 
             return new PagedResultDto<AccountsPayableListDto>(count, entityList);
         }
 
         public async Task<PagedResultDto<AccountsPayableDetailDto>> GetSupplierPayableDetailAsync(GetAccountsPayableInput input)
         {
-            var advancePaymentDetails = _advancePaymentDetailRepository.GetAll().Select(aa => new { aa.Id, aa.PurchaseDetailId, aa.Amount, aa.AdvancePaymentId });
+            var advancePaymentDetails = _advancePaymentDetailRepository.GetAll();
             var advancePayments = _advancePaymentRepository.GetAll().Select(aa => new { aa.Id, aa.PurchaseId, aa.Status, aa.PlanTime });
             var products = _productRepository.GetAll();
-            var purchaseDetails = _purchaseDetailRepository.GetAll().Where(aa => aa.SupplierId == input.SupplierId.Value)
+            var purchaseDetails = _purchaseDetailRepository.GetAll().WhereIf(input.SupplierId.HasValue, aa => aa.SupplierId == input.SupplierId.Value)
                 .WhereIf(input.ProductId.HasValue, aa => aa.ProductId == input.ProductId.Value)
-                .Select(aa => new { aa.Id, aa.SupplierId, aa.PurchaseId, aa.Num, aa.ProductId });
+                .Select(aa => new { aa.Id, aa.PurchaseId, aa.Num, aa.ProductId });
             var purchases = _purchaseRepository.GetAll().Select(aa => aa.Id);
 
-            var paymentDetails = from advancePaymentDetail in advancePaymentDetails
-                                 join advancePayment in advancePayments on advancePaymentDetail.AdvancePaymentId equals advancePayment.Id
-                                 select new
-                                 {
-                                     advancePaymentDetailId = advancePaymentDetail.Id,
-                                     purchaseDetailId = advancePaymentDetail.PurchaseDetailId,
-                                     advancePaymentDetail.Amount,
-                                     advancePayment.Status,
-                                     advancePayment.PurchaseId,
-                                     ExpectedPaymentDate = advancePayment.PlanTime
-                                 };
-
-            var productList = (from purchase in purchases
-                              join purchaseDetail in purchaseDetails on purchase equals purchaseDetail.PurchaseId
-                              join paymentDetail in paymentDetails on purchase equals paymentDetail.PurchaseId into aa
-                              from bb in aa.DefaultIfEmpty()
-                              where bb.purchaseDetailId==purchaseDetail.Id
-                              select (new
-                              {
-                                  purchaseDetail.Id,
-                                  purchaseDetail.SupplierId,
-                                  purchaseDetail.PurchaseId,
-                                  purchaseDetail.Num,
-                                  purchaseDetail.ProductId,
-                                  bb.Status,
-                                  bb.ExpectedPaymentDate,
-                                  bb.Amount,
-                                  bb.purchaseDetailId
-                              })).ToList();
-
-            var items = from product in productList
-                        join paymentDetail in paymentDetails on product.purchaseDetailId equals paymentDetail.purchaseDetailId
-                        //from bb in aa.DefaultIfEmpty()
-                        group new { product, paymentDetail } by product.Id into gtemp
-                        select new AccountsPayableDetailDto()
+            var list1 = from purchase in purchases
+                        join purchaseDetail in purchaseDetails on purchase equals purchaseDetail.PurchaseId
+                        join advancePayment in advancePayments on purchase equals advancePayment.PurchaseId
+                        select new
                         {
-                            Id= Convert.ToInt32(gtemp.Key)
-                            //Id = gtemp.Key,
-                            //Name = gtemp.Select(aa=>aa.product.Name).FirstOrDefault(),
-                            //Amount = gtemp.Sum(aa => aa.product.Num * aa.product.Price + aa.product.Num * aa.product.Price * (Convert.ToDecimal(aa.product.TaxRate.Replace("%", "")) / 100)),
+                            purchaseDetail.ProductId,
+                            advancePayment.Id,
+                            purchaseDetailId = purchaseDetail.Id,
+                            advancePayment.Status,
+                            advancePayment.PlanTime,
                         };
 
+            var list2 = from list in list1
+                        join advancePaymentDetail in advancePaymentDetails on list.Id equals advancePaymentDetail.AdvancePaymentId
+                        where advancePaymentDetail.PurchaseDetailId == list.purchaseDetailId
+                        select new
+                        {
+                            list.ProductId,
+                            list.Status,
+                            list.PlanTime,
+                            Amount = advancePaymentDetail.Amount ?? 0
+                        };
 
-            //var count = await items.CountAsync();
-            //var entityList = await items
-            //                .OrderBy(input.Sorting).AsNoTracking()
-            //                //.PageBy(input)
-            //                .ToListAsync();
-            //entityList.Add(new AccountsPayableDetailDto()
-            //{
-            //    Name = "合计",
-            //    Amount = entityList.Sum(aa => aa.Amount),
-            //    AcceptedAmount = entityList.Sum(aa => aa.AcceptedAmount),
-            //    UncollectedAmount = entityList.Sum(aa => aa.UncollectedAmount)
-            //});
-            return new PagedResultDto<AccountsPayableDetailDto>(0, null);
+            var items = from product in products
+                        join purchaseDetail in purchaseDetails on product.Id equals purchaseDetail.ProductId
+                        join purchase in purchases on purchaseDetail.PurchaseId equals purchase
+                        group new { product, purchaseDetail.Num } by product.Id into gtem
+                        select new AccountsPayableDetailDto()
+                        {
+                            Id = gtem.Key,
+                            Name = gtem.Select(aa => aa.product.Name).FirstOrDefault(),
+                            Amount = gtem.Sum(aa => aa.Num * aa.product.Price + aa.Num * aa.product.Price * (Convert.ToDecimal(aa.product.TaxRate.Replace("%", "")) / 100)),
+                            AcceptedAmount = 0,
+                            UncollectedAmount = 0,
+                        };
+            if (await list2.CountAsync() > 0)
+            {
+                items = from product in items
+                        join list in list2 on product.Id equals list.ProductId into aa
+                        from bb in aa.DefaultIfEmpty()
+                        group new { product, bb } by product.Id into gtem
+                        select new AccountsPayableDetailDto()
+                        {
+                            Id = gtem.Key,
+                            Name = gtem.Select(aa => aa.product.Name).FirstOrDefault(),
+                            Amount = gtem.Select(aa => aa.product.Amount).FirstOrDefault(),
+                            AcceptedAmount = gtem.Where(aa => aa.bb.Status == AdvancePaymentStatusEnum.已付款).Sum(aa => aa.bb.Amount),
+                            UncollectedAmount = gtem.Where(Aa => Aa.bb.Status == AdvancePaymentStatusEnum.未付款).Sum(aa => aa.bb.Amount),
+                            ExpectedPaymentDate = gtem.Max(aa => aa.bb.PlanTime)
+                        };
+            }
+            //return null;
+            var count = await items.CountAsync();
+            var entityList = await items
+                            .OrderBy(input.Sorting).AsNoTracking()
+                            //.PageBy(input)
+                            .ToListAsync();
+            if (count > 0)
+            {
+                entityList.Add(new AccountsPayableDetailDto()
+                {
+                    Name = "合计",
+                    Amount = entityList.Sum(aa => aa.Amount),
+                    AcceptedAmount = entityList.Sum(aa => aa.AcceptedAmount),
+                    UncollectedAmount = entityList.Sum(aa => aa.UncollectedAmount)
+                });
+            }
+            return new PagedResultDto<AccountsPayableDetailDto>(count, entityList);
 
         }
     }
