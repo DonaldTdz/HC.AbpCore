@@ -37,6 +37,7 @@ using HC.AbpCore.AdvancePayments;
 using HC.AbpCore.InventoryFlows;
 using HC.AbpCore.Reports.ProfitStatistics;
 using HC.AbpCore.AdvancePayments.AdvancePaymentDetails;
+using HC.AbpCore.Reports.SalesDetails;
 
 namespace HC.AbpCore.EntityFrameworkCore
 {
@@ -114,5 +115,7 @@ namespace HC.AbpCore.EntityFrameworkCore
         public virtual DbSet<ProfitStatistic> ProfitStatistics { get; set; }
 
         public virtual DbSet<AdvancePaymentDetail> AdvancePaymentDetails { get; set; }
+
+        public virtual DbSet<SalesDetail> SalesDetails { get; set; }
     }
 }

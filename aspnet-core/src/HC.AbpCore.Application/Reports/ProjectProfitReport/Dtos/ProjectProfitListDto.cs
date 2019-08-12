@@ -6,6 +6,10 @@ namespace HC.AbpCore.Reports.ProjectProfitReport.Dtos
 {
     public class ProjectProfitListDto
     {
+        /// <summary>
+        /// 项目Id
+        /// </summary>
+        public Guid Id { get; set; }
 
         /// <summary>
         /// 项目名称
@@ -45,7 +49,7 @@ namespace HC.AbpCore.Reports.ProjectProfitReport.Dtos
         /// <summary>
         /// 费用
         /// </summary>
-        public List<Cost> Cost { get; set; }
+        //public List<Cost> Cost { get; set; }
 
 
 
@@ -129,6 +133,11 @@ namespace HC.AbpCore.Reports.ProjectProfitReport.Dtos
         /// 企业所得税
         /// </summary>
         public decimal? CorporateIncomeTax { get; set; }
+
+        /// <summary>
+        /// 个人所得税
+        /// </summary>
+        public decimal? IndividualIncomeTax { get; set; }
     }
 
     public class Cost
@@ -138,4 +147,6 @@ namespace HC.AbpCore.Reports.ProjectProfitReport.Dtos
         /// </summary>
         public decimal? IndividualIncomeTax { get; set; }
     }
+
+    
 }

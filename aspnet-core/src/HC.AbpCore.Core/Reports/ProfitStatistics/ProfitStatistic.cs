@@ -7,7 +7,7 @@ using System.Text;
 
 namespace HC.AbpCore.Reports.ProfitStatistics
 {
-    [Table("ProfitStatistic")]
+    [Table("ProfitStatistics")]
     public class ProfitStatistic : Entity<Guid>, IHasCreationTime //注意修改主键Id数据类型
     {
         /// <summary>

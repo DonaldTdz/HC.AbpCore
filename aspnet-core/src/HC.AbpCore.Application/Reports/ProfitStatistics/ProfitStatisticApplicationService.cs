@@ -86,11 +86,11 @@ namespace HC.AbpCore.Reports.ProfitStatistics
                 profitStatistic.CreationTime = item.CreationTime;
                 profitStatistic.VATPayable = profitStatistic.SaleTaxAmount - profitStatistic.IncomeTaxAmount;
                 profitStatistic.CityEducationTax = Math.Round((profitStatistic.VATPayable * Convert.ToDecimal(0.07 + 0.02 + 0.03) + profitStatistic.ContractAmount * Convert.ToDecimal(0.01)).Value,2);
-                profitStatistic.CorporateIncomeTax = Math.Round(((profitStatistic.ContractAmount - profitStatistic.TotalCostAmount - profitStatistic.CityEducationTax
+                profitStatistic.CorporateIncomeTax = Math.Round(((profitStatistic.ContractAmount - profitStatistic.CommodityCostAmount - profitStatistic.CityEducationTax
                     - profitStatistic.VATPayable) * Convert.ToDecimal(0.25)).Value,2);
-                profitStatistic.IndividualIncomeTax = Math.Round(((profitStatistic.ContractAmount - profitStatistic.TotalCostAmount - profitStatistic.CityEducationTax
+                profitStatistic.IndividualIncomeTax = Math.Round(((profitStatistic.ContractAmount - profitStatistic.CommodityCostAmount - profitStatistic.CityEducationTax
                     - profitStatistic.VATPayable - profitStatistic.CorporateIncomeTax) * Convert.ToDecimal(0.2)).Value,2);
-                profitStatistic.Profit = profitStatistic.ContractAmount - profitStatistic.TotalCostAmount - profitStatistic.VATPayable - profitStatistic.CityEducationTax
+                profitStatistic.Profit = profitStatistic.ContractAmount - profitStatistic.CommodityCostAmount - profitStatistic.VATPayable - profitStatistic.CityEducationTax
                     - profitStatistic.CorporateIncomeTax - profitStatistic.IndividualIncomeTax;
                 profitStatistic.ProfitMargin = Math.Round((profitStatistic.Profit / (profitStatistic.ContractAmount==0?1: profitStatistic.ContractAmount) * Convert.ToDecimal(100)).Value,2);
                 profitStatisticListDtos.Add(profitStatistic);

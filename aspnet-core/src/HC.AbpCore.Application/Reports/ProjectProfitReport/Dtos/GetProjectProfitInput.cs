@@ -22,6 +22,6 @@ namespace HC.AbpCore.Reports.ProjectProfitReport.Dtos
         /// <summary>
         /// 查询条件-项目Id
         /// </summary>
-        public Guid? ProjectId { get; set; }
+        public Guid ProjectId { get; set; }
     }
 }

@@ -7,13 +7,13 @@ using System.Text;
 
 namespace HC.AbpCore.Reports.SalesDetails
 {
-    [Table("SalesDetail")]
+    [Table("SalesDetails")]
     public class SalesDetail : Entity<Guid>, IHasCreationTime //注意修改主键Id数据类型
     {
         /// <summary>
         /// 项目名称
         /// </summary>
-        public virtual string Name { get; set; }
+        public virtual string projectName { get; set; }
 
         /// <summary>
         /// 项目编号
@@ -50,10 +50,10 @@ namespace HC.AbpCore.Reports.SalesDetails
         /// </summary>
         public virtual decimal? acceptedAmount { get; set; }
 
-    /// <summary>
-    /// 未收金额
-    /// </summary>
-    public virtual decimal? uncollectedAmount { get; set; }
+        /// <summary>
+        /// 未收金额
+        /// </summary>
+        public virtual decimal? uncollectedAmount { get; set; }
 
         /// <summary>
         /// 收款日期

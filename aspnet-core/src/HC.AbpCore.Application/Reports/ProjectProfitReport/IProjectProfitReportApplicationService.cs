@@ -14,6 +14,6 @@ namespace HC.AbpCore.Reports.ProjectProfitReport
         ///</summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<ProjectProfitListDto> GetProjectProfitByIdAsync(GetProjectProfitInput input);
+        Task<List<ProjectProfitListDto>> GetProjectProfitByIdAsync(GetProjectProfitInput input);
     }
 }
