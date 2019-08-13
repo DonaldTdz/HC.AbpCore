@@ -9,7 +9,7 @@ namespace HC.AbpCore.Reports.ProjectProfitReport.Dtos
         /// <summary>
         /// 项目Id
         /// </summary>
-        public Guid Id { get; set; }
+        public Guid? Id { get; set; }
 
         /// <summary>
         /// 项目名称
@@ -25,24 +25,109 @@ namespace HC.AbpCore.Reports.ProjectProfitReport.Dtos
 
 
 
+        ///// <summary>
+        ///// 销售明细
+        ///// </summary>
+        //public List<SalesDetails> SalesDetails { get; set; }
+
         /// <summary>
-        /// 销售明细
+        /// 销售单价
         /// </summary>
-        public List<SalesDetails> SalesDetails { get; set; }
+        public decimal? SalesPrice { get; set; }
+
+
+
+        /// <summary>
+        /// 销售数量
+        /// </summary>
+        public int? SalesNum { get; set; }
+
+
+
+        /// <summary>
+        /// 销售总额
+        /// </summary>
+        public decimal? SalesAmount { get; set; }
 
 
 
         /// <summary>
         /// 成本
         /// </summary>
-        public List<ProjectCost> ProjectCost { get; set; }
+        //public List<ProjectCost> ProjectCost { get; set; }
+
+        /// <summary>
+        /// 成本设备名称
+        /// </summary>
+        public string CostDeviceName { get; set; }
+
+
+
+        /// <summary>
+        /// 成本单价
+        /// </summary>
+        public decimal? CostPrice { get; set; }
+
+
+
+        /// <summary>
+        /// 成本数量
+        /// </summary>
+        public int? CostNum { get; set; }
+
+
+
+        /// <summary>
+        /// 成本总额
+        /// </summary>
+        public decimal? CostAmount { get; set; }
 
 
 
         /// <summary>
         /// 税费
         /// </summary>
-        public List<Taxation> Taxation { get; set; }
+        //public List<Taxation> Taxation { get; set; }
+
+        /// <summary>
+        /// 销项税额
+        /// </summary>
+        public decimal? SaleTaxAmount { get; set; }
+
+
+
+        /// <summary>
+        /// 进项税额
+        /// </summary>
+        public decimal? IncomeTaxAmount { get; set; }
+
+
+
+        /// <summary>
+        /// 应交增值税
+        /// </summary>
+        public decimal? VATPayable { get; set; }
+
+
+
+        /// <summary>
+        /// 城建税+教育附加
+        /// </summary>
+        public decimal? CityEducationTax { get; set; }
+
+
+
+        /// <summary>
+        /// 企业所得税
+        /// </summary>
+        public decimal? CorporateIncomeTax { get; set; }
+
+
+
+        /// <summary>
+        /// 个人所得税
+        /// </summary>
+        public decimal? IndividualIncomeTax { get; set; }
 
 
 
@@ -72,10 +157,10 @@ namespace HC.AbpCore.Reports.ProjectProfitReport.Dtos
         /// <summary>
         /// 创建日期
         /// </summary>
-        public DateTime CreationTime { get; set; }
+        public DateTime? CreationTime { get; set; }
     }
 
-    public class SalesDetails
+    public class SalesDetail
     {
         /// <summary>
         /// 单价
@@ -148,5 +233,5 @@ namespace HC.AbpCore.Reports.ProjectProfitReport.Dtos
         public decimal? IndividualIncomeTax { get; set; }
     }
 
-    
+
 }

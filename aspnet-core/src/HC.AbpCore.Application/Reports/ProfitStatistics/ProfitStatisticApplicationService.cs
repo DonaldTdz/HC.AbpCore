@@ -85,7 +85,7 @@ namespace HC.AbpCore.Reports.ProfitStatistics
                 profitStatistic.TotalCostAmount = profitStatistic.CommodityCostAmount + profitStatistic.TimesheetAmount + profitStatistic.ReimburseAmount;
                 profitStatistic.CreationTime = item.CreationTime;
                 profitStatistic.VATPayable = profitStatistic.SaleTaxAmount - profitStatistic.IncomeTaxAmount;
-                profitStatistic.CityEducationTax = Math.Round((profitStatistic.VATPayable * Convert.ToDecimal(0.07 + 0.02 + 0.03) + profitStatistic.ContractAmount * Convert.ToDecimal(0.01)).Value,2);
+                profitStatistic.CityEducationTax = Math.Round(((profitStatistic.VATPayable * Convert.ToDecimal(0.07 + 0.02 + 0.03)) + (profitStatistic.ContractAmount * Convert.ToDecimal(0.001)))??0,2);
                 profitStatistic.CorporateIncomeTax = Math.Round(((profitStatistic.ContractAmount - profitStatistic.CommodityCostAmount - profitStatistic.CityEducationTax
                     - profitStatistic.VATPayable) * Convert.ToDecimal(0.25)).Value,2);
                 profitStatistic.IndividualIncomeTax = Math.Round(((profitStatistic.ContractAmount - profitStatistic.CommodityCostAmount - profitStatistic.CityEducationTax
