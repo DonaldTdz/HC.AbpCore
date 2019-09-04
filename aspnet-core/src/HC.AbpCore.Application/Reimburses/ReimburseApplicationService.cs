@@ -75,23 +75,13 @@ namespace HC.AbpCore.Reimburses
         /// <returns></returns>
         [AbpAllowAnonymous]
         [Audited]
-        public async Task<PagedResultDto<ReimburseListDto>> GetPagedAsync(GetReimbursesInput input)
+        public async Task<PagedResultNewDto<ReimburseListDto>> GetPagedAsync(GetReimbursesInput input)
         {
             var query = _entityRepository.GetAll().WhereIf(input.ProjectId.HasValue, aa => aa.ProjectId == input.ProjectId.Value)
                 .WhereIf(input.Status.HasValue, aa => aa.Status == input.Status.Value)
-                .WhereIf(input.type.HasValue, aa => aa.Type == input.type.Value)
+                .WhereIf(input.Type.HasValue, aa => aa.Type == input.Type.Value)
+                .WhereIf(input.SubmitDate.HasValue, aa => aa.SubmitDate >= input.StartSubmitDate.Value && aa.SubmitDate < input.EndSubmitDate.Value)
                 .Where(aa => aa.Status != null);
-            // TODO:根据传入的参数添加过滤条件
-            //if (!String.IsNullOrEmpty(input.EmployeeId))
-            //{
-            //    query = query.Where(aa => aa.EmployeeId == input.EmployeeId);
-            //}
-            //else
-            //{
-            //    var user = await _userManager.GetUserByIdAsync(AbpSession.UserId.Value);
-            //    if (user.EmployeeId != "0205151055692871" && user.EmployeeId != "1706561401635019335")  //如果是代姐或吴总则可以查看全部
-            //        query = query.Where(aa => aa.EmployeeId == user.EmployeeId);
-            //}
 
             if (String.IsNullOrEmpty(input.EmployeeId))
             {
@@ -115,10 +105,8 @@ namespace HC.AbpCore.Reimburses
             var entityList = from item in query
                              join project in projects on item.ProjectId equals project.Id into projectName
                              join employee in employees on item.EmployeeId equals employee.Id into employeeName
-                             //join approver in employees on item.ApproverId equals approver.Id into approverName
                              from bb in employeeName.DefaultIfEmpty()
                              from cc in projectName.DefaultIfEmpty()
-                                 //from cc in approverName.DefaultIfEmpty()
                              select new ReimburseListDto()
                              {
                                  Id = item.Id,
@@ -132,11 +120,11 @@ namespace HC.AbpCore.Reimburses
                                  Type = item.Type,
                                  ApproverId = item.ApproverId,
                                  ApprovalTime = item.ApprovalTime,
-                                 //ApproverName = cc.Name,
                                  CancelTime = item.CancelTime,
                                  CreationTime = item.CreationTime
                              };
 
+            var totalAmount = await entityList.SumAsync(aa => aa.Amount ?? 0);
             var count = await entityList.CountAsync();
 
             var items = await entityList
@@ -145,7 +133,7 @@ namespace HC.AbpCore.Reimburses
                 .PageBy(input)
                 .AsNoTracking()
                 .ToListAsync();
-            return new PagedResultDto<ReimburseListDto>(count, items);
+            return new PagedResultNewDto<ReimburseListDto>(count, items, totalAmount);
         }
 
 

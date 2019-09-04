@@ -41,6 +41,33 @@ namespace HC.AbpCore.Reimburses.Dtos
         /// <summary>
         /// 查询条件-类型
         /// </summary>
-        public ReimburseTypeEnum? type { get; set; }
+        public ReimburseTypeEnum? Type { get; set; }
+
+        /// <summary>
+        /// 查询条件-申请日期
+        /// </summary>
+        public DateTime? SubmitDate { get; set; }
+
+        public DateTime? StartSubmitDate
+        {
+            get
+            {
+                if (SubmitDate.HasValue)
+                    return new DateTime(SubmitDate.Value.Year, 1, 1);
+                else
+                    return null;
+            }
+        }
+
+        public DateTime? EndSubmitDate
+        {
+            get
+            {
+                if (SubmitDate.HasValue)
+                    return new DateTime(SubmitDate.Value.Year + 1, 1, 1);
+                else
+                    return null;
+            }
+        }
     }
 }

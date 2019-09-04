@@ -34,7 +34,7 @@ namespace HC.AbpCore.Reimburses
 		///</summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<PagedResultDto<ReimburseListDto>> GetPagedAsync(GetReimbursesInput input);
+        Task<PagedResultNewDto<ReimburseListDto>> GetPagedAsync(GetReimbursesInput input);
 
 
 		/// <summary>
