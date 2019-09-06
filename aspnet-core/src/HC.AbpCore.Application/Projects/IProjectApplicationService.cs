@@ -38,10 +38,18 @@ namespace HC.AbpCore.Projects
         Task<PagedResultDto<ProjectListDto>> GetPagedAsync(GetProjectsInput input);
 
 
-		/// <summary>
-		/// 通过指定id获取ProjectListDto信息
-		/// </summary>
-		Task<ProjectListDto> GetByIdAsync(EntityDto<Guid> input);
+        /// <summary>
+        /// 钉钉获取Project的分页列表信息
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        Task<PagedResultDto<ProjectListDto>> GetPagedByDDAsync(GetProjectsInput input);
+
+
+        /// <summary>
+        /// 通过指定id获取ProjectListDto信息
+        /// </summary>
+        Task<ProjectListDto> GetByIdAsync(EntityDto<Guid> input);
 
 
         /// <summary>

@@ -77,7 +77,7 @@ namespace HC.AbpCore.Reimburses
         [Audited]
         public async Task<PagedResultNewDto<ReimburseListDto>> GetPagedAsync(GetReimbursesInput input)
         {
-            var query = _entityRepository.GetAll().WhereIf(input.ProjectId.HasValue, aa => aa.ProjectId == input.ProjectId.Value)
+             var query = _entityRepository.GetAll().WhereIf(input.ProjectId.HasValue, aa => aa.ProjectId == input.ProjectId.Value)
                 .WhereIf(input.Status.HasValue, aa => aa.Status == input.Status.Value)
                 .WhereIf(input.Type.HasValue, aa => aa.Type == input.Type.Value)
                 .WhereIf(input.SubmitDate.HasValue, aa => aa.SubmitDate >= input.StartSubmitDate.Value && aa.SubmitDate < input.EndSubmitDate.Value)

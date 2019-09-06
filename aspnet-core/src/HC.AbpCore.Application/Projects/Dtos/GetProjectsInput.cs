@@ -20,6 +20,10 @@ namespace HC.AbpCore.Projects.Dtos
                 Sorting = "Id";
             }
         }
+        /// <summary>
+        /// 查询条件-所属销售/销售助理
+        /// </summary>
+        public string EmployeeId { get; set; }
 
         /// <summary>
         /// 查询条件-所属客户

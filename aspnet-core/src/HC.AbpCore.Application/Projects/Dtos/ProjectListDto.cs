@@ -65,7 +65,8 @@ namespace HC.AbpCore.Projects.Dtos
         /// <summary>
         /// CustomerContact
         /// </summary>
-        public int? CustomerContactId { get; set; }
+        [StringLength(25)]
+        public string CustomerContact { get; set; }
 
         /// <summary>
         /// StartDate
@@ -123,6 +124,19 @@ namespace HC.AbpCore.Projects.Dtos
         /// </summary>
         public string ProjectSalesName { get; set; }
 
-
+        /// <summary>
+        /// 格式化开始日期
+        /// </summary>
+        public string StartDateFormat
+        {
+            get
+            {
+                if (StartDate.HasValue)
+                {
+                    return StartDate.Value.ToString("yyyy-MM-dd");
+                }
+                return string.Empty;
+            }
+        }
     }
 }

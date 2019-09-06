@@ -119,6 +119,47 @@ namespace HC.AbpCore.Projects
             return new PagedResultDto<ProjectListDto>(count, entityList);
         }
 
+        /// <summary>
+        /// 钉钉获取Project的分页列表信息
+        ///</summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        [AbpAllowAnonymous]
+        public async Task<PagedResultDto<ProjectListDto>> GetPagedByDDAsync(GetProjectsInput input)
+        {
+
+            var query = _entityRepository.GetAll();
+            if (!String.IsNullOrEmpty(input.EmployeeId))
+            {
+                User user = new User() { EmployeeId = input.EmployeeId };
+                var roles = await _userManager.GetRolesAsync(user);
+                if (!roles.Contains("Admin") && !roles.Contains("Finance") && !roles.Contains("GeneralManager"))
+                    query = query.Where(aa => aa.ProjectSalesId == input.EmployeeId||aa.SalesAssistantId==input.EmployeeId);
+            }
+
+            var count = await query.CountAsync();
+
+            var entityList = await query
+                    .OrderBy(input.Sorting).AsNoTracking()
+                    .OrderByDescending(aa => aa.CreationTime)
+                    .PageBy(input)
+                    .Select(aa => new ProjectListDto()
+                    {
+                        Id = aa.Id,
+                        Mode = aa.Mode,
+                        ProfitRatio = aa.ProfitRatio,
+                        BillCost = aa.BillCost,
+                        Type = aa.Type,
+                        ProjectCode = aa.ProjectCode,
+                        Name = aa.Name,
+                        StartDate = aa.StartDate,
+                        Status = aa.Status,
+                    })
+                    .ToListAsync();
+
+            return new PagedResultDto<ProjectListDto>(count, entityList);
+        }
+
 
         /// <summary>
         /// 通过指定id获取ProjectListDto信息

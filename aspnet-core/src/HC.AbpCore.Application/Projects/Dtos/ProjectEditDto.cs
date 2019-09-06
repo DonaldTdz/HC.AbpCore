@@ -80,7 +80,8 @@ namespace  HC.AbpCore.Projects.Dtos
         /// <summary>
         /// CustomerContact
         /// </summary>
-        public int? CustomerContactId { get; set; }
+        [StringLength(25)]
+        public string CustomerContact { get; set; }
 
 
 

@@ -54,9 +54,10 @@ namespace HC.AbpCore.Projects
         /// </summary>
         public virtual int? CustomerId { get; set; }
         /// <summary>
-        /// 所属客户联系人（外键）
+        /// 所属客户联系人
         /// </summary>
-        public virtual int? CustomerContactId { get; set; }
+        [StringLength(50)]
+        public virtual string CustomerContact { get; set; }
         /// <summary>
         /// 开始日期
         /// </summary>

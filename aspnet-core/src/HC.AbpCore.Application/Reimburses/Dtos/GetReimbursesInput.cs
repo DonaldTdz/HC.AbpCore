@@ -53,7 +53,7 @@ namespace HC.AbpCore.Reimburses.Dtos
             get
             {
                 if (SubmitDate.HasValue)
-                    return new DateTime(SubmitDate.Value.Year, 1, 1);
+                    return new DateTime(SubmitDate.Value.Year, SubmitDate.Value.Month, 1);
                 else
                     return null;
             }
@@ -64,7 +64,7 @@ namespace HC.AbpCore.Reimburses.Dtos
             get
             {
                 if (SubmitDate.HasValue)
-                    return new DateTime(SubmitDate.Value.Year + 1, 1, 1);
+                    return new DateTime(SubmitDate.Value.Year, SubmitDate.Value.Month + 1, 1);
                 else
                     return null;
             }
