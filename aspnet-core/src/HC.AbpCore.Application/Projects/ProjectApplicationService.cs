@@ -78,12 +78,12 @@ namespace HC.AbpCore.Projects
                 .WhereIf(input.Id.HasValue, a => a.Id == input.Id.Value)
                 .WhereIf(!String.IsNullOrEmpty(input.ProjectCode), a => a.ProjectCode == input.ProjectCode)
                 .WhereIf(input.StartDate.HasValue && input.EndDate.HasValue, a => a.CreationTime >= input.StartDate.Value && a.CreationTime < input.EndDate.Value.AddDays(1));
-                var roles =await GetUserRolesAsync();
-                if (!roles.Contains("Admin") && !roles.Contains("Finance") && !roles.Contains("GeneralManager"))
-                {
-                    var user = await GetCurrentUserAsync();
-                    query = query.Where(aa => aa.ProjectSalesId == user.EmployeeId || aa.SalesAssistantId == user.EmployeeId);
-                }
+            var roles = await GetUserRolesAsync();
+            if (!roles.Contains("Admin") && !roles.Contains("Finance") && !roles.Contains("GeneralManager"))
+            {
+                var user = await GetCurrentUserAsync();
+                query = query.Where(aa => aa.ProjectSalesId == user.EmployeeId || aa.SalesAssistantId == user.EmployeeId);
+            }
 
             var customerList = await _customerRepository.GetAll().AsNoTracking().ToListAsync();
             var employeeList = await _employeeRepository.GetAll().AsNoTracking().ToListAsync();
@@ -134,7 +134,7 @@ namespace HC.AbpCore.Projects
                 User user = new User() { EmployeeId = input.EmployeeId };
                 var roles = await _userManager.GetRolesAsync(user);
                 if (!roles.Contains("Admin") && !roles.Contains("Finance") && !roles.Contains("GeneralManager"))
-                    query = query.Where(aa => aa.ProjectSalesId == input.EmployeeId||aa.SalesAssistantId==input.EmployeeId);
+                    query = query.Where(aa => aa.ProjectSalesId == input.EmployeeId || aa.SalesAssistantId == input.EmployeeId);
             }
 
             var count = await query.CountAsync();
@@ -337,10 +337,26 @@ namespace HC.AbpCore.Projects
         /// </summary>
         /// <returns></returns>
         [AbpAllowAnonymous]
-        [Audited]
         public async Task<List<DropDownDto>> GetDropDownsAsync()
         {
             var query = _entityRepository.GetAll();
+            var entityList = await query
+                    .OrderBy(a => a.CreationTime).AsNoTracking()
+                    .Select(c => new DropDownDto() { Text = c.Name + "(" + c.ProjectCode + ")", Value = c.Id.ToString() })
+                    .ToListAsync();
+            return entityList;
+        }
+
+        /// <summary>
+        /// 根据应用菜单获取项目下拉列表
+        /// </summary>
+        /// <returns></returns>
+        [AbpAllowAnonymous]
+        public async Task<List<DropDownDto>> GetDropDownsByAppAsync(AppMenu appMenu)
+        {
+            var query = _entityRepository.GetAll();
+            if (appMenu == AppMenu.工时统计)
+                query = query.Where(aa => aa.Type == "软件开发" || aa.Type == "系统集成" || aa.Type == "维保服务");
             var entityList = await query
                     .OrderBy(a => a.CreationTime).AsNoTracking()
                     .Select(c => new DropDownDto() { Text = c.Name + "(" + c.ProjectCode + ")", Value = c.Id.ToString() })
@@ -373,9 +389,12 @@ namespace HC.AbpCore.Projects
         public async Task<string> GenerateProjectCodeAsync(string type)
         {
             string projectCode = "";
+            DateTime dt = DateTime.Now;
+            DateTime startTime = new DateTime(dt.Year, dt.Month, 1);
+            DateTime endTime = new DateTime(dt.Year, dt.Month + 1, 1);
             if (!String.IsNullOrEmpty(type))
             {
-                var project = await _entityRepository.GetAll().Where(aa => aa.Type == type).AsNoTracking().ToListAsync();
+                var project = await _entityRepository.GetAll().Where(aa => aa.Type == type && aa.CreationTime >= startTime && aa.CreationTime < endTime).AsNoTracking().ToListAsync();
                 if (project?.Count > 0)
                 {
                     projectCode = project.Max(aa => aa.ProjectCode);

@@ -138,7 +138,7 @@ namespace HC.AbpCore.Purchases.PurchaseDetails.DomainService
             inventoryFlow.Initial = product.Num;
             inventoryFlow.StreamNumber = entity.Num;
             inventoryFlow.Ending = product.Num-entity.Num;
-            inventoryFlow.Desc = "更改采购明细";
+            inventoryFlow.Desc = "更改采购";
             inventoryFlow.ProductId = product.Id;
             inventoryFlow.RefId = entity.PurchaseId.ToString();
             inventoryFlow.Type = InventoryFlowType.出库;

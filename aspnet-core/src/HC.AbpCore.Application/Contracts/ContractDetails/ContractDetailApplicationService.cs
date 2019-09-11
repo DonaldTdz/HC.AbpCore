@@ -213,7 +213,6 @@ namespace HC.AbpCore.Contracts.ContractDetails
                 var detail = contractDetail.MapTo<ContractDetail>();
                 await _entityManager.CreateAsync(detail);
                 //var products = await _productRepository.FirstOrDefaultAsync(aa => aa.Id == contractDetail.ProductId);
-
             }
         }
 

@@ -91,13 +91,35 @@ namespace HC.AbpCore.Reports.SalesDetails
         /// 导出SalesDetail为excel表,等待开发。
         /// </summary>
         /// <returns></returns>
-        //public async Task<FileDto> GetToExcel()
-        //{
-        //	var users = await UserManager.Users.ToListAsync();
-        //	var userListDtos = ObjectMapper.Map<List<UserListDto>>(users);
-        //	await FillRoleNames(userListDtos);
-        //	return _userListExcelExporter.ExportToFile(userListDtos);
-        //}
+     //   public async Task<SalesDetailExcelDto> GetToExcel(GetSalesDetailsInput input)
+     //   {
+     //       var query = _entityRepository.GetAll().Where(aa => aa.CreationTime >= input.StartCreateDate && aa.CreationTime < input.EndCreateDate)
+     //.WhereIf(input.ProjectId.HasValue, aa => aa.Id == input.ProjectId.Value);
+     //       var entityList = await query
+     //        .OrderBy(input.Sorting).AsNoTracking()
+     //        .ToListAsync();
+     //       var dataSource = DevStatusTrace.Select(aa => new DevStatusTraceExcelVM
+     //       {
+     //           停车场 = new Func<string>(() =>
+     //           {
+     //               ParklotVM data = new ParklotVM();
+     //               ParklotEntity role = _sv.GetParklot(aa.lotID);
+     //               data = MapperWrapper.Map<ParklotEntity, ParklotVM>(role);
+     //               if (data == null) return "";
+     //               else return data.name;
+     //           })(),
+     //           触发时间 = aa.actDate.ToString(),
+     //           上报时间 = aa.upDtm.ToString(),
+     //           操作行为 = "签到",
+     //           通信状况 = aa.netCommState,
+     //           版本号 = aa.softwareVersion,
+     //           警示信息 = aa.errInfo,
+     //           设备名称 = aa.deviceName,
+
+     //       }).ToList();
+
+     //       return RsExcelFile(PubUtils.Excel.ListToExcel(dataSource), recordType + "告警Excel.xlsx");
+     //   }
 
     }
 }

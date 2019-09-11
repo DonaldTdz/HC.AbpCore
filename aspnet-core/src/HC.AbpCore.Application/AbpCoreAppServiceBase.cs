@@ -71,5 +71,16 @@ namespace HC.AbpCore
             var roles = await UserManager.GetRolesAsync(currentUser);
             return roles;
         }
+
+        /// <summary>
+        ///  返回Excel文件
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        //protected FileContentResult RsExcelFile(byte[] bytes, string fileName)
+        //{
+        //    return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        //}
     }
 }

@@ -28,5 +28,10 @@ namespace HC.AbpCore.Projects
             已完成 = 5,
             丢单=6
         }
+
+        public enum AppMenu
+        {
+            工时统计=1
+        }
     }
 }

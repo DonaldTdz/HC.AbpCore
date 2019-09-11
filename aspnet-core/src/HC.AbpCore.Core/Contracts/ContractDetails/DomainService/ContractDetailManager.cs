@@ -23,47 +23,45 @@ using HC.AbpCore.Purchases.PurchaseDetails;
 using static HC.AbpCore.Contracts.ContractEnum;
 using Abp.Domain.Entities;
 using HC.AbpCore.Products;
+using HC.AbpCore.InventoryFlows;
 
 namespace HC.AbpCore.Contracts.ContractDetails.DomainService
 {
     /// <summary>
     /// ContractDetail领域层的业务管理
     ///</summary>
-    public class ContractDetailManager :AbpCoreDomainServiceBase, IContractDetailManager
+    public class ContractDetailManager : AbpCoreDomainServiceBase, IContractDetailManager
     {
-		
-		private readonly IRepository<ContractDetail,Guid> _repository;
+
+        private readonly IRepository<ContractDetail, Guid> _repository;
         private readonly IRepository<Contract, Guid> _contractRepository;
-        private readonly IRepository<ProjectDetail, Guid> _projectDetailRepository;
         private readonly IRepository<Product, int> _productRepository;
-        private readonly IRepository<PurchaseDetail, Guid> _purchaseDetailRepository;
+        private readonly IRepository<InventoryFlow, long> _inventoryFlowRepository;
 
         /// <summary>
         /// ContractDetail的构造方法
         ///</summary>
         public ContractDetailManager(
-			IRepository<ContractDetail, Guid> repository,
-             IRepository<Contract, Guid> contractRepository
-            , IRepository<ProjectDetail, Guid> projectDetailRepository
-            , IRepository<Product, int> productRepository
-            , IRepository<PurchaseDetail, Guid> purchaseDetailRepository
+            IRepository<ContractDetail, Guid> repository,
+            IRepository<Contract, Guid> contractRepository,
+            IRepository<Product, int> productRepository,
+            IRepository<InventoryFlow, long> inventoryFlowRepository
         )
-		{
+        {
             _productRepository = productRepository;
-            _repository =  repository;
+            _repository = repository;
             _contractRepository = contractRepository;
-            _projectDetailRepository = projectDetailRepository;
-            _purchaseDetailRepository = purchaseDetailRepository;
+            _inventoryFlowRepository = inventoryFlowRepository;
         }
 
 
-		/// <summary>
-		/// 初始化
-		///</summary>
-		public void InitContractDetail()
-		{
-			throw new NotImplementedException();
-		}
+        /// <summary>
+        /// 初始化
+        ///</summary>
+        public void InitContractDetail()
+        {
+            throw new NotImplementedException();
+        }
 
         // TODO:编写领域业务代码
 
@@ -81,17 +79,27 @@ namespace HC.AbpCore.Contracts.ContractDetails.DomainService
                 contract.Amount += input.Num * input.Price;
                 await _contractRepository.UpdateAsync(contract);
             }
+            input = await _repository.InsertAsync(input);
             var product = await _productRepository.FirstOrDefaultAsync(aa => aa.Id == input.ProductId);
             if (input.Num.HasValue)
             {
+                //更新库存流水
+                InventoryFlow inventoryFlow = new InventoryFlow();
+                inventoryFlow.Desc = "出库";
+                inventoryFlow.Initial = product.Num;
+                inventoryFlow.StreamNumber = input.Num;
+                inventoryFlow.Ending = product.Num - input.Num;
+                inventoryFlow.ProductId = product.Id;
+                inventoryFlow.RefId = input.Id.ToString();
+                inventoryFlow.Type = InventoryFlowType.出库;
+                await _inventoryFlowRepository.InsertAsync(inventoryFlow);
                 product.Num -= input.Num;
                 await _productRepository.UpdateAsync(product);
             }
 
 
             // var entity = ObjectMapper.Map <ContractDetail>(input);
-
-            input = await _repository.InsertAsync(input);
+            //await CurrentUnitOfWork.SaveChangesAsync();
             return input;
         }
 
@@ -107,22 +115,71 @@ namespace HC.AbpCore.Contracts.ContractDetails.DomainService
             var product = await _productRepository.FirstOrDefaultAsync(aa => aa.Id == entity.ProductId);
             if (input.ProductId == entity.ProductId)
             {
+                if (entity.Num > input.Num)
+                {
+                    //更新库存流水
+                    InventoryFlow inventoryFlow = new InventoryFlow();
+                    inventoryFlow.Desc = "合同明细更新产生的退货";
+                    inventoryFlow.Initial = product.Num;
+                    inventoryFlow.StreamNumber = entity.Num-input.Num;
+                    inventoryFlow.Ending = product.Num + entity.Num - input.Num;
+                    inventoryFlow.ProductId = product.Id;
+                    inventoryFlow.RefId = input.Id.ToString();
+                    inventoryFlow.Type = InventoryFlowType.入库;
+                    await _inventoryFlowRepository.InsertAsync(inventoryFlow);
+                }
+                else if (entity.Num < input.Num)
+                {
+                    //更新库存流水
+                    InventoryFlow inventoryFlow = new InventoryFlow();
+                    inventoryFlow.Desc = "合同明细更新产生的新增出库";
+                    inventoryFlow.Initial = product.Num;
+                    inventoryFlow.StreamNumber =  input.Num- entity.Num;
+                    inventoryFlow.Ending = product.Num + entity.Num - input.Num;
+                    inventoryFlow.ProductId = product.Id;
+                    inventoryFlow.RefId = input.Id.ToString();
+                    inventoryFlow.Type = InventoryFlowType.出库;
+                    await _inventoryFlowRepository.InsertAsync(inventoryFlow);
+                }
+                else
+                {
+
+                }
                 product.Num = product.Num + entity.Num - input.Num;
                 await _productRepository.UpdateAsync(product);
             }
             else
             {
-                var productOld = await _productRepository.GetAsync(input.ProductId.Value);
+                var productNew = await _productRepository.GetAsync(input.ProductId.Value);
+                #region  把更新合同之前的货物返回到库存
+                InventoryFlow inventoryFlowOld = new InventoryFlow();
+                inventoryFlowOld.Desc = "合同明细更新产生的退货";
+                inventoryFlowOld.Initial = product.Num;
+                inventoryFlowOld.StreamNumber = entity.Num;
+                inventoryFlowOld.Ending = product.Num + entity.Num;
+                inventoryFlowOld.ProductId = product.Id;
+                inventoryFlowOld.RefId = input.Id.ToString();
+                inventoryFlowOld.Type = InventoryFlowType.入库;
+                await _inventoryFlowRepository.InsertAsync(inventoryFlowOld);
+                #endregion
                 product.Num += entity.Num;
                 await _productRepository.UpdateAsync(product);
-                if (productOld.Num.HasValue)
-                    productOld.Num -= input.Num;
+                #region  把更新合同之后的货物进行出库
+                InventoryFlow inventoryFlowNew = new InventoryFlow();
+                inventoryFlowNew.Desc = "合同明细更新产生的出库";
+                inventoryFlowNew.Initial = productNew.Num;
+                inventoryFlowNew.StreamNumber = input.Num;
+                inventoryFlowNew.Ending = productNew.Num - input.Num;
+                inventoryFlowNew.ProductId = productNew.Id;
+                inventoryFlowNew.RefId = input.Id.ToString();
+                inventoryFlowNew.Type = InventoryFlowType.出库;
+                await _inventoryFlowRepository.InsertAsync(inventoryFlowNew);
+                #endregion
+                if (productNew.Num.HasValue)
+                    productNew.Num -= input.Num;
                 else
-                    productOld.Num =0- input.Num;
-                await _productRepository.UpdateAsync(productOld);
-                //entity.Num = purchaseDetail.Num;
-                //entity.ProductId = purchaseDetail.ProductId;
-                //await _repository.UpdateAsync(entity);
+                    productNew.Num = 0 - input.Num;
+                await _productRepository.UpdateAsync(productNew);
             }
             //修改合同金额
             if (input.ContractId.HasValue)
@@ -150,9 +207,19 @@ namespace HC.AbpCore.Contracts.ContractDetails.DomainService
         {
             var entity = await _repository.GetAsync(Id);
             var product = await _productRepository.FirstOrDefaultAsync(aa => aa.Id == entity.ProductId);
-            if (product!=null)
+            if (product != null)
             {
-                product.Num += entity.Num; 
+                //更新库存流水
+                InventoryFlow inventoryFlow = new InventoryFlow();
+                inventoryFlow.Desc = "合同明细更改参生的退货";
+                inventoryFlow.Initial = product.Num;
+                inventoryFlow.StreamNumber = entity.Num;
+                inventoryFlow.Ending = product.Num + entity.Num;
+                inventoryFlow.ProductId = product.Id;
+                inventoryFlow.RefId = entity.Id.ToString();
+                inventoryFlow.Type = InventoryFlowType.入库;
+                await _inventoryFlowRepository.InsertAsync(inventoryFlow);
+                product.Num += entity.Num;
                 await _productRepository.UpdateAsync(product);
             }
             if (entity.ContractId.HasValue)

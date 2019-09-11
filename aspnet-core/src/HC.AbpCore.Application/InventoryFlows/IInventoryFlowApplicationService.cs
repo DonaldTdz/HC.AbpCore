@@ -33,13 +33,13 @@ namespace HC.AbpCore.InventoryFlows
 		///</summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<PagedResultDto<InventoryFlowListDto>> GetPaged(GetInventoryFlowsInput input);
+        Task<PagedResultDto<InventoryFlowListDto>> GetPagedAsync(GetInventoryFlowsInput input);
 
 
 		/// <summary>
 		/// 通过指定id获取InventoryFlowListDto信息
 		/// </summary>
-		Task<InventoryFlowListDto> GetById(EntityDto<long> input);
+		Task<InventoryFlowListDto> GetByIdAsync(EntityDto<long> input);
 
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace HC.AbpCore.InventoryFlows
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<GetInventoryFlowForEditOutput> GetForEdit(NullableIdDto<long> input);
+        Task<GetInventoryFlowForEditOutput> GetForEditAsync(NullableIdDto<long> input);
 
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace HC.AbpCore.InventoryFlows
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task CreateOrUpdate(CreateOrUpdateInventoryFlowInput input);
+        Task CreateOrUpdateAsync(CreateOrUpdateInventoryFlowInput input);
 
 
         /// <summary>
@@ -63,13 +63,13 @@ namespace HC.AbpCore.InventoryFlows
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task Delete(EntityDto<long> input);
+        Task DeleteAsync(EntityDto<long> input);
 
 
         /// <summary>
         /// 批量删除InventoryFlow
         /// </summary>
-        Task BatchDelete(List<long> input);
+        Task BatchDeleteAsync(List<long> input);
 
 
 		/// <summary>

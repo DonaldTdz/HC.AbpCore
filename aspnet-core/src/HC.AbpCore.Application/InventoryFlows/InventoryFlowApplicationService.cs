@@ -55,10 +55,10 @@ namespace HC.AbpCore.InventoryFlows
         /// <param name="input"></param>
         /// <returns></returns>
 		 
-        public async Task<PagedResultDto<InventoryFlowListDto>> GetPaged(GetInventoryFlowsInput input)
+        public async Task<PagedResultDto<InventoryFlowListDto>> GetPagedAsync(GetInventoryFlowsInput input)
 		{
 
-		    var query = _entityRepository.GetAll();
+		    var query = _entityRepository.GetAll().Where(aa=>aa.ProductId==input.ProductId);
 			// TODO:根据传入的参数添加过滤条件
             
 
@@ -66,6 +66,7 @@ namespace HC.AbpCore.InventoryFlows
 
 			var entityList = await query
 					.OrderBy(input.Sorting).AsNoTracking()
+                    .OrderByDescending(aa=>aa.CreationTime)
 					.PageBy(input)
 					.ToListAsync();
 
@@ -80,7 +81,7 @@ namespace HC.AbpCore.InventoryFlows
 		/// 通过指定id获取InventoryFlowListDto信息
 		/// </summary>
 		 
-		public async Task<InventoryFlowListDto> GetById(EntityDto<long> input)
+		public async Task<InventoryFlowListDto> GetByIdAsync(EntityDto<long> input)
 		{
 			var entity = await _entityRepository.GetAsync(input.Id);
 
@@ -93,7 +94,7 @@ namespace HC.AbpCore.InventoryFlows
 		/// <param name="input"></param>
 		/// <returns></returns>
 		
-		public async Task<GetInventoryFlowForEditOutput> GetForEdit(NullableIdDto<long> input)
+		public async Task<GetInventoryFlowForEditOutput> GetForEditAsync(NullableIdDto<long> input)
 		{
 			var output = new GetInventoryFlowForEditOutput();
 InventoryFlowEditDto editDto;
@@ -122,16 +123,16 @@ InventoryFlowEditDto editDto;
 		/// <param name="input"></param>
 		/// <returns></returns>
 		
-		public async Task CreateOrUpdate(CreateOrUpdateInventoryFlowInput input)
+		public async Task CreateOrUpdateAsync(CreateOrUpdateInventoryFlowInput input)
 		{
 
 			if (input.InventoryFlow.Id.HasValue)
 			{
-				await Update(input.InventoryFlow);
+				await UpdateAsync(input.InventoryFlow);
 			}
 			else
 			{
-				await Create(input.InventoryFlow);
+				await CreateAsync(input.InventoryFlow);
 			}
 		}
 
@@ -140,7 +141,7 @@ InventoryFlowEditDto editDto;
 		/// 新增InventoryFlow
 		/// </summary>
 		
-		protected virtual async Task<InventoryFlowEditDto> Create(InventoryFlowEditDto input)
+		protected virtual async Task<InventoryFlowEditDto> CreateAsync(InventoryFlowEditDto input)
 		{
 			//TODO:新增前的逻辑判断，是否允许新增
 
@@ -156,7 +157,7 @@ InventoryFlowEditDto editDto;
 		/// 编辑InventoryFlow
 		/// </summary>
 		
-		protected virtual async Task Update(InventoryFlowEditDto input)
+		protected virtual async Task UpdateAsync(InventoryFlowEditDto input)
 		{
 			//TODO:更新前的逻辑判断，是否允许更新
 
@@ -175,7 +176,7 @@ InventoryFlowEditDto editDto;
 		/// <param name="input"></param>
 		/// <returns></returns>
 		
-		public async Task Delete(EntityDto<long> input)
+		public async Task DeleteAsync(EntityDto<long> input)
 		{
 			//TODO:删除前的逻辑判断，是否允许删除
 			await _entityRepository.DeleteAsync(input.Id);
@@ -187,7 +188,7 @@ InventoryFlowEditDto editDto;
 		/// 批量删除InventoryFlow的方法
 		/// </summary>
 		
-		public async Task BatchDelete(List<long> input)
+		public async Task BatchDeleteAsync(List<long> input)
 		{
 			// TODO:批量删除前的逻辑判断，是否允许删除
 			await _entityRepository.DeleteAsync(s => input.Contains(s.Id));

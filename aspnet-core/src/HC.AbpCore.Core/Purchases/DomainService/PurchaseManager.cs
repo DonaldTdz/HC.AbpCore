@@ -88,7 +88,6 @@ namespace HC.AbpCore.Purchases.DomainService
             //新增采购明细和产品
             if (purchaseDetailNews?.Count > 0)
             {
-
                 //库存流水
                 InventoryFlow inventoryFlow = new InventoryFlow();
                 foreach (var item in purchaseDetailNews)

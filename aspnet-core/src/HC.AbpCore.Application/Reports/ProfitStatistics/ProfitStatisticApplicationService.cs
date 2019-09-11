@@ -85,14 +85,14 @@ namespace HC.AbpCore.Reports.ProfitStatistics
                 profitStatistic.TotalCostAmount = profitStatistic.CommodityCostAmount + profitStatistic.TimesheetAmount + profitStatistic.ReimburseAmount;
                 profitStatistic.CreationTime = item.CreationTime;
                 profitStatistic.VATPayable = profitStatistic.SaleTaxAmount - profitStatistic.IncomeTaxAmount;
-                profitStatistic.CityEducationTax = Math.Round(((profitStatistic.VATPayable * Convert.ToDecimal(0.07 + 0.02 + 0.03)) + (profitStatistic.ContractAmount * Convert.ToDecimal(0.001)))??0,2);
-                profitStatistic.CorporateIncomeTax = Math.Round(((profitStatistic.ContractAmount - profitStatistic.CommodityCostAmount - profitStatistic.CityEducationTax
+                profitStatistic.CityEducationTax = Math.Round(((profitStatistic.VATPayable * Convert.ToDecimal(0.07 + 0.02 + 0.03)) + (profitStatistic.ContractAmount* item.CostCount * Convert.ToDecimal(0.001)))??0,2);
+                profitStatistic.CorporateIncomeTax = Math.Round(((profitStatistic.ContractAmount*item.CostCount - profitStatistic.CommodityCostAmount - profitStatistic.CityEducationTax
                     - profitStatistic.VATPayable) * Convert.ToDecimal(0.25)).Value,2);
-                profitStatistic.IndividualIncomeTax = Math.Round(((profitStatistic.ContractAmount - profitStatistic.CommodityCostAmount - profitStatistic.CityEducationTax
+                profitStatistic.IndividualIncomeTax = Math.Round(((profitStatistic.ContractAmount * item.CostCount - profitStatistic.CommodityCostAmount - profitStatistic.CityEducationTax
                     - profitStatistic.VATPayable - profitStatistic.CorporateIncomeTax) * Convert.ToDecimal(0.2)).Value,2);
-                profitStatistic.Profit = profitStatistic.ContractAmount - profitStatistic.CommodityCostAmount - profitStatistic.VATPayable - profitStatistic.CityEducationTax
+                profitStatistic.Profit = profitStatistic.ContractAmount - profitStatistic.TotalCostAmount - profitStatistic.VATPayable - profitStatistic.CityEducationTax
                     - profitStatistic.CorporateIncomeTax - profitStatistic.IndividualIncomeTax;
-                profitStatistic.ProfitMargin = Math.Round((profitStatistic.Profit / (profitStatistic.ContractAmount==0?1: profitStatistic.ContractAmount) * Convert.ToDecimal(100)).Value,2);
+                profitStatistic.ProfitMargin = Math.Round((profitStatistic.Profit / (profitStatistic.ContractAmount==0?1: profitStatistic.ContractAmount) / Convert.ToDecimal(100)).Value,2);
                 profitStatisticListDtos.Add(profitStatistic);
             }
             if (profitStatisticListDtos?.Count > 0)
@@ -106,7 +106,7 @@ namespace HC.AbpCore.Reports.ProfitStatistics
                 entity.CityEducationTax = profitStatisticListDtos.Sum(aa => aa.CityEducationTax);
                 entity.IndividualIncomeTax = profitStatisticListDtos.Sum(aa => aa.IndividualIncomeTax);
                 entity.Profit = profitStatisticListDtos.Sum(aa => aa.Profit);
-                entity.ProfitMargin = Math.Round((entity.Profit / (entity.ContractAmount == 0 ? 1 : entity.ContractAmount) * Convert.ToDecimal(100)).Value, 2);
+                entity.ProfitMargin = Math.Round((entity.Profit / (entity.ContractAmount == 0 ? 1 : entity.ContractAmount) / Convert.ToDecimal(100)).Value, 2);
                 entity.CorporateIncomeTax = profitStatisticListDtos.Sum(aa => aa.CorporateIncomeTax);
                 profitStatisticListDtos.Add(entity);
             }

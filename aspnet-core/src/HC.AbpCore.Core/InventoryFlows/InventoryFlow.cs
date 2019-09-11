@@ -39,7 +39,7 @@ namespace HC.AbpCore.InventoryFlows
         [StringLength(500)]
         public virtual string Desc { get; set; }
         /// <summary>
-        /// 引用Id，如采购id
+        /// 引用Id，如采购明细id
         /// </summary>
         [StringLength(100)]
         public virtual string RefId { get; set; }

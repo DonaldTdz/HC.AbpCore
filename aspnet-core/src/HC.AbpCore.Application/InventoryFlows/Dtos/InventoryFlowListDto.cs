@@ -71,6 +71,10 @@ namespace HC.AbpCore.InventoryFlows.Dtos
 
 
 
+        public string TypeName
+        {
+            get { return Type.ToString(); }
+        }
 
     }
 }

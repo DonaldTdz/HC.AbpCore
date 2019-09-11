@@ -19,5 +19,10 @@ namespace HC.AbpCore.InventoryFlows.Dtos
             }
         }
 
+        /// <summary>
+        /// 查询条件-产品Id
+        /// </summary>
+        public int ProductId { get; set; }
+
     }
 }

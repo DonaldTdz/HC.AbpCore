@@ -61,12 +61,10 @@ namespace HC.AbpCore.Reports.ProfitStatistics.Dtos
 
 
 
-
         /// <summary>
         /// 应交增值税
         /// </summary>
         public decimal? VATPayable { get; set; }
-
 
 
 
@@ -77,12 +75,10 @@ namespace HC.AbpCore.Reports.ProfitStatistics.Dtos
 
 
 
-
         /// <summary>
         /// 企业所得税
         /// </summary>
         public decimal? CorporateIncomeTax { get; set; }
-
 
 
 
@@ -93,12 +89,10 @@ namespace HC.AbpCore.Reports.ProfitStatistics.Dtos
 
 
 
-
         /// <summary>
         /// 利润
         /// </summary>
         public decimal? Profit { get; set; }
-
 
 
 
@@ -109,11 +103,17 @@ namespace HC.AbpCore.Reports.ProfitStatistics.Dtos
 
 
 
-
         /// <summary>
         /// 成本总金额
         /// </summary>%
         public decimal? TotalCostAmount { get; set; }
+
+
+
+        /// <summary>
+        /// 商品成本总条数
+        /// </summary>
+        public virtual int CostCount { get; set; }
 
 
 

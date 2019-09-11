@@ -46,6 +46,11 @@ namespace HC.AbpCore.Reports.ProfitStatistics
         public virtual decimal? IncomeTaxAmount { get; set; }
 
         /// <summary>
+        /// 商品成本总条数
+        /// </summary>
+        public virtual int CostCount { get; set; }
+
+        /// <summary>
         /// 创建日期
         /// </summary>
         public virtual DateTime CreationTime { get; set; }

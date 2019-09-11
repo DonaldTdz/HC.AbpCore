@@ -9,6 +9,6 @@ namespace HC.AbpCore.InventoryFlows
     }
     public enum InventoryFlowType
     {
-        入库=1,出库=2,
+        入库=1,出库=2
     }
 }

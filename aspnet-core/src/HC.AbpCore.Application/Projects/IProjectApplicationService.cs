@@ -60,6 +60,13 @@ namespace HC.AbpCore.Projects
 
 
         /// <summary>
+        /// 根据应用菜单获取项目下拉列表
+        /// </summary>
+        /// <returns></returns>
+        Task<List<DropDownDto>> GetDropDownsByAppAsync(AppMenu appMenu);
+
+
+        /// <summary>
         /// 自动生成项目编号
         /// </summary>
         /// <returns></returns>

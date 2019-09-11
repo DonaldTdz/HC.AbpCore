@@ -95,33 +95,31 @@ namespace HC.AbpCore.Reports.ProjectProfitReport
                                        VATPayable = ff.Sum(aa => aa.d == null ? 0 : aa.d.TaxAmount) - Math.Round(ff.Select(aa => aa.contractDetail.Num).FirstOrDefault() * ff.Select(aa => aa.product.Price).FirstOrDefault()
                                        * Convert.ToDecimal(ff.Select(aa => aa.product.TaxRate).FirstOrDefault().Substring(0, ff.Select(aa => aa.product.TaxRate).FirstOrDefault().IndexOf("%")))/100 ?? 0, 2),
                                        CityEducationTax = Math.Round((ff.Sum(aa => aa.d == null ? 0 : aa.d.TaxAmount) - Math.Round(ff.Select(aa => aa.contractDetail.Num).First()
-                                       * ff.Select(aa => aa.contractDetail.Price).First() * Convert.ToDecimal(ff.Select(aa => aa.product.TaxRate).FirstOrDefault().Substring(0,
+                                       * ff.Select(aa => aa.product.Price).First() * Convert.ToDecimal(ff.Select(aa => aa.product.TaxRate).FirstOrDefault().Substring(0,
                                        ff.Select(aa => aa.product.TaxRate).FirstOrDefault().IndexOf("%")))/100 ?? 0, 2))
                                        * Convert.ToDecimal(0.07 + 0.02 + 0.03) + contract.Amount * Convert.ToDecimal(0.001) ?? 0, 2),
-                                       CorporateIncomeTax = Math.Round((contract.Amount - ff.Select(aa => aa.contractDetail.Num).First() * ff.Select(aa => aa.contractDetail.Price).First() -
-                                       (ff.Sum(aa => aa.d == null ? 0 : aa.d.TaxAmount) - Math.Round(ff.Select(aa => aa.contractDetail.Num).First() * ff.Select(aa => aa.contractDetail.Price).First()
+                                       CorporateIncomeTax = Math.Round((contract.Amount - ff.Select(aa => aa.contractDetail.Num).First() * ff.Select(aa => aa.product.Price).First() -
+                                       (ff.Sum(aa => aa.d == null ? 0 : aa.d.TaxAmount) - Math.Round(ff.Select(aa => aa.contractDetail.Num).First() * ff.Select(aa => aa.product.Price).First()
                                        * Convert.ToDecimal(ff.Select(aa => aa.product.TaxRate).FirstOrDefault().Substring(0,
                                        ff.Select(aa => aa.product.TaxRate).FirstOrDefault().IndexOf("%")))/100 ?? 0, 2)) -
-                                       Math.Round((ff.Sum(aa => aa.d == null ? 0 : aa.d.TaxAmount) - Math.Round(ff.Select(aa => aa.contractDetail.Num).First() * ff.Select(aa => aa.contractDetail.Price).First()
+                                       Math.Round((ff.Sum(aa => aa.d == null ? 0 : aa.d.TaxAmount) - Math.Round(ff.Select(aa => aa.contractDetail.Num).First() * ff.Select(aa => aa.product.Price).First()
                                        * Convert.ToDecimal(ff.Select(aa => aa.product.TaxRate).FirstOrDefault().Substring(0,
                                        ff.Select(aa => aa.product.TaxRate).FirstOrDefault().IndexOf("%")))/100 ?? 0, 2))
                                        * Convert.ToDecimal(0.07 + 0.02 + 0.03) + contract.Amount * Convert.ToDecimal(0.001) ?? 0, 2)) * Convert.ToDecimal(0.25) ?? 0, 2),
-                                       IndividualIncomeTax = Math.Round((ff.Select(aa => aa.contractDetail.Num).First() * ff.Select(aa => aa.contractDetail.Price).First() - ff.Select(aa => aa.contractDetail.Num).First()
-                                       * ff.Select(aa => aa.product.Price).First() -
+                                       IndividualIncomeTax = Math.Round((contract.Amount - ff.Select(aa => aa.contractDetail.Num).First() * ff.Select(aa => aa.product.Price).First() -
                                        (ff.Sum(aa => aa.d == null ? 0 : aa.d.TaxAmount) - Math.Round(ff.Select(aa => aa.contractDetail.Num).First() * ff.Select(aa => aa.product.Price).First()
-                                        * Convert.ToDecimal(ff.Select(aa => aa.product.TaxRate).FirstOrDefault().Substring(0,
-                                       ff.Select(aa => aa.product.TaxRate).FirstOrDefault().IndexOf("%")))/100 ?? 0, 2)) -
+                                       * Convert.ToDecimal(ff.Select(aa => aa.product.TaxRate).FirstOrDefault().Substring(0,
+                                       ff.Select(aa => aa.product.TaxRate).FirstOrDefault().IndexOf("%"))) / 100 ?? 0, 2)) -
                                        Math.Round((ff.Sum(aa => aa.d == null ? 0 : aa.d.TaxAmount) - Math.Round(ff.Select(aa => aa.contractDetail.Num).First() * ff.Select(aa => aa.product.Price).First()
                                        * Convert.ToDecimal(ff.Select(aa => aa.product.TaxRate).FirstOrDefault().Substring(0,
-                                       ff.Select(aa => aa.product.TaxRate).FirstOrDefault().IndexOf("%")))/100 ?? 0, 2))
-                                       * Convert.ToDecimal(0.07 + 0.02 + 0.03) + contract.Amount * Convert.ToDecimal(0.001) ?? 0, 2) - Math.Round((contract.Amount - ff.Select(aa => aa.contractDetail.Num).First()
-                                       * ff.Select(aa => aa.product.Price).First() -
+                                       ff.Select(aa => aa.product.TaxRate).FirstOrDefault().IndexOf("%"))) / 100 ?? 0, 2))
+                                       * Convert.ToDecimal(0.07 + 0.02 + 0.03) + contract.Amount * Convert.ToDecimal(0.001) ?? 0, 2) - Math.Round((contract.Amount - ff.Select(aa => aa.contractDetail.Num).First() * ff.Select(aa => aa.product.Price).First() -
                                        (ff.Sum(aa => aa.d == null ? 0 : aa.d.TaxAmount) - Math.Round(ff.Select(aa => aa.contractDetail.Num).First() * ff.Select(aa => aa.product.Price).First()
-                                      * Convert.ToDecimal(ff.Select(aa => aa.product.TaxRate).FirstOrDefault().Substring(0,
-                                       ff.Select(aa => aa.product.TaxRate).FirstOrDefault().IndexOf("%")))/100 ?? 0, 2)) -
+                                       * Convert.ToDecimal(ff.Select(aa => aa.product.TaxRate).FirstOrDefault().Substring(0,
+                                       ff.Select(aa => aa.product.TaxRate).FirstOrDefault().IndexOf("%"))) / 100 ?? 0, 2)) -
                                        Math.Round((ff.Sum(aa => aa.d == null ? 0 : aa.d.TaxAmount) - Math.Round(ff.Select(aa => aa.contractDetail.Num).First() * ff.Select(aa => aa.product.Price).First()
-                                        * Convert.ToDecimal(ff.Select(aa => aa.product.TaxRate).FirstOrDefault().Substring(0,
-                                       ff.Select(aa => aa.product.TaxRate).FirstOrDefault().IndexOf("%")))/100 ?? 0, 2))
+                                       * Convert.ToDecimal(ff.Select(aa => aa.product.TaxRate).FirstOrDefault().Substring(0,
+                                       ff.Select(aa => aa.product.TaxRate).FirstOrDefault().IndexOf("%"))) / 100 ?? 0, 2))
                                        * Convert.ToDecimal(0.07 + 0.02 + 0.03) + contract.Amount * Convert.ToDecimal(0.001) ?? 0, 2)) * Convert.ToDecimal(0.25) ?? 0, 2)) * Convert.ToDecimal(0.2) ?? 0, 2)
                                    }).AsNoTracking().ToListAsync();
                 projectCosts = await (from contractDetail in contractDetails
@@ -140,8 +138,7 @@ namespace HC.AbpCore.Reports.ProjectProfitReport
                     .AsNoTracking().ToListAsync();
 
             }
-
-            projectCosts.Add(new ProjectCost() { DeviceName = "工时成本", Num = 1, Price = Math.Round(Convert.ToDecimal(timeSheetHour * (30000 / 21 / 8)), 2) });
+            projectCosts.Add(new ProjectCost() { DeviceName = "工时成本", Num = 1, Price = Math.Round(Convert.ToDecimal(timeSheetHour * (30000.00 / 21 / 8)), 2) });
             projectCosts.Add(new ProjectCost() { DeviceName = "报销金额", Num = 1, Price = reimburseAmount });
 
             int index = 0;
@@ -165,7 +162,7 @@ namespace HC.AbpCore.Reports.ProjectProfitReport
                         item.ContractAmount = contract.Amount ?? 0;
                         item.Profit = salesDetails.Sum(aa => aa.Num * aa.Price) - projectCosts.Sum(aa => aa.Num * aa.Price) - taxations.Sum(aa => aa.VATPayable) -
                             taxations.Sum(aa => aa.CityEducationTax) - taxations.Sum(aa => aa.CorporateIncomeTax) - taxations.Sum(aa => aa.IndividualIncomeTax);
-                        item.ProfitMargin = Math.Round(item.Profit / item.ContractAmount ?? 0, 2);
+                        item.ProfitMargin = Math.Round(item.Profit.Value / (item.ContractAmount.Value == 0 ? 1 : item.ContractAmount.Value) / 100, 2);
                     }
                     if (index <= salesDetails.Count - 1)
                     {
