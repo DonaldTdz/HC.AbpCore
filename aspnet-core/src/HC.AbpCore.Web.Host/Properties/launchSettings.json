@@ -20,7 +20,7 @@
       }
     },
     "HC.AbpCore.Web.Host": {
-      "commandName": "Project",
+      "commandName": "IIS",
       "launchBrowser": true,
       "launchUrl": "http://localhost:21022",
       "environmentVariables": {
