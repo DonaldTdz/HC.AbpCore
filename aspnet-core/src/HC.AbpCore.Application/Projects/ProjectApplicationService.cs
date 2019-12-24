@@ -390,8 +390,9 @@ namespace HC.AbpCore.Projects
         {
             string projectCode = "";
             DateTime dt = DateTime.Now;
+            DateTime entDt = dt.AddMonths(1);
             DateTime startTime = new DateTime(dt.Year, dt.Month, 1);
-            DateTime endTime = new DateTime(dt.Year, dt.Month + 1, 1);
+            DateTime endTime = new DateTime(entDt.Year, entDt.Month, 1);
             if (!String.IsNullOrEmpty(type))
             {
                 var project = await _entityRepository.GetAll().Where(aa => aa.Type == type && aa.CreationTime >= startTime && aa.CreationTime < endTime).AsNoTracking().ToListAsync();
