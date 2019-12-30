@@ -50,9 +50,9 @@ namespace HC.AbpCore.Reimburses.Dtos
 
 
         /// <summary>
-        /// Remark
+        /// GrantStatus
         /// </summary>
-        public string Remark { get; set; }
+        public bool GrantStatus { get; set; }
 
 
 

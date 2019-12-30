@@ -40,12 +40,12 @@ namespace HC.AbpCore.Reimburses.ReimburseDetails
         ///</summary>
         public ReimburseDetailAppService(
         IRepository<ReimburseDetail, Guid> entityRepository
-            , IRepository<Reimburse, Guid> reimburseRepository
         , IReimburseDetailManager entityManager
+            , IRepository<Reimburse, Guid> reimburseRepository
         )
         {
-            _reimburseRepository = reimburseRepository;
             _entityRepository = entityRepository;
+            _reimburseRepository = reimburseRepository;
             _entityManager = entityManager;
         }
 
@@ -127,16 +127,16 @@ namespace HC.AbpCore.Reimburses.ReimburseDetails
         /// <returns></returns>
         [AbpAllowAnonymous]
         [Audited]
-        public async Task CreateOrUpdateAsync(CreateOrUpdateReimburseDetailInput input)
+        public async Task<decimal> CreateOrUpdateAsync(CreateOrUpdateReimburseDetailInput input)
         {
 
             if (input.ReimburseDetail.Id.HasValue)
             {
-                await UpdateAsync(input.ReimburseDetail);
+                return await UpdateAsync(input.ReimburseDetail);
             }
             else
             {
-                await CreateAsync(input.ReimburseDetail);
+                return await CreateAsync(input.ReimburseDetail);
             }
         }
 
@@ -145,43 +145,39 @@ namespace HC.AbpCore.Reimburses.ReimburseDetails
         /// 新增ReimburseDetail
         /// </summary>
 
-        protected virtual async Task<ReimburseDetailEditDto> CreateAsync(ReimburseDetailEditDto input)
+        protected virtual async Task<decimal> CreateAsync(ReimburseDetailEditDto input)
         {
             //TODO:新增前的逻辑判断，是否允许新增
-            var reimburse = await _reimburseRepository.GetAsync(input.ReimburseId);
-            reimburse.Amount += input.Amount;
-            await _reimburseRepository.UpdateAsync(reimburse);
 
-            // var entity = ObjectMapper.Map <ReimburseDetail>(input);
             var entity = input.MapTo<ReimburseDetail>();
 
-
-            entity = await _entityRepository.InsertAsync(entity);
-            return entity.MapTo<ReimburseDetailEditDto>();
+            return await _entityManager.Create(entity);
         }
 
         /// <summary>
         /// 编辑ReimburseDetail
         /// </summary>
 
-        protected virtual async Task UpdateAsync(ReimburseDetailEditDto input)
+        protected virtual async Task<decimal> UpdateAsync(ReimburseDetailEditDto input)
         {
             //TODO:更新前的逻辑判断，是否允许更新
 
-            var entity = await _entityRepository.GetAsync(input.Id.Value);
-            if (input.Amount != entity.Amount)
-            {
-                var reimburse = await _reimburseRepository.GetAsync(input.ReimburseId);
-                reimburse.Amount = reimburse.Amount - entity.Amount + input.Amount;
-                await _reimburseRepository.UpdateAsync(reimburse);
-            }
 
-            input.MapTo(entity);
+            //var entity = input.MapTo<ReimburseDetail>();
 
 
 
             // ObjectMapper.Map(input, entity);
+            //return await _entityManager.Update(entity);
+
+            var entity = await _entityRepository.GetAsync(input.Id.Value);
+            var reimburse = await _reimburseRepository.GetAsync(input.ReimburseId);
+
+            reimburse.Amount = reimburse.Amount - entity.Amount + input.Amount;
+            await _reimburseRepository.UpdateAsync(reimburse);
+            entity = input.MapTo(entity);
             await _entityRepository.UpdateAsync(entity);
+            return reimburse.Amount ?? 0;
         }
 
 
@@ -191,17 +187,10 @@ namespace HC.AbpCore.Reimburses.ReimburseDetails
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        [AbpAllowAnonymous]
-        [Audited]
-        public async Task DeleteAsync(EntityDto<Guid> input)
+        public async Task<decimal> DeleteAsync(EntityDto<Guid> input)
         {
             //TODO:删除前的逻辑判断，是否允许删除
-            var entity = await _entityRepository.GetAsync(input.Id);
-            var reimburse = await _reimburseRepository.GetAsync(entity.ReimburseId);
-            reimburse.Amount -= entity.Amount;
-            await _reimburseRepository.UpdateAsync(reimburse);
-
-            await _entityRepository.DeleteAsync(input.Id);
+            return await _entityManager.Delete(input.Id);
         }
 
 

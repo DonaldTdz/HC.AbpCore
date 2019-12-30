@@ -74,13 +74,6 @@ namespace  HC.AbpCore.Reimburses.ReimburseDetails.Dtos
 
 
 		/// <summary>
-		/// Remark
-		/// </summary>
-		public string Remark { get; set; }
-
-
-
-		/// <summary>
 		/// Attachments
 		/// </summary>
 		public string Attachments { get; set; }

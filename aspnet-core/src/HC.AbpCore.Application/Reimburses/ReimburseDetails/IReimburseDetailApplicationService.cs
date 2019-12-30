@@ -55,7 +55,7 @@ namespace HC.AbpCore.Reimburses.ReimburseDetails
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task CreateOrUpdateAsync(CreateOrUpdateReimburseDetailInput input);
+        Task<decimal> CreateOrUpdateAsync(CreateOrUpdateReimburseDetailInput input);
 
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace HC.AbpCore.Reimburses.ReimburseDetails
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task DeleteAsync(EntityDto<Guid> input);
+        Task<decimal> DeleteAsync(EntityDto<Guid> input);
 
 
         /// <summary>

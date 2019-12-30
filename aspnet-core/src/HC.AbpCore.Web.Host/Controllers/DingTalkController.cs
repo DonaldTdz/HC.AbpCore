@@ -191,15 +191,7 @@ namespace HC.AbpCore.Web.Host.Controllers
             request.CallBackTag = items;
             var rq = SerializerHelper.GetJsonString(request, null);
             OapiCallBackUpdateCallBackResponse response = client.Execute(request, accessToken);
-            //using (MemoryStream ms = new MemoryStream())
-            //{
-            //    var bytes = Encoding.UTF8.GetBytes(rq);
-            //    ms.Write(bytes, 0, bytes.Length);
-            //    ms.Seek(0, SeekOrigin.Begin);
-            //    response = Post.PostGetJson<OapiCallBackUpdateCallBackResponse>(url, null, ms);
-            //};
             return response;
-            //OapiCallBackUpdateCallBackResponse response = client.execute(request, accessToken);
         }
 
         /// <summary>
@@ -210,11 +202,9 @@ namespace HC.AbpCore.Web.Host.Controllers
         public async Task<OapiCallBackDeleteCallBackResponse> DeleteCallBackAsync()
         {
             string accessToken = await _dingTalkManager.GetAccessTokenByAppAsync(DingDingAppEnum.智能办公);
-            //var url = string.Format("https://oapi.dingtalk.com/call_back/delete_call_back?access_token={0}", accessToken);
             DefaultDingTalkClient client = new DefaultDingTalkClient("https://oapi.dingtalk.com/call_back/delete_call_back");
             OapiCallBackDeleteCallBackRequest request = new OapiCallBackDeleteCallBackRequest();
             request.SetHttpMethod("GET");
-            //OapiCallBackDeleteCallBackResponse response = Get.GetJson<OapiCallBackDeleteCallBackResponse>(url);
             OapiCallBackDeleteCallBackResponse response = client.Execute(request, accessToken);
             return response;
         }

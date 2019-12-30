@@ -34,10 +34,9 @@ namespace HC.AbpCore.Reimburses
         [Required]
         public virtual ReimburseTypeEnum Type { get; set; }
         /// <summary>
-        /// 备注
+        /// 发放状态
         /// </summary>
-        [StringLength(500)]
-        public virtual string Remark { get; set; }
+        public virtual bool GrantStatus { get; set; }
         /// <summary>
         /// 申请时间
         /// </summary>

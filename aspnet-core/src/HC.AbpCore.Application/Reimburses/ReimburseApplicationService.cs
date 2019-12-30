@@ -77,11 +77,12 @@ namespace HC.AbpCore.Reimburses
         [Audited]
         public async Task<PagedResultNewDto<ReimburseListDto>> GetPagedAsync(GetReimbursesInput input)
         {
-             var query = _entityRepository.GetAll().WhereIf(input.ProjectId.HasValue, aa => aa.ProjectId == input.ProjectId.Value)
-                .WhereIf(input.Status.HasValue, aa => aa.Status == input.Status.Value)
-                .WhereIf(input.Type.HasValue, aa => aa.Type == input.Type.Value)
-                .WhereIf(input.SubmitDate.HasValue, aa => aa.SubmitDate >= input.StartSubmitDate.Value && aa.SubmitDate < input.EndSubmitDate.Value)
-                .Where(aa => aa.Status != null);
+            var query = _entityRepository.GetAll().WhereIf(input.ProjectId.HasValue, aa => aa.ProjectId == input.ProjectId.Value)
+               .WhereIf(input.Status.HasValue, aa => aa.Status == input.Status.Value)
+               .WhereIf(input.Type.HasValue, aa => aa.Type == input.Type.Value)
+               .WhereIf(input.SubmitDate.HasValue, aa => aa.SubmitDate >= input.StartSubmitDate.Value && aa.SubmitDate < input.EndSubmitDate.Value)
+               .WhereIf(input.GrantStatus.HasValue, aa => aa.GrantStatus == input.GrantStatus.Value)
+               .Where(aa => aa.Status != null);
 
             if (String.IsNullOrEmpty(input.EmployeeId))
             {
@@ -91,6 +92,10 @@ namespace HC.AbpCore.Reimburses
                 {
                     user = await _userManager.GetUserByIdAsync(AbpSession.UserId.Value);
                     query = query.Where(aa => aa.EmployeeId == user.EmployeeId);
+                }
+                else
+                {
+                    query = query.Where(aa => aa.Status != ReimburseStatusEnum.草稿 && aa.Status != ReimburseStatusEnum.取消);
                 }
             }
             else
@@ -121,7 +126,8 @@ namespace HC.AbpCore.Reimburses
                                  ApproverId = item.ApproverId,
                                  ApprovalTime = item.ApprovalTime,
                                  CancelTime = item.CancelTime,
-                                 CreationTime = item.CreationTime
+                                 CreationTime = item.CreationTime,
+                                 GrantStatus = item.GrantStatus
                              };
 
             var totalAmount = await entityList.SumAsync(aa => aa.Amount ?? 0);
@@ -204,11 +210,11 @@ namespace HC.AbpCore.Reimburses
 
             if (input.Reimburse.Id.HasValue)
             {
-                return await UpdateAsync(input.Reimburse);
+                return await Update(input.Reimburse);
             }
             else
             {
-                return await CreateAsync(input.Reimburse);
+                return await Create(input.Reimburse);
             }
         }
 
@@ -217,13 +223,21 @@ namespace HC.AbpCore.Reimburses
         /// 新增Reimburse
         /// </summary>
 
-        protected virtual async Task<ReimburseEditDto> CreateAsync(ReimburseEditDto input)
+        protected virtual async Task<ReimburseEditDto> Create(ReimburseEditDto input)
         {
             //TODO:新增前的逻辑判断，是否允许新增
             if (input.Type == ReimburseTypeEnum.非项目报销)
                 input.ProjectId = null;
+            //如果报销人为空则为当前登录人
+            if (String.IsNullOrEmpty(input.EmployeeId))
+            {
+                var user = await _userManager.GetUserByIdAsync(AbpSession.UserId.Value);
+                input.EmployeeId = user.EmployeeId;
+            }
             var entity = input.MapTo<Reimburse>();
-
+            entity.GrantStatus = false;
+            entity.Status = ReimburseStatusEnum.草稿;
+            entity.SubmitDate = DateTime.Now;
             entity = await _entityRepository.InsertAsync(entity);
             return entity.MapTo<ReimburseEditDto>();
         }
@@ -232,14 +246,13 @@ namespace HC.AbpCore.Reimburses
         /// 编辑Reimburse
         /// </summary>
 
-        protected virtual async Task<ReimburseEditDto> UpdateAsync(ReimburseEditDto input)
+        protected virtual async Task<ReimburseEditDto> Update(ReimburseEditDto input)
         {
             //TODO:更新前的逻辑判断，是否允许更新
 
             var entity = await _entityRepository.GetAsync(input.Id.Value);
             input.MapTo(entity);
 
-            // ObjectMapper.Map(input, entity);
             entity = await _entityRepository.UpdateAsync(entity);
             return entity.MapTo<ReimburseEditDto>();
         }
@@ -256,7 +269,7 @@ namespace HC.AbpCore.Reimburses
         public async Task DeleteAsync(EntityDto<Guid> input)
         {
             //TODO:删除前的逻辑判断，是否允许删除
-            await _entityRepository.DeleteAsync(input.Id);
+            await _entityManager.Delete(input.Id);
         }
 
 
@@ -282,26 +295,27 @@ namespace HC.AbpCore.Reimburses
         public async Task<APIResultDto> DingSubmitApprovalAsync(CreateOrUpdateReimburseInput input)
         {
             //List<ReimburseDetail> reimburseDetails = input.ReimburseDetails.MapTo<List<ReimburseDetail>>();
-            var reimburse = await _entityRepository.GetAsync(input.Reimburse.Id.Value);
-            reimburse.SubmitDate = DateTime.Now;
-            reimburse.Status = ReimburseStatusEnum.提交;
-            reimburse.ProjectId = input.Reimburse.ProjectId;
-            reimburse.Type = input.Reimburse.Type;
-            if (input.Reimburse.Type == ReimburseTypeEnum.非项目报销)
-                reimburse.ProjectId = null;
-            //Reimburse reimburse = input.Reimburse.MapTo<Reimburse>();
-            var reimburseDetails = await _reimburseDetailRepository.GetAllListAsync(aa => aa.ReimburseId == input.Reimburse.Id.Value);
-            var apiResult = await _entityManager.SubmitApprovalAsync(reimburse, reimburseDetails);
-            if (apiResult.Code == 0)
-            {
-                reimburse.ProcessInstanceId = apiResult.Data.ToString();
-                reimburse = await _entityRepository.UpdateAsync(reimburse);  //更新报销
-                return new APIResultDto() { Code = apiResult.Code, Msg = apiResult.Msg };
-            }
-            else
-            {
-                return apiResult.MapTo<APIResultDto>();
-            }
+            //var reimburse = await _entityRepository.GetAsync(input.Reimburse.Id.Value);
+            //reimburse.SubmitDate = DateTime.Now;
+            //reimburse.Status = ReimburseStatusEnum.提交;
+            //reimburse.ProjectId = input.Reimburse.ProjectId;
+            //reimburse.Type = input.Reimburse.Type;
+            //if (input.Reimburse.Type == ReimburseTypeEnum.非项目报销)
+            //    reimburse.ProjectId = null;
+            ////Reimburse reimburse = input.Reimburse.MapTo<Reimburse>();
+            //var reimburseDetails = await _reimburseDetailRepository.GetAllListAsync(aa => aa.ReimburseId == input.Reimburse.Id.Value);
+            //var apiResult = await _entityManager.SubmitApprovalAsync(reimburse, reimburseDetails);
+            //if (apiResult.Code == 0)
+            //{
+            //    reimburse.ProcessInstanceId = apiResult.Data.ToString();
+            //    reimburse = await _entityRepository.UpdateAsync(reimburse);  //更新报销
+            //    return new APIResultDto() { Code = apiResult.Code, Msg = apiResult.Msg };
+            //}
+            //else
+            //{
+            //    return apiResult.MapTo<APIResultDto>();
+            //}
+            return null;
 
         }
 
@@ -311,42 +325,22 @@ namespace HC.AbpCore.Reimburses
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task<APIResultDto> SubmitApprovalAsync(CreateReimburseAndDetailInput input)
+        public async Task<APIResultDto> SubmitApprovalAsync(EntityDto<Guid> input)
         {
-            //如果报销人为空则为当前登录人
-            if (String.IsNullOrEmpty(input.Reimburse.EmployeeId))
-            {
-                var user = await _userManager.GetUserByIdAsync(AbpSession.UserId.Value);
-                input.Reimburse.EmployeeId = user.EmployeeId;
-            }
-            input.Reimburse.SubmitDate = DateTime.Now;
-            input.Reimburse.Status = ReimburseStatusEnum.提交;
-            if (input.Reimburse.Type == ReimburseTypeEnum.非项目报销)
-                input.Reimburse.ProjectId = null;
-            List<ReimburseDetail> reimburseDetails = input.ReimburseDetails.MapTo<List<ReimburseDetail>>();
-            Reimburse reimburse = input.Reimburse.MapTo<Reimburse>();
+            var apiResult = await _entityManager.SubmitApprovalAsync(input.Id);
+            return apiResult.MapTo<APIResultDto>();
 
-            var apiResult = await _entityManager.SubmitApprovalAsync(reimburse, reimburseDetails);
-            if (apiResult.Code == 0)
-            {
-                input.Reimburse.ProcessInstanceId = apiResult.Data.ToString();
-                ReimburseEditDto reimburseModel = await CreateAsync(input.Reimburse);  //保存报销
-                //List<ReimburseDetail> reimburseDetails = new List<ReimburseDetail>();
+        }
 
-                foreach (var item in input.ReimburseDetails)
-                {
-                    var entity = item.MapTo<ReimburseDetail>();
-                    entity.ReimburseId = reimburseModel.Id.Value;
-                    entity = await _reimburseDetailRepository.InsertAsync(entity);
-                    //reimburseDetails.Add(entity);
-                }
-                return apiResult.MapTo<APIResultDto>();
-            }
+        public async Task<bool> ModifyGrantStatusAsync(ModifyGrantStatusEditDto editDto)
+        {
+            var entity =await _entityRepository.GetAsync(editDto.Id);
+            entity.GrantStatus = editDto.GrantStatus;
+            entity = await _entityRepository.UpdateAsync(entity);
+            if (entity != null)
+                return true;
             else
-            {
-                return apiResult.MapTo<APIResultDto>();
-            }
-
+                return false;
         }
 
 
