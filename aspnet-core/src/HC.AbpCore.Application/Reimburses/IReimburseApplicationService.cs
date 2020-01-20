@@ -82,12 +82,20 @@ namespace HC.AbpCore.Reimburses
 
 
         /// <summary>
-        /// 提交审批(并保存报销与报销详情)
+        /// 提交审批
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<APIResultDto> SubmitApprovalAsync(CreateReimburseAndDetailInput input);
+        Task<APIResultDto> SubmitApprovalAsync(EntityDto<Guid> input);
 
+
+        /// <summary>
+        /// 修改发放状态
+        /// </summary>
+        /// <param name="guid"></param>
+        /// <param name="grantStatus"></param>
+        /// <returns></returns>
+        Task<bool> ModifyGrantStatusAsync(ModifyGrantStatusEditDto editDto);
 
         /// <summary>
         /// 导出Reimburse为excel表

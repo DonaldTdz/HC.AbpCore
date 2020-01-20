@@ -81,8 +81,6 @@ namespace HC.AbpCore.Reimburses.DomainService
         }
 
 
-
-
         // TODO:编写领域业务代码
 
 
@@ -157,42 +155,14 @@ namespace HC.AbpCore.Reimburses.DomainService
 
 
         /// <summary>
-        /// 提交审批(return 1)  
+        /// 提交审批
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task<ResultCode> SubmitApprovalAsync(Reimburse reimburse, List<ReimburseDetail> reimburseDetails)
+        public async Task<ResultCode> SubmitApprovalAsync(Guid reimburseId)
         {
-            if (reimburse.Type == ReimburseTypeEnum.项目型报销)
-            {
-                var amounts = await _repository.GetAll().Where(aa => aa.Type == ReimburseTypeEnum.项目型报销 &&
-                aa.ProjectId == reimburse.ProjectId.Value&&aa.Status!=null&&aa.Status!=ReimburseStatusEnum.取消).Select(aa => aa.Amount).SumAsync();
-                var project = await _projectRepository.FirstOrDefaultAsync(aa => aa.Id == reimburse.ProjectId.Value);
-                //switch (project.Status)
-                //{
-                //    case ProjectStatus.线索:
-                //        if ((reimburse.Amount + amounts) > 3000)
-                //            return new ResultCode() { Code = 2, Msg = "当前项目处于线索阶段,报销费用不能超过3000元" };
-                //        break;
-                //    case ProjectStatus.立项:
-                //        if ((reimburse.Amount + amounts) > 5000)
-                //            return new ResultCode() { Code = 2, Msg = "当前项目处于立项阶段,报销费用不能超过5000元" };
-                //        break;
-                //    case ProjectStatus.招标:
-                //        if ((reimburse.Amount + amounts) > 7000)
-                //            return new ResultCode() { Code = 2, Msg = "当前项目处于招标阶段,报销费用不能超过7000元" };
-                //        break;
-                //    case ProjectStatus.执行:
-                //        if ((reimburse.Amount + amounts) > 9000)
-                //            return new ResultCode() { Code = 2, Msg = "当前项目处于执行阶段,报销费用不能超过9000元" };
-                //        break;
-                //    case ProjectStatus.已完成:
-                //        return new ResultCode() { Code = 2, Msg = "当前项目处于已完成阶段,不能申请费用报销" };
-                //    default: /* 可选的 */
-
-                //        break;
-                //}
-            }
+            var reimburse =await  _repository.GetAsync(reimburseId);
+            var reimburseDetails = await _detailRepository.GetAll().Where(aa => aa.ReimburseId == reimburseId).AsNoTracking().ToListAsync();
             ResultCode resultCode = new ResultCode();
             var config = await _dingTalkManager.GetDingDingConfigByAppAsync(DingDingAppEnum.智能办公);
             string accessToken = await _dingTalkManager.GetAccessTokenByAppAsync(DingDingAppEnum.智能办公); 
@@ -203,7 +173,6 @@ namespace HC.AbpCore.Reimburses.DomainService
                 resultCode.Msg = "所属报销人不存在";
                 return resultCode;
             }
-            
             var url = string.Format("https://oapi.dingtalk.com/topapi/processinstance/create?access_token={0}", accessToken);
             SubmitApprovalEntity request = new SubmitApprovalEntity();
             request.process_code = "PROC-0AA374CC-7381-46EA-BB8F-3BF4B2BFDEA2";
@@ -245,9 +214,8 @@ namespace HC.AbpCore.Reimburses.DomainService
             };
             if (approvalReturn.errcode == 0)
             {
-                //reimburse.ProcessInstanceId = approvalReturn.process_instance_id;
-                //reimburse.Status = ReimburseStatusEnum.提交;
-                //await _repository.UpdateAsync(reimburse);
+                reimburse.Status = ReimburseStatusEnum.提交;
+                await _repository.UpdateAsync(reimburse);
                 return new ResultCode() { Code = 0, Msg = "提交成功",Data= approvalReturn.process_instance_id };
 
             }
@@ -288,6 +256,13 @@ namespace HC.AbpCore.Reimburses.DomainService
                 item.CancelTime = DateTime.Now;
             }
             await _repository.UpdateAsync(item);
+        }
+
+        public async Task Delete(Guid guid)
+        {
+            await _repository.DeleteAsync(guid);
+
+            await _detailRepository.DeleteAsync(aa => aa.ReimburseId == guid);
         }
     }
 }

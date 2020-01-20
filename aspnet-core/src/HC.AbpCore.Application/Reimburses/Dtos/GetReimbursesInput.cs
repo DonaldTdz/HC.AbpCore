@@ -48,6 +48,11 @@ namespace HC.AbpCore.Reimburses.Dtos
         /// </summary>
         public DateTime? SubmitDate { get; set; }
 
+        /// <summary>
+        /// 查询条件-发放状态
+        /// </summary>
+        public bool? GrantStatus { get; set; }
+
         public DateTime? StartSubmitDate
         {
             get

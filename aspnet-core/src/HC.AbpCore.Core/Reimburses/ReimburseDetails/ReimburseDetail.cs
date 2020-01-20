@@ -53,11 +53,6 @@ namespace HC.AbpCore.Reimburses.ReimburseDetails
         /// </summary>
         public virtual int? InvoiceNum { get; set; }
         /// <summary>
-        /// 备注
-        /// </summary>
-        [StringLength(500)]
-        public virtual string Remark { get; set; }
-        /// <summary>
         /// 附件 多个用逗号分隔
         /// </summary>
         [StringLength(500)]

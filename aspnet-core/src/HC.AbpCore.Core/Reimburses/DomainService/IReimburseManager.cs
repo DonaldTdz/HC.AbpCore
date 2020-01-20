@@ -23,11 +23,11 @@ namespace HC.AbpCore.Reimburses.DomainService
 
 
         /// <summary>
-        /// 提交审批
+        /// 提交审批-并且修改报销状态
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<ResultCode> SubmitApprovalAsync(Reimburse reimburse, List<ReimburseDetail> reimburseDetail);
+        Task<ResultCode> SubmitApprovalAsync(Guid reimburseId);
 
 
         /// <summary>
@@ -48,5 +48,11 @@ namespace HC.AbpCore.Reimburses.DomainService
         Task UpdateReimburseByPIIdAsync(string processInstanceId, string result);
 
 
+        /// <summary>
+        /// 删除报销及相关信息
+        /// </summary>
+        /// <param name="guid"></param>
+        /// <returns></returns>
+        Task Delete(Guid guid);
     }
 }
